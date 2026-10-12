@@ -24,6 +24,13 @@
   --grid: #E3E9EE;
   --axis: #B9C5CE;
   --band: rgba(31, 110, 75, 0.09);
+  --hero-bg: #13202A;
+  --hero-fg: #F4F7F9;
+  --hero-muted: #A9B8C3;
+  --hero-line: #33444F;
+  --hero-soft: rgba(255, 255, 255, 0.08);
+  --hero-accent: #F48CC0;
+  --hero-on-accent: #2A0718;
   --accent: #A3135F;
   --accent-soft: #F8E4EF;
   --on-accent: #FFFFFF;
@@ -40,14 +47,14 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --grid: #22303A; --axis: #3A4A56; --band: rgba(92, 199, 150, 0.10);
+    --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --grid: #22303A; --axis: #3A4A56; --band: rgba(92, 199, 150, 0.10); --hero-bg: #1B2A35; --hero-line: #34495A;
     --accent: #F173B3; --accent-soft: #3A1A2C; --on-accent: #1C0814;
     --ok: #5CC796; --ok-soft: #12302A; --warn: #E6B556; --warn-soft: #382B10; --bad: #F2806F; --bad-soft: #3C1B17;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --grid: #22303A; --axis: #3A4A56; --band: rgba(92, 199, 150, 0.10);
+  --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --grid: #22303A; --axis: #3A4A56; --band: rgba(92, 199, 150, 0.10); --hero-bg: #1B2A35; --hero-line: #34495A;
   --accent: #F173B3; --accent-soft: #3A1A2C; --on-accent: #1C0814;
   --ok: #5CC796; --ok-soft: #12302A; --warn: #E6B556; --warn-soft: #382B10; --bad: #F2806F; --bad-soft: #3C1B17;
   color-scheme: dark;
@@ -68,7 +75,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .tema svg { width: 20px; height: 20px; }
 .brand .hoje { font-family: var(--f-mono); font-size: .8rem; color: var(--muted); }
 .tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
-.tabs button { background: none; border: 0; padding: 8px 12px 10px; cursor: pointer; color: var(--muted); font-weight: 700; font-size: .95rem; border-bottom: 3px solid transparent; white-space: nowrap; }
+.tabs button { background: none; border: 0; padding: 8px 12px 10px; cursor: pointer; color: var(--muted); font-weight: 700; font-size: .95rem; border-bottom: 3px solid transparent; white-space: nowrap; display: inline-flex; align-items: center; gap: 7px; }
+.tabs button svg { width: 18px; height: 18px; flex: none; }
 .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
 
 main { max-width: 44rem; margin: 0 auto; padding-inline: 16px; padding-block: 18px 96px; }
@@ -95,15 +103,58 @@ textarea { width: 100%; resize: vertical; min-height: 4.5rem; }
 .plan { margin: 0; font-size: 1rem; }
 .plan b { color: var(--accent); }
 
-.note { border-radius: 8px; padding: 10px 12px; font-size: .9rem; }
+.note { border-radius: 12px; padding: 12px; font-size: .9rem; display: flex; gap: 10px; align-items: flex-start; }
+.note > svg { flex: none; width: 18px; height: 18px; margin-top: 2px; }
+.note-txt { display: grid; gap: 8px; justify-items: start; min-width: 0; }
+.note .btn { background: var(--surface); }
 .note.info { background: var(--accent-soft); }
 .note.warn { background: var(--warn-soft); color: var(--ink); }
 
 .tags { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.tag { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
-.tag.on { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
-.tag-row { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; }
-.tag-row input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; }
+.tag { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; transition: border-color .15s, box-shadow .15s; }
+.tag.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.tag-row { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px; min-height: 64px; cursor: pointer; }
+.check { appearance: none; -webkit-appearance: none; flex: none; width: 30px; height: 30px; margin: 0; border-radius: 999px; border: 2px solid var(--field-line); background: var(--surface); display: grid; place-items: center; cursor: pointer; transition: background .15s, border-color .15s; }
+.check::after { content: ""; width: 7px; height: 13px; border: solid var(--on-accent); border-width: 0 3px 3px 0; transform: translateY(-1px) rotate(45deg); opacity: 0; }
+.check:checked { background: var(--accent); border-color: var(--accent); }
+.check:checked::after { opacity: 1; }
+.check:disabled { opacity: .5; }
+.pill { font-family: var(--f-mono); font-size: .75rem; font-weight: 600; padding: 4px 9px; border-radius: 999px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); } .pill.warn { background: var(--warn-soft); color: var(--warn); } .pill.bad { background: var(--bad-soft); color: var(--bad); }
+
+.hero { background: var(--hero-bg); color: var(--hero-fg); border-radius: 18px; padding: 14px; display: grid; gap: 14px; color-scheme: dark; }
+.hero-top { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 6px; }
+.nav-dia { width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--hero-line); background: transparent; color: var(--hero-fg); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.nav-dia svg { width: 20px; height: 20px; }
+.nav-dia:disabled { opacity: .3; cursor: default; }
+.hero-data { position: relative; display: grid; justify-items: center; text-align: center; gap: 2px; padding: 4px; border-radius: 12px; cursor: pointer; min-width: 0; }
+.hero-data:focus-within { outline: 2px solid var(--hero-accent); outline-offset: 2px; }
+.hero-rel { font-family: var(--f-mono); font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--hero-accent); }
+.hero-dia { font-family: var(--f-display); font-stretch: 110%; font-weight: 800; font-size: 1.45rem; line-height: 1.15; display: inline-flex; align-items: center; gap: 7px; text-wrap: balance; }
+.hero-dia svg { width: 17px; height: 17px; flex: none; opacity: .7; }
+.hero-data input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; margin: 0; }
+.hero .seg { display: grid; grid-template-columns: 1fr 1fr; width: 100%; background: var(--hero-soft); border-color: var(--hero-line); }
+.hero .seg button { color: var(--hero-muted); font-family: var(--f-display); font-stretch: 108%; font-size: 1.05rem; min-height: 50px; display: grid; place-content: center; line-height: 1.1; }
+.hero .seg button small { font-family: var(--f-body); font-size: .66rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; opacity: .85; }
+.hero .seg button[aria-checked="true"] { background: var(--hero-accent); color: var(--hero-on-accent); }
+.hero-motivo { margin: 0; color: var(--hero-muted); font-size: .88rem; text-align: center; text-wrap: balance; }
+.prog { display: grid; gap: 7px; }
+.prog-top { display: flex; justify-content: space-between; gap: 10px; font-size: .88rem; color: var(--hero-muted); }
+.prog-top b { color: var(--hero-accent); }
+.prog-bar { height: 8px; border-radius: 999px; background: var(--hero-soft); overflow: hidden; }
+.prog-bar i { display: block; height: 100%; border-radius: 999px; background: var(--hero-accent); transition: width .25s ease; }
+.lista-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.link { background: none; border: 0; color: var(--accent); font-weight: 700; cursor: pointer; padding: 8px 4px; min-height: 44px; }
+details.outros { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+details.outros > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 56px; font-weight: 700; }
+details.outros > summary::-webkit-details-marker { display: none; }
+details.outros > summary small { display: block; font-weight: 400; color: var(--muted); font-size: .82rem; }
+details.outros > summary::after { content: ""; flex: none; width: 9px; height: 9px; border: solid var(--muted); border-width: 0 2px 2px 0; transform: rotate(45deg); margin: 0 4px 4px 0; transition: transform .2s; }
+details.outros[open] > summary::after { transform: rotate(-135deg); margin: 4px 4px 0 0; }
+details.outros .tags { padding: 0 10px 10px; }
+.savebar { position: sticky; bottom: 12px; z-index: 3; padding-top: 6px; }
+.savebar .btn { width: 100%; min-height: 54px; border-radius: 14px; font-size: 1.02rem; box-shadow: 0 6px 18px rgba(0, 0, 0, .16); }
+.savebar .btn:disabled { opacity: 1; background: var(--surface); border-color: var(--line); color: var(--muted); }
 .ico { width: 28px; height: 28px; display: grid; place-items: center; color: var(--muted); }
 .ico svg { width: 24px; height: 24px; }
 .nm { display: grid; min-width: 0; }
@@ -114,11 +165,11 @@ textarea { width: 100%; resize: vertical; min-height: 4.5rem; }
 .idade.ok { color: var(--ok); } .idade.warn { color: var(--warn); } .idade.bad { color: var(--bad); }
 .idade.nunca { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
 
-.res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0 14px 12px 14px; }
+.res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 2px 14px 14px; border-top: 1px dashed var(--line); margin-inline: 14px; padding-inline: 0; padding-top: 12px; }
 .res label { display: grid; grid-template-rows: 1fr auto; gap: 3px; font-size: .75rem; color: var(--muted); font-weight: 700; min-width: 0; }
 .res input { width: 100%; font-family: var(--f-mono); font-size: 16px; font-variant-numeric: tabular-nums; padding: 7px 8px; background: var(--bg); border: 1px solid var(--field-line); border-radius: 6px; }
 .res input.fora { border-color: var(--bad); background: var(--bad-soft); }
-.res .ref { font-weight: 400; font-family: var(--f-mono); font-size: .68rem; white-space: nowrap; }
+.res .ref { display: block; font-weight: 400; font-family: var(--f-mono); font-size: .68rem; white-space: nowrap; }
 
 .btn { border: 1px solid var(--line); background: var(--surface); padding: 9px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
 .btn:hover { border-color: var(--muted); }
@@ -224,9 +275,18 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
   .rows .ico { width: 24px; }
   .res { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 }
-@media (max-width: 440px) { .tabs { gap: 0; } .tabs button { padding: 8px 6px 10px; font-size: .88rem; } }
-@media (max-width: 360px) { .tabs button { padding: 8px 4px 10px; font-size: .8rem; } }
-@media (max-width: 340px) { .brand .hoje { display: none; } }
+@media (max-width: 719px) {
+  .top-in { padding-block: 10px; }
+  .brand .hoje { display: none; }
+  .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; overflow: visible; background: var(--surface); border-top: 1px solid var(--line); padding: 5px 6px calc(5px + env(safe-area-inset-bottom, 0px)); }
+  .tabs button { display: grid; justify-items: center; gap: 3px; padding: 6px 2px; min-height: 54px; border: 0; border-radius: 12px; font-size: .72rem; }
+  .tabs button svg { width: 22px; height: 22px; }
+  .tabs button[aria-selected="true"] { color: var(--accent); background: var(--accent-soft); }
+  main { padding-block: 16px calc(90px + env(safe-area-inset-bottom, 0px)); }
+  .savebar { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
+  #toast { bottom: auto; top: calc(66px + env(safe-area-inset-top, 0px)); }
+}
+@media (max-width: 340px) { .tabs button { font-size: .66rem; } .hero-dia { font-size: 1.1rem; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -241,11 +301,11 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
       </div>
     </div>
     <nav class="tabs" role="tablist" aria-label="Seções">
-      <button role="tab" id="t-hoje" data-aba="hoje" aria-selected="true">Coleta</button>
-      <button role="tab" id="t-pontos" data-aba="pontos" aria-selected="false">Pontos</button>
-      <button role="tab" id="t-graficos" data-aba="graficos" aria-selected="false">Gráficos</button>
-      <button role="tab" id="t-historico" data-aba="historico" aria-selected="false">Histórico</button>
-      <button role="tab" id="t-ajustes" data-aba="ajustes" aria-selected="false">Ajustes</button>
+      <button role="tab" id="t-hoje" data-aba="hoje" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-3 4.4-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-3-6.6-6-11z"/><path d="M9.5 14.5l1.8 1.8 3.4-3.6"/></svg><span>Coleta</span></button>
+      <button role="tab" id="t-pontos" data-aba="pontos" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.8-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15.2 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg><span>Pontos</span></button>
+      <button role="tab" id="t-graficos" data-aba="graficos" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 20h17"/><path d="M7 16.5v-5M12 16.5V6M17 16.5v-8"/></svg><span>Gráficos</span></button>
+      <button role="tab" id="t-historico" data-aba="historico" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></svg><span>Histórico</span></button>
+      <button role="tab" id="t-ajustes" data-aba="ajustes" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg><span>Ajustes</span></button>
     </nav>
   </div>
 </header>
@@ -536,41 +596,51 @@ function pontoInfo(id) {
 }
 
 const RASC = {};
-function guardarRascunho() { if (S.dirty) RASC[S.data + "|" + S.fab] = { sel: clone(S.sel), obs: S.obs }; }
+const RASC_KEY = "coleta-agua:rascunhos";
+try { const r = JSON.parse(localStorage.getItem(RASC_KEY) || "{}"); if (r && typeof r === "object") Object.assign(RASC, r); } catch {}
+function gravarRascunhos() { try { localStorage.setItem(RASC_KEY, JSON.stringify(RASC)); } catch {} }
+function guardarRascunho() { if (S.dirty) { RASC[S.data + "|" + S.fab] = { sel: clone(S.sel), obs: S.obs, em: new Date().toISOString() }; gravarRascunhos(); } }
+function marcarRascunho() {
+  S.dirty = true;
+  RASC[S.data + "|" + S.fab] = { sel: clone(S.sel), obs: S.obs, em: new Date().toISOString() };
+  clearTimeout(marcarRascunho.t); marcarRascunho.t = setTimeout(gravarRascunhos, 300);
+}
 function montarRascunho() {
   const reg = S.dias[S.data];
   S.fab = S.fabManual ?? (reg ? reg.fabrica : fabricaSugerida(S.data));
   const r = RASC[S.data + "|" + S.fab];
-  if (r) { S.sel = clone(r.sel); S.obs = r.obs; S.dirty = true; return; }
+  if (r && reg && reg.atualizadoEm && r.em && reg.atualizadoEm > r.em) { delete RASC[S.data + "|" + S.fab]; gravarRascunhos(); }
+  else if (r && r.sel && typeof r.sel === "object") { S.sel = clone(r.sel); S.obs = typeof r.obs === "string" ? r.obs : ""; S.dirty = true; return; }
   S.sel = {};
   if (reg && S.fab === reg.fabrica) {
     for (const it of reg.itens || []) S.sel[it.ponto] = { cloro: fmtNum(it.cloro), ph: fmtNum(it.ph), turbidez: fmtNum(it.turbidez) };
     S.obs = reg.obs || "";
   } else {
-    for (const id of sugeridos(S.fab, S.data)) S.sel[id] = { cloro: "", ph: "", turbidez: "" };
     S.obs = "";
   }
   S.dirty = false;
 }
 
 /* ---------- Telas ---------- */
+function editandoHoje() {
+  const a = document.activeElement;
+  return !!(a && a.closest && a.closest("#v-hoje") && a.matches("input:not([type=checkbox]), textarea"));
+}
 function aoMudarDados() {
   if (!S.pronto || S.importandoAgora) return;
-  if (!S.dirty) montarRascunho();
+  if (!S.dirty) { montarRascunho(); if (!editandoHoje()) renderHoje(); }
   renderTudo();
 }
 function renderTudo() {
   if (!S.pronto) return;
-  const a = document.activeElement;
-  const editando = a && a.closest && a.closest("#v-hoje") && a.matches("input:not([type=checkbox]), textarea");
-  if (!S.dirty && !editando) renderHoje();
+  if (!S.dirty && !editandoHoje()) renderHoje();
   renderPontos(); renderHistorico(); renderAjustes();
   if (S.aba === "graficos") renderGraficos();
 }
 
 function idadeHTML(e) {
-  if (e.dias === Infinity) return '<b class="idade nunca bad">nunca<small>coletado</small></b>';
-  return `<b class="idade ${nivel(e.dias)}">${e.dias}<small>${e.dias === 1 ? "dia" : "dias"}</small></b>`;
+  if (e.dias === Infinity) return '<span class="pill bad">nunca</span>';
+  return `<span class="pill ${nivel(e.dias)}" title="Dias desde a última coleta">${e.dias} ${e.dias === 1 ? "dia" : "dias"}</span>`;
 }
 function resHTML(id) {
   const v = S.sel[id];
@@ -584,13 +654,27 @@ function tagHTML(e) {
   const id = e.p.id, on = !!S.sel[id];
   return `<li class="tag ${on ? "on" : ""}">
     <label class="tag-row" for="ck-${id}">
-      <input type="checkbox" id="ck-${id}" data-ponto="${id}" ${on ? "checked" : ""} ${S.soLeitura ? "disabled" : ""}>
+      <input type="checkbox" class="check" id="ck-${id}" data-ponto="${id}" ${on ? "checked" : ""} ${S.soLeitura ? "disabled" : ""} aria-label="Coletei ${esc(e.p.setor + ", " + e.p.tipo)}">
       <span class="ico">${ICO[e.p.tipo] || ICO["Torneira"]}</span>
-      <span class="nm"><span class="setor">${esc(e.p.setor)}</span><span class="sub">${esc(e.p.tipo)} · ${nomeFab(e.p.fabrica)}${e.ult ? " · última em " + fmtCurto(e.ult) : ""}</span></span>
+      <span class="nm"><span class="setor">${esc(e.p.setor)}</span><span class="sub">${esc(e.p.tipo)}${e.p.fabrica === 0 ? " · todo dia" : ""}${e.ult ? " · última " + fmtCurto(e.ult) : " · sem registro"}</span></span>
       ${idadeHTML(e)}
     </label>
     ${on ? resHTML(id) : ""}
   </li>`;
+}
+const SEMANA_LONGA = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+const SVG_A = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+const SETA_E = SVG_A + '<path d="M15 5l-7 7 7 7"/></svg>';
+const SETA_D = SVG_A + '<path d="M9 5l7 7-7 7"/></svg>';
+const ICO_CAL = SVG_A + '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
+const ICO_INFO = SVG_A + '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r=".7" fill="currentColor"/></svg>';
+function nota(tipo, texto, acao) { return `<div class="note ${tipo}">${tipo === "info" ? ICO_INFO : ICO_ALERTA}<div class="note-txt"><span>${texto}</span>${acao || ""}</div></div>`; }
+function proxDiaUtil(s) { let d = addDias(s, 1); while ([0, 6].includes(new Date(utc(d)).getUTCDay())) d = addDias(d, 1); return d; }
+function irParaDia(d) {
+  guardarRascunho();
+  const hoje = hojeISO();
+  S.data = d > hoje ? hoje : d; S.fabManual = null; S.outrosAberto = false;
+  montarRascunho(); renderHoje();
 }
 function listaNomes(arr) { return arr.length <= 1 ? arr.join("") : arr.slice(0, -1).join(", ") + " e " + arr[arr.length - 1]; }
 
@@ -615,54 +699,64 @@ function renderHoje() {
   const ehHoje = S.data === hojeISO();
   const fimDeSemana = [0, 6].includes(new Date(utc(S.data)).getUTCDay());
 
-  let motivo = anterior
-    ? `A última coleta registrada foi na Fábrica ${anterior.fabrica}, ${semana(anterior.data)} ${fmt(anterior.data)}. ${ehHoje ? "Hoje" : "Neste dia"} é a vez da Fábrica ${fabSug}.`
-    : "Nenhuma coleta anterior registrada. Comece pela Fábrica 1.";
-  if (S.fab !== fabSug) motivo = `Você escolheu a Fábrica ${S.fab}. Pelo rodízio seria a Fábrica ${fabSug}.`;
-
-  const porTipo = (t) => fila.filter((e) => sugSet.has(e.p.id) && e.p.tipo === t).map((e) => e.p.setor);
-  const partes = [];
-  if (diarios.length) partes.push(listaNomes(diarios.map((e) => `${e.p.tipo.toLowerCase()} (${e.p.setor})`)));
-  const tor = porTipo("Torneira"), beb = porTipo("Bebedouro");
-  if (tor.length) partes.push(`torneira${tor.length > 1 ? "s" : ""} ${listaNomes(tor)}`);
-  if (beb.length) partes.push(`bebedouro${beb.length > 1 ? "s" : ""} ${listaNomes(beb)}`);
-
+  const hoje = hojeISO();
+  const rel = diffDias(hoje, S.data);
+  const relTxt = rel === 0 ? "Hoje" : rel === 1 ? "Ontem" : rel > 1 ? `Há ${rel} dias` : "Data futura";
+  const [, mm, dd] = S.data.split("-");
+  const motivo = S.fab !== fabSug
+    ? `Você trocou de fábrica. Pelo rodízio seria a Fábrica ${fabSug}.`
+    : anterior ? `É a vez da Fábrica ${fabSug}: a última coleta foi na Fábrica ${anterior.fabrica}, ${semana(anterior.data)} ${fmtCurto(anterior.data)}.` : "Nenhuma coleta registrada antes desta data.";
   const lacuna = anterior ? diasUteisEntre(anterior.data, S.data) : 0;
   const nSel = Object.keys(S.sel).length;
+  const nTopo = topo.length, nFeitos = topo.filter((e) => S.sel[e.p.id]).length;
+  S.topoIds = topo.map((e) => e.p.id);
+  const notas = [];
+  if (reg) {
+    const prox = proxDiaUtil(S.data);
+    notas.push(nota("info", `A coleta deste dia já está salva (Fábrica ${reg.fabrica}). Corrija o que precisar e salve de novo.`,
+      prox <= hoje && !S.dias[prox] ? `<button class="btn small" type="button" data-ir="${prox}">Ir para ${semana(prox)} ${fmtCurto(prox)}</button>` : ""));
+  }
+  if (S.semNuvem) notas.push(nota("warn", "Sem conexão com o armazenamento compartilhado. O que você salvar agora fica só neste navegador."));
+  if (fimDeSemana) notas.push(nota("warn", "Esta data cai num fim de semana. Confira se é o dia certo."));
+  if (!reg && lacuna >= 2) {
+    const prox = proxDiaUtil(anterior.data);
+    notas.push(nota("warn", `Faltam ${lacuna} dias úteis sem registro desde ${semana(anterior.data)} ${fmtCurto(anterior.data)}. Se você coletou nesses dias, lance um por vez para o rodízio ficar certo.`,
+      prox < S.data ? `<button class="btn small" type="button" data-ir="${prox}">Lançar ${semana(prox)} ${fmtCurto(prox)}</button>` : ""));
+  }
+  if (S.soLeitura) notas.push(nota("warn", "Você está vendo este site só para leitura. As coletas não podem ser salvas daqui."));
 
   el.innerHTML = `
-    <div class="dayhead">
-      <div class="dayrow">
-        <label class="field" for="f-data"><span>Data da coleta</span><input type="date" id="f-data" value="${S.data}" max="${hojeISO()}"></label>
-        <div class="field"><span id="lbl-fab">Fábrica do dia</span>
-          <div class="seg" role="radiogroup" aria-labelledby="lbl-fab">
-            <button type="button" role="radio" id="fab-1" data-fab="1" aria-checked="${S.fab === 1}">Fábrica 1</button>
-            <button type="button" role="radio" id="fab-2" data-fab="2" aria-checked="${S.fab === 2}">Fábrica 2</button>
-          </div>
-        </div>
+    <div class="hero">
+      <div class="hero-top">
+        <button type="button" class="nav-dia" id="b-dia-ant" data-dia="-1" aria-label="Dia anterior">${SETA_E}</button>
+        <label class="hero-data" for="f-data">
+          <span class="hero-rel">${relTxt} · ${SEMANA_LONGA[new Date(utc(S.data)).getUTCDay()]}</span>
+          <span class="hero-dia">${Number(dd)} de ${MESES[Number(mm) - 1]}${ICO_CAL}</span>
+          <input type="date" id="f-data" value="${S.data}" max="${hoje}" aria-label="Escolher a data da coleta">
+        </label>
+        <button type="button" class="nav-dia" id="b-dia-prox" data-dia="1" aria-label="Próximo dia" ${S.data >= hoje ? "disabled" : ""}>${SETA_D}</button>
       </div>
-      <p class="hint">${esc(motivo)}</p>
-      <p class="plan">Coletar ${semana(S.data)} ${fmtCurto(S.data)}: <b>${esc(listaNomes(partes)) || "nenhum ponto ativo"}</b>.</p>
+      <div class="seg" role="radiogroup" aria-label="Fábrica do dia">
+        ${[1, 2].map((f) => `<button type="button" role="radio" id="fab-${f}" data-fab="${f}" aria-checked="${S.fab === f}">Fábrica ${f}${f === fabSug ? "<small>sugerida</small>" : ""}</button>`).join("")}
+      </div>
+      <p class="hero-motivo">${esc(motivo)}</p>
+      <div class="prog">
+        <div class="prog-top"><span>${nFeitos} de ${nTopo} ${nTopo === 1 ? "ponto coletado" : "pontos coletados"}</span>${nTopo && nFeitos === nTopo ? "<b>Tudo coletado</b>" : ""}</div>
+        <div class="prog-bar" role="progressbar" aria-label="Pontos coletados" aria-valuemin="0" aria-valuemax="${nTopo}" aria-valuenow="${nFeitos}"><i style="width:${nTopo ? Math.round(nFeitos / nTopo * 100) : 0}%"></i></div>
+      </div>
     </div>
-    ${reg ? `<div class="note info">A coleta de ${fmt(S.data)} já está registrada (Fábrica ${reg.fabrica}). Corrija o que precisar e salve de novo.</div>` : ""}
-    ${S.semNuvem ? '<div class="note warn">Não foi possível conectar ao armazenamento compartilhado. O que você salvar agora fica só neste navegador.</div>' : ""}
-    ${fimDeSemana ? '<div class="note warn">Esta data cai num fim de semana. Confira se é o dia certo.</div>' : ""}
-    ${!reg && lacuna >= 2 ? `<div class="note warn">Faltam ${lacuna} dias úteis sem registro entre ${fmt(anterior.data)} e ${fmt(S.data)}. Se você coletou nesses dias, lance cada um escolhendo a data acima, para o rodízio ficar certo.</div>` : ""}
-    ${S.soLeitura ? '<div class="note warn">Você está vendo este site só para leitura. As coletas não podem ser salvas daqui.</div>' : ""}
+    ${notas.join("")}
     <div class="block">
-      <h2>${ehHoje ? "Pontos de hoje" : "Pontos do dia"}</h2>
-      <p class="hint">Marque o que você coletou. Os resultados são opcionais; valores fora da faixa ficam em vermelho.</p>
+      <div class="lista-head"><h2>${ehHoje ? "Coletar hoje" : "Pontos do dia"}</h2>${!S.soLeitura && nTopo && nFeitos < nTopo ? '<button type="button" class="link" id="b-todos">Marcar todos</button>' : ""}</div>
+      <p class="hint">Toque em cada ponto depois de coletar. Os resultados são opcionais; valores fora da faixa ficam em vermelho.</p>
       <ul class="tags">${topo.map(tagHTML).join("")}</ul>
     </div>
-    <label class="field" for="f-obs"><span>Observação do dia (opcional)</span><textarea id="f-obs" ${S.soLeitura ? "disabled" : ""}>${esc(S.obs)}</textarea></label>
-    <div class="actions">
-      <button class="btn primary" type="button" id="b-salvar" ${S.soLeitura ? "disabled" : ""}>${reg ? "Atualizar" : "Salvar"} coleta de ${fmtCurto(S.data)} · ${nSel} ${nSel === 1 ? "ponto" : "pontos"}</button>
-    </div>
-    ${outros.length ? `<div class="block">
-      <h2>Outros pontos da Fábrica ${S.fab}</h2>
-      <p class="hint">Do mais antigo para o mais recente. Marque aqui se precisou coletar um ponto diferente do sugerido.</p>
+    ${outros.length ? `<details class="outros" id="d-outros" ${S.outrosAberto || outros.some((e) => S.sel[e.p.id]) ? "open" : ""}>
+      <summary><span>Coletou outro ponto da Fábrica ${S.fab}?<small>${outros.length} ${outros.length === 1 ? "ponto" : "pontos"}, do mais antigo ao mais recente</small></span></summary>
       <ul class="tags">${outros.map(tagHTML).join("")}</ul>
-    </div>` : ""}
+    </details>` : ""}
+    <label class="field" for="f-obs"><span>Observação do dia (opcional)</span><textarea id="f-obs" placeholder="Ex.: bebedouro do DMP em manutenção" ${S.soLeitura ? "disabled" : ""}>${esc(S.obs)}</textarea></label>
+    <div class="savebar"><button class="btn primary" type="button" id="b-salvar" ${S.soLeitura || !nSel ? "disabled" : ""}>${nSel ? `${reg ? "Atualizar" : "Salvar"} coleta · ${nSel} ${nSel === 1 ? "ponto" : "pontos"}` : "Marque os pontos coletados"}</button></div>
   `;
 }
 
@@ -766,7 +860,8 @@ function trocarAba(aba) {
   S.aba = aba;
   for (const b of document.querySelectorAll(".tabs button")) b.setAttribute("aria-selected", String(b.dataset.aba === aba));
   for (const id of ABAS) $("#v-" + id).hidden = id !== aba;
-  document.querySelector('.tabs [aria-selected="true"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  const tabs = $(".tabs");
+  if (tabs.scrollWidth > tabs.clientWidth) document.querySelector('.tabs [aria-selected="true"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
   if (aba === "graficos") renderGraficos();
   try { localStorage.setItem("coleta-agua:aba", aba); } catch {}
 }
@@ -986,7 +1081,7 @@ async function salvarHoje() {
   const b = $("#b-salvar"); if (b) b.disabled = true;
   try {
     await salvarDia(dia);
-    delete RASC[S.data + "|" + S.fab];
+    delete RASC[S.data + "|" + S.fab]; gravarRascunhos();
     S.dirty = false; S.fabManual = null;
     const nFora = itens.reduce((n, it) => n + CAMPOS.filter((c) => fora(c, it[c])).length, 0);
     toast(`Coleta de ${fmt(S.data)} salva.` + (nFora ? ` ${nFora} ${nFora === 1 ? "valor fora" : "valores fora"} da faixa: avise o responsável.` : ""));
@@ -1067,6 +1162,12 @@ document.addEventListener("click", async (ev) => {
   if (t.id === "b-tema") { aplicarTema(temaEscuro() ? "claro" : "escuro"); return; }
   if (t.dataset.fab) { guardarRascunho(); S.fabManual = Number(t.dataset.fab); montarRascunho(); renderHoje(); $("#fab-" + S.fab)?.focus(); return; }
   if (t.id === "b-salvar") { salvarHoje(); return; }
+  if (t.dataset.dia) { irParaDia(addDias(S.data, Number(t.dataset.dia))); $("#" + t.id)?.focus(); return; }
+  if (t.dataset.ir) { irParaDia(t.dataset.ir); window.scrollTo(0, 0); return; }
+  if (t.id === "b-todos") {
+    for (const id of S.topoIds || []) S.sel[id] = S.sel[id] || { cloro: "", ph: "", turbidez: "" };
+    marcarRascunho(); renderHoje(); return;
+  }
   if (t.id === "b-csv") { oferecerArquivo(`coleta_agua_${hojeISO()}.csv`, paraCSV()); return; }
   if (t.id === "b-backup") { oferecerArquivo(`coleta_agua_backup_${hojeISO()}.json`, JSON.stringify({ config: S.config, dias: Object.values(S.dias) }, null, 1)); return; }
   if (t.id === "b-import-sim") { importar(); return; }
@@ -1094,11 +1195,11 @@ document.addEventListener("change", async (ev) => {
     if (t.id === "g-periodo") G.periodo = t.value; else G.ponto = t.value;
     renderGraficos(); $("#" + t.id)?.focus(); return;
   }
-  if (t.id === "f-data") { guardarRascunho(); S.data = dataValida(t.value) ? t.value : hojeISO(); S.fabManual = null; montarRascunho(); renderHoje(); $("#f-data")?.focus(); return; }
+  if (t.id === "f-data") { irParaDia(dataValida(t.value) ? t.value : hojeISO()); $("#f-data")?.focus(); return; }
   if (t.matches('#v-hoje input[type="checkbox"][data-ponto]')) {
     const id = t.dataset.ponto;
     if (t.checked) S.sel[id] = S.sel[id] || { cloro: "", ph: "", turbidez: "" }; else delete S.sel[id];
-    S.dirty = true; renderHoje(); $("#ck-" + id)?.focus(); return;
+    marcarRascunho(); renderHoje(); $("#ck-" + id)?.focus(); return;
   }
   if (t.dataset.ativo) {
     if (!S.pronto) return;
@@ -1131,11 +1232,11 @@ document.addEventListener("input", (ev) => {
   const t = ev.target;
   if (t.dataset && t.dataset.campo) {
     const v = S.sel[t.dataset.ponto]; if (!v) return;
-    v[t.dataset.campo] = t.value; S.dirty = true;
+    v[t.dataset.campo] = t.value; marcarRascunho();
     t.classList.toggle("fora", fora(t.dataset.campo, t.value) || invalido(t.value));
     return;
   }
-  if (t.id === "f-obs") { S.obs = t.value; S.dirty = true; }
+  if (t.id === "f-obs") { S.obs = t.value; marcarRascunho(); }
 });
 
 document.getElementById("f-novo").addEventListener("submit", async (ev) => {
@@ -1151,6 +1252,8 @@ document.getElementById("f-novo").addEventListener("submit", async (ev) => {
   try { await salvarConfig(cfg); $("#n-setor").value = ""; toast(`${setor} · ${tipo} adicionado.`); } catch (e) { toast(msgErro(e)); }
 });
 
+document.addEventListener("toggle", (ev) => { if (ev.target.id === "d-outros") S.outrosAberto = ev.target.open; }, true);
+document.addEventListener("click", (ev) => { if (ev.target.id === "f-data" && typeof ev.target.showPicker === "function") { try { ev.target.showPicker(); } catch {} } });
 const vg = document.getElementById("v-graficos");
 function alvoTip(ev) {
   const a = ev.target.closest && ev.target.closest("#v-graficos [data-tip]");
