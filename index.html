@@ -263,27 +263,39 @@ details.outros .tags { padding: 0 10px 10px; }
 .band { fill: var(--band); }
 .hit { fill: transparent; cursor: pointer; }
 .sp-list { display: grid; }
-.sp-eixo, .sp-row { display: grid; grid-template-columns: var(--lw) var(--sw) minmax(0, 1fr); gap: 10px; align-items: center; padding-inline: 4px; }
-.sp-eixo { font-family: var(--f-mono); font-size: .7rem; color: var(--muted); padding-bottom: 4px; }
-.sp-eixo > span:nth-child(2) { display: flex; justify-content: space-between; }
-.sp-row { padding-block: 9px; border-top: 1px solid var(--line); border-radius: 8px; cursor: default; }
-.sp-row:hover, .sp-row:focus-visible { background: var(--bg); }
+.sp-row { display: grid; grid-template-columns: var(--lw) minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px 8px; border-top: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.sp-row:first-child { border-top-color: transparent; }
+.sp-row:hover { background: var(--bg); }
+.sp-row.sel { background: var(--accent-soft); border-top-color: transparent; }
+.sp-row.sel + .sp-row { border-top-color: transparent; }
 .sp-lbl { display: flex; gap: 8px; align-items: flex-start; min-width: 0; font-size: .88rem; line-height: 1.25; overflow-wrap: anywhere; }
 .sp-lbl .k { flex: none; width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; }
 .sp-lbl small { display: block; color: var(--muted); font-size: .75rem; }
+.sp-graf { display: grid; gap: 2px; min-width: 0; }
+.sp-top { display: flex; justify-content: flex-end; align-items: baseline; gap: 6px; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.sp-top b { font-size: 1rem; font-weight: 600; }
+.sp-top small { font-size: .72rem; color: var(--muted); }
+.sp-top.fora b, .sp-top.fora small { color: var(--bad); }
 .spark { display: block; overflow: visible; }
-.sp-vazio { font-size: .78rem; color: var(--muted); }
-.sp-val { text-align: right; font-family: var(--f-mono); font-weight: 600; font-size: .95rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
-.sp-val small { display: block; font-weight: 400; font-size: .7rem; color: var(--muted); }
-.sp-val.fora, .sp-val.fora small { color: var(--bad); }
 .sp-base { stroke: var(--axis); stroke-width: 1; }
-.sp-tick.f0, .sp-dot.f0, .sp-area.f0 { fill: var(--s3); } .sp-tick.f1, .sp-dot.f1, .sp-area.f1 { fill: var(--s1); } .sp-tick.f2, .sp-dot.f2, .sp-area.f2 { fill: var(--s2); }
-.sp-tick { opacity: .75; } .sp-tick.ult { opacity: 1; }
-.sp-line { fill: none; stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; }
+.sp-dt { fill: var(--muted); font-family: var(--f-mono); font-size: 10px; }
+.sp-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .sp-line.f0 { stroke: var(--s3); } .sp-line.f1 { stroke: var(--s1); } .sp-line.f2 { stroke: var(--s2); }
-.sp-area { opacity: .13; }
+.sp-area { opacity: .3; } .sp-area.f0, .sp-dot.f0, .xh-dot.f0 { fill: var(--s3); } .sp-area.f1, .sp-dot.f1, .xh-dot.f1 { fill: var(--s1); } .sp-area.f2, .sp-dot.f2, .xh-dot.f2 { fill: var(--s2); }
 .sp-dot { stroke: var(--surface); stroke-width: 2; }
+.sp-row.sel .sp-dot { stroke: var(--accent-soft); }
 .sp-dot.fora { fill: var(--bad); }
+.big { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; cursor: crosshair; }
+.ax-t { fill: var(--muted); font-family: var(--f-mono); font-size: 11px; }
+.ax-g { stroke: var(--grid); stroke-width: 1; }
+.ax-b { stroke: var(--axis); stroke-width: 1; }
+.mk { stroke-width: 1.5; opacity: .5; } .mk.f0 { stroke: var(--s3); } .mk.f1 { stroke: var(--s1); } .mk.f2 { stroke: var(--s2); }
+.mk-t { fill: var(--ink); font-family: var(--f-mono); font-size: 11px; font-weight: 600; }
+.xh { stroke: var(--muted); stroke-width: 1; }
+.xh-dot { stroke: var(--surface); stroke-width: 2.5; }
+.det { scroll-margin-top: 84px; }
+.det .chart-head > div { display: grid; gap: 2px; }
+.det h3 { margin-top: 6px; }
 .seg-param { display: grid; grid-template-columns: repeat(3, auto); width: 100%; }
 .seg-param button { padding: 7px 8px; }
 .res-resumo { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; font-size: .85rem; color: var(--muted); }
@@ -931,7 +943,7 @@ function iniciarTema() {
 }
 
 /* ---------- Gráficos ---------- */
-const G = { periodo: "tudo", ponto: "", param: "cloro", tips: [] };
+const G = { periodo: "30", ponto: "", param: "cloro", tips: [], charts: {} };
 const PARAM = [
   { c: "cloro", titulo: "Cloro livre", un: "mg/L" },
   { c: "ph", titulo: "pH", un: "" },
@@ -955,56 +967,119 @@ function chavesHTML(fabs) {
 }
 function layoutSpark(el) {
   const inner = Math.max(240, Math.floor(el.clientWidth) - 30);
-  const lw = Math.round(Math.min(170, Math.max(96, inner * 0.36)));
-  const vw = inner < 360 ? 52 : 70;
-  return { lw, sw: Math.max(64, inner - lw - vw - 28) };
+  const lw = Math.round(Math.min(170, Math.max(92, inner * 0.33)));
+  return { inner, lw, sw: Math.max(90, inner - lw - 12 - 16) };
 }
 function dominioParam(c, vs) {
   const lim = LIM[c];
   if (c === "ph") return { lo: Math.min(Math.min(...vs), lim.min) - 0.5, hi: Math.max(Math.max(...vs), lim.max) + 0.5 };
   return { lo: 0, hi: Math.max(Math.max(...vs) * 1.15, c === "cloro" ? 0.5 : 1) };
 }
-function cadenciaSVG(datas, fab, dom, sw) {
-  const H = 24, px = 3, base = H - 3;
-  const t0 = utc(dom.ini), t1 = utc(dom.fim);
-  const x = (s) => px + ((utc(s) - t0) / (t1 - t0)) * (sw - 2 * px);
-  const ord = datas.slice().sort();
+function diaLongo(s) {
+  const [, m, d] = s.split("-");
+  const t = SEMANA_LONGA[new Date(utc(s)).getUTCDay()] + ", " + Number(d) + " de " + MESES[Number(m) - 1];
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+function serieRitmo(datas, dom) {
+  const out = [];
+  let j = -1;
+  for (let t = utc(dom.ini); t <= utc(dom.fim); t += 86400000) {
+    const d = isoUtc(t);
+    while (j + 1 < datas.length && datas[j + 1] <= d) j++;
+    out.push({ data: d, v: j >= 0 ? diffDias(d, datas[j]) : null, coleta: j >= 0 && datas[j] === d });
+  }
+  return out;
+}
+function rotular(xs, larg, linhas) {
+  const pos = xs.map(() => -1), usados = Array.from({ length: linhas }, () => []);
+  for (let k = xs.length - 1; k >= 0; k--) {
+    for (let l = 0; l < linhas; l++) {
+      if (usados[l].every((u) => Math.abs(u - xs[k]) >= larg + 4)) { usados[l].push(xs[k]); pos[k] = l; break; }
+    }
+  }
+  return pos;
+}
+function caminhos(pts, base, fab) {
+  let g = "", seg = [];
+  const fecha = () => {
+    if (seg.length > 1) {
+      const lin = seg.map((q) => q.join(",")).join(" L");
+      g += `<path class="sp-area f${fab}" d="M${seg[0][0]},${base} L${lin} L${seg[seg.length - 1][0]},${base} Z"/><polyline class="sp-line f${fab}" points="${seg.map((q) => q.join(",")).join(" ")}"/>`;
+    }
+    seg = [];
+  };
+  for (const q of pts) { if (q === null) fecha(); else seg.push(q); }
+  fecha();
+  return g;
+}
+function rotuloX(x, w) { return Math.max(15, Math.min(w - 15, x)).toFixed(1); }
+function sparkRitmo(serie, fab, sw, ymax, tipDe) {
+  const base = 40, top = 4, px = 4, H = 56, n = serie.length;
+  const x = (i) => +(px + (n > 1 ? i / (n - 1) : 0.5) * (sw - 2 * px)).toFixed(1);
+  const y = (v) => +(base - (v / ymax) * (base - top)).toFixed(1);
   let g = `<line class="sp-base" x1="0" x2="${sw}" y1="${base}" y2="${base}"/>`;
-  ord.forEach((d, i) => {
-    const ult = i === ord.length - 1, h = ult ? 17 : 11;
-    g += `<rect class="sp-tick f${fab}${ult ? " ult" : ""}" x="${(x(d) - 1.5).toFixed(1)}" y="${base - h}" width="3" height="${h}" rx="1.5"/>`;
+  g += caminhos(serie.map((q, i) => (q.v === null ? null : [x(i), y(q.v)])), base, fab);
+  const cols = serie.map((q, i) => (q.coleta ? i : -1)).filter((i) => i >= 0);
+  const pos = rotular(cols.map((i) => x(i)), 30, 1);
+  cols.forEach((i, k) => {
+    g += `<circle class="sp-dot f${fab}" cx="${x(i)}" cy="${base}" r="3.5"/>`;
+    if (pos[k] === 0) g += `<text class="sp-dt" x="${rotuloX(x(i), sw)}" y="${H - 2}" text-anchor="middle">${fmtCurto(serie[i].data)}</text>`;
   });
+  cols.forEach((i) => { g += `<circle class="hit" cx="${x(i)}" cy="${base}" r="11" data-tip="${tipDe(serie[i])}"/>`; });
   return `<svg class="spark" width="${sw}" height="${H}" viewBox="0 0 ${sw} ${H}" aria-hidden="true">${g}</svg>`;
 }
-function sparkSVG(c, ord, dom, sw, faixa, fab) {
-  const H = 40, px = 5, py = 6;
-  const t0 = utc(dom.ini), t1 = utc(dom.fim), lim = LIM[c];
+function sparkRes(ord, dom, fab, c, sw, faixa) {
+  const base = 40, top = 4, px = 5, H = 56, lim = LIM[c];
+  const t0 = utc(dom.ini), t1 = utc(dom.fim);
   const x = (s) => +(px + ((utc(s) - t0) / (t1 - t0)) * (sw - 2 * px)).toFixed(1);
-  const y = (v) => +(py + (1 - (v - faixa.lo) / (faixa.hi - faixa.lo)) * (H - 2 * py)).toFixed(1);
+  const y = (v) => +(base - ((v - faixa.lo) / (faixa.hi - faixa.lo)) * (base - top)).toFixed(1);
   let g = "";
   const bLo = Math.max(faixa.lo, lim.min ?? faixa.lo), bHi = Math.min(faixa.hi, lim.max ?? faixa.hi);
-  if (bHi > bLo) g += `<rect class="band" x="0" y="${y(bHi)}" width="${sw}" height="${(y(bLo) - y(bHi)).toFixed(1)}" rx="4"/>`;
-  const pts = ord.map((a) => [x(a.data), y(a.v)]);
-  if (pts.length > 1) {
-    g += `<path class="sp-area f${fab}" d="M${pts[0][0]},${H - py} L${pts.map((q) => q.join(",")).join(" L")} L${pts[pts.length - 1][0]},${H - py} Z"/>`;
-    g += `<polyline class="sp-line f${fab}" points="${pts.map((q) => q.join(",")).join(" ")}"/>`;
-  }
-  ord.forEach((a, i) => {
-    const ult = i === ord.length - 1;
-    if (a.fora) g += `<circle class="sp-dot fora" cx="${pts[i][0]}" cy="${pts[i][1]}" r="${ult ? 4 : 3.5}"/>`;
-    else if (ult) g += `<circle class="sp-dot f${fab}" cx="${pts[i][0]}" cy="${pts[i][1]}" r="4"/>`;
+  if (bHi > bLo) g += `<rect class="band" x="0" y="${y(bHi)}" width="${sw}" height="${(y(bLo) - y(bHi)).toFixed(1)}" rx="3"/>`;
+  g += `<line class="sp-base" x1="0" x2="${sw}" y1="${base}" y2="${base}"/>`;
+  g += caminhos(ord.map((a) => [x(a.data), y(a.v)]), base, fab);
+  const pos = rotular(ord.map((a) => x(a.data)), 30, 1);
+  ord.forEach((a, k) => {
+    g += `<circle class="sp-dot ${a.fora ? "fora" : "f" + fab}" cx="${x(a.data)}" cy="${y(a.v)}" r="3.5"/>`;
+    if (pos[k] === 0) g += `<text class="sp-dt" x="${rotuloX(x(a.data), sw)}" y="${H - 2}" text-anchor="middle">${fmtCurto(a.data)}</text>`;
   });
-  ord.forEach((a, i) => { g += `<circle class="hit" cx="${pts[i][0]}" cy="${pts[i][1]}" r="10" data-tip="${a.tip}"/>`; });
+  ord.forEach((a) => { g += `<circle class="hit" cx="${x(a.data)}" cy="${y(a.v)}" r="11" data-tip="${a.tip}"/>`; });
   return `<svg class="spark" width="${sw}" height="${H}" viewBox="0 0 ${sw} ${H}" aria-hidden="true">${g}</svg>`;
 }
-function linhaRes(lbl, sub, fab, lista, c, dom, L, faixa) {
-  const ord = lista.slice().sort((a, b) => (a.data < b.data ? -1 : 1)), u = ord[ord.length - 1];
-  const un = PARAM.find((pr) => pr.c === c).un;
-  return `<div class="sp-row" tabindex="0" data-tip="${u.tip}" aria-label="${esc(lbl + " " + sub + ": último valor " + fmtNum(u.v) + " " + un + " em " + fmt(u.data) + (u.fora ? ", fora da faixa" : ""))}">
-    <span class="sp-lbl"><i class="k f${fab}"></i><span>${esc(lbl)}<small>${esc(sub)}</small></span></span>
-    ${sparkSVG(c, ord, dom, L.sw, faixa, fab)}
-    <span class="sp-val${u.fora ? " fora" : ""}">${fmtNum(u.v)}<small>${u.fora ? "fora · " : ""}${fmtCurto(u.data)}</small></span>
-  </div>`;
+function grande(cfg) {
+  const { id, W, pts, dom, fab, faixa } = cfg;
+  const H = cfg.h || 230, ml = 36, mr = 14, mt = 14, mb = 46, iw = W - ml - mr, ih = H - mt - mb, base = mt + ih;
+  let lo = cfg.lo ?? 0, hi = cfg.hi;
+  const step = passoBom(hi - lo, 4);
+  lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+  const t0 = utc(dom.ini), t1 = utc(dom.fim);
+  const x = (s) => +(ml + ((utc(s) - t0) / (t1 - t0)) * iw).toFixed(1);
+  const y = (v) => +(mt + (1 - (v - lo) / (hi - lo)) * ih).toFixed(1);
+  let g = "";
+  if (faixa) {
+    const bLo = Math.max(lo, faixa.min ?? lo), bHi = Math.min(hi, faixa.max ?? hi);
+    if (bHi > bLo) g += `<rect class="band" x="${ml}" y="${y(bHi)}" width="${iw}" height="${(y(bLo) - y(bHi)).toFixed(1)}"/>`;
+  }
+  for (let i = 0, v = lo; v <= hi + step / 1000; i++, v = lo + i * step) {
+    const yy = y(v);
+    if (i > 0) g += `<line class="ax-g" x1="${ml}" x2="${ml + iw}" y1="${yy}" y2="${yy}"/>`;
+    g += `<text class="ax-t" x="${ml - 6}" y="${yy}" text-anchor="end" dominant-baseline="middle">${fmtEixo(v)}</text>`;
+  }
+  g += `<line class="ax-b" x1="${ml}" x2="${ml + iw}" y1="${base}" y2="${base}"/>`;
+  const marcas = pts.filter((q) => q.marca);
+  for (const q of marcas) g += `<line class="mk f${fab}" x1="${x(q.data)}" x2="${x(q.data)}" y1="${mt}" y2="${base}"/>`;
+  g += caminhos(pts.map((q) => (q.v === null ? null : [x(q.data), y(q.v)])), base, fab);
+  for (const q of marcas) g += `<circle class="sp-dot ${q.fora ? "fora" : "f" + fab}" cx="${x(q.data)}" cy="${y(q.v ?? lo)}" r="4.5"/>`;
+  const pos = rotular(marcas.map((q) => x(q.data)), 32, 2);
+  marcas.forEach((q, k) => {
+    if (pos[k] < 0) return;
+    g += `<text class="mk-t" x="${Math.max(ml, Math.min(ml + iw, x(q.data))).toFixed(1)}" y="${base + 18 + pos[k] * 15}" text-anchor="middle">${fmtCurto(q.data)}</text>`;
+  });
+  if (!marcas.length || marcas[0].data !== dom.ini) g += `<text class="ax-t" x="${ml}" y="${H - 2}" text-anchor="start">${fmtCurto(dom.ini)}</text>`;
+  g += `<text class="ax-t" x="${ml + iw}" y="${H - 2}" text-anchor="end">${dom.fim === hojeISO() ? "hoje" : fmtCurto(dom.fim)}</text>`;
+  g += `<line class="xh" x1="0" x2="0" y1="${mt}" y2="${base}" style="display:none"/><circle class="xh-dot f${fab}" r="5" cx="0" cy="0" style="display:none"/>`;
+  G.charts[id] = { W, base, pts: pts.map((q) => ({ x: x(q.data), y: q.v === null ? null : y(q.v), tip: q.tip })) };
+  return `<svg class="big" data-g="${id}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(cfg.rotulo)}">${g}</svg>`;
 }
 function renderGraficos() {
   const el = $("#v-graficos");
@@ -1015,13 +1090,32 @@ function renderGraficos() {
   for (const d of Object.values(S.dias)) for (const it of d.itens || []) if (!info[it.ponto]) info[it.ponto] = { id: it.ponto, setor: it.setor, tipo: it.tipo, fabrica: it.fabrica, ativo: false };
   if (G.ponto && !info[G.ponto]) G.ponto = "";
   const diasP = Object.values(S.dias).filter((d) => d.data >= dom.ini && d.data <= dom.fim);
-  const datasPonto = {};
-  for (const d of diasP) for (const it of d.itens || []) (datasPonto[it.ponto] = datasPonto[it.ponto] || []).push(d.data);
-  G.tips = [];
+  const todas = {}, noPeriodo = {};
+  for (const d of Object.values(S.dias)) for (const it of d.itens || []) {
+    (todas[it.ponto] = todas[it.ponto] || []).push(d.data);
+    if (d.data >= dom.ini && d.data <= dom.fim) noPeriodo[it.ponto] = (noPeriodo[it.ponto] || 0) + 1;
+  }
+  for (const k in todas) todas[k].sort();
+  const series = {};
+  for (const id in info) series[id] = serieRitmo(todas[id] || [], dom);
+  G.tips = []; G.charts = {};
   const tip = (o) => { G.tips.push(o); return G.tips.length - 1; };
   const L = layoutSpark(el);
-  const vars = `style="--lw:${L.lw}px;--sw:${L.sw}px"`;
-  const eixo = `<div class="sp-eixo" aria-hidden="true"><span></span><span><span>${fmtCurto(dom.ini)}</span><span>${fmtCurto(dom.fim)}</span></span><span></span></div>`;
+  const vars = `style="--lw:${L.lw}px"`;
+  const tipRitmo = (p) => (q) => tip({ valor: q.coleta ? "Coleta feita" : q.v === null ? "Sem coleta registrada" : q.v + (q.v === 1 ? " dia sem coleta" : " dias sem coleta"), titulo: p.setor + " · " + p.tipo, sub: diaLongo(q.data), extra: "", serie: p.fabrica });
+
+  const amostras = [], linhas = [];
+  for (const d of diasP.slice().sort((a, b) => (a.data < b.data ? 1 : -1))) for (const it of d.itens || []) {
+    let tem = false;
+    for (const pr of PARAM) {
+      const v = num(it[pr.c]); if (v === null) continue;
+      tem = true;
+      const fo = fora(pr.c, v);
+      amostras.push({ c: pr.c, data: d.data, ponto: it.ponto, setor: it.setor, tipo: it.tipo, fab: it.fabrica, v, fora: fo,
+        tip: tip({ valor: pr.titulo + ": " + fmtNum(v) + (pr.un ? " " + pr.un : ""), titulo: it.setor + " · " + it.tipo, sub: diaLongo(d.data), extra: fo ? "fora da faixa" : "", serie: it.fabrica }) });
+    }
+    if (tem && (!G.ponto || it.ponto === G.ponto)) linhas.push({ d, it });
+  }
 
   const opts = [0, 1, 2].map((f) => {
     const ps = Object.values(info).filter((p) => p.fabrica === f);
@@ -1035,55 +1129,44 @@ function renderGraficos() {
     </select></label>
     <label class="field" for="g-ponto"><span>Ponto</span><select id="g-ponto"><option value="">Todos os pontos</option>${opts}</select></label>
   </div>
-  <p class="hint">De ${fmt(dom.ini)} a ${fmt(dom.fim)}: ${diasP.length} ${diasP.length === 1 ? "dia" : "dias"} com coleta.</p>`;
+  <p class="hint">De ${fmt(dom.ini)} a ${fmt(dom.fim)}: ${diasP.length} ${diasP.length === 1 ? "dia" : "dias"} com coleta.${G.ponto ? "" : " Toque num ponto para ver o gráfico dele em detalhe."}</p>`;
 
-  const grupos = (G.ponto ? [info[G.ponto].fabrica] : [1, 2, 0])
-    .map((f) => ({ f, ps: Object.values(info).filter((p) => p.fabrica === f && (G.ponto ? p.id === G.ponto : (p.ativo !== false || datasPonto[p.id]))) }))
-    .filter((g) => g.ps.length);
-  html += `<div class="chart"><div class="chart-head"><h2>Ritmo de coleta</h2><span class="un">cada traço é uma coleta</span></div>`;
-  if (!G.ponto) html += '<p class="hint">Traços espaçados por igual mostram o rodízio em dia. Um vazio longo no fim indica um ponto ficando para trás.</p>' + chavesHTML(new Set(grupos.map((g) => g.f)));
+  if (G.ponto) {
+    const p = info[G.ponto], se = series[G.ponto], u = (todas[G.ponto] || []).filter((d) => d <= dom.fim).pop();
+    const n = noPeriodo[G.ponto] || 0, tr = tipRitmo(p);
+    const vmax = Math.max(7, ...se.map((q) => q.v ?? 0));
+    html += `<div class="chart det" id="det">
+      <div class="chart-head"><div><h2>${esc(p.setor + " · " + p.tipo)}</h2><span class="hint">${nomeLocal(p.fabrica)} · ${n} ${n === 1 ? "coleta" : "coletas"} no período${u ? ", a última em " + fmt(u) : ""}</span></div><button type="button" class="link" data-sel="">Fechar</button></div>
+      <h3>Dias sem coleta</h3>
+      <p class="hint">A área sobe a cada dia sem coleta e volta a zero no dia em que o ponto é coletado. Cada linha vertical é uma coleta, com a data embaixo.</p>
+      ${grande({ id: "ritmo", W: L.inner, dom, fab: p.fabrica, hi: vmax, rotulo: "Dias sem coleta de " + p.setor + " " + p.tipo, pts: se.map((q) => ({ data: q.data, v: q.v, marca: q.coleta, tip: tr(q) })) })}`;
+    for (const pr of PARAM) {
+      const lista = amostras.filter((a) => a.ponto === G.ponto && a.c === pr.c).sort((a, b) => (a.data < b.data ? -1 : 1));
+      if (!lista.length) continue;
+      const fx = dominioParam(pr.c, lista.map((a) => a.v));
+      html += `<h3>${pr.titulo}${pr.un ? ` <span class="un">${pr.un}</span>` : ""}</h3>` + grande({ id: "r-" + pr.c, h: 180, W: L.inner, dom, fab: p.fabrica, lo: fx.lo, hi: fx.hi, faixa: LIM[pr.c], rotulo: pr.titulo + " de " + p.setor + " " + p.tipo, pts: lista.map((a) => ({ data: a.data, v: a.v, marca: true, fora: a.fora, tip: a.tip })) });
+    }
+    html += "</div>";
+  }
+
+  const grupos = [1, 2, 0].map((f) => ({ f, ps: Object.values(info).filter((p) => p.fabrica === f && (p.ativo !== false || noPeriodo[p.id])) })).filter((g) => g.ps.length);
+  const ymax = Math.max(7, ...grupos.flatMap((g) => g.ps.flatMap((p) => series[p.id].map((q) => q.v ?? 0))));
+  html += `<div class="chart"><div class="chart-head"><h2>Ritmo de coleta</h2><span class="un">dias sem coleta</span></div>
+    <p class="hint">Cada bolinha é uma coleta, com a data embaixo. A área cresce enquanto o ponto fica sem coleta.</p>${chavesHTML(new Set(grupos.map((g) => g.f)))}`;
   for (const g of grupos) {
-    if (!G.ponto) html += `<h3>${nomeLocal(g.f)}</h3>`;
-    html += `<div class="sp-list" ${vars}>${eixo}` + g.ps.map((p) => {
-      const ds = datasPonto[p.id] || [];
-      const u = ds.length ? ds.slice().sort()[ds.length - 1] : null;
-      const atras = u ? diffDias(dom.fim, u) : null;
-      const t = tip({ valor: ds.length + (ds.length === 1 ? " coleta" : " coletas"), titulo: p.setor + " · " + p.tipo, sub: nomeLocal(p.fabrica), extra: u ? "última em " + fmt(u) : "nenhuma no período", serie: p.fabrica });
-      return `<div class="sp-row" tabindex="0" data-tip="${t}" aria-label="${esc(p.setor + " " + p.tipo + ": " + ds.length + " coletas no período" + (u ? ", última em " + fmt(u) : ""))}">
-        <span class="sp-lbl"><i class="k f${p.fabrica}"></i><span>${esc(p.setor)}<small>${esc(p.tipo)}</small></span></span>
-        ${ds.length ? cadenciaSVG(ds, p.fabrica, dom, L.sw) : '<span class="sp-vazio">nenhuma coleta no período</span>'}
-        <span class="sp-val">${ds.length}×<small>${u ? (atras === 0 ? "hoje" : "há " + atras + " d") : "nunca"}</small></span>
+    html += `<h3>${nomeLocal(g.f)}</h3><div class="sp-list" ${vars}>` + g.ps.map((p) => {
+      const se = series[p.id], ult = se[se.length - 1].v, n = noPeriodo[p.id] || 0;
+      return `<div class="sp-row${G.ponto === p.id ? " sel" : ""}" data-sel="${p.id}" role="button" tabindex="0" aria-pressed="${G.ponto === p.id}" aria-label="${esc(p.setor + " " + p.tipo + ": " + n + " coletas no período" + (ult === null ? "" : ", " + ult + " dias sem coleta"))}">
+        <span class="sp-lbl"><i class="k f${p.fabrica}"></i><span>${esc(p.setor)}<small>${esc(p.tipo)} · ${n}×</small></span></span>
+        <span class="sp-graf"><span class="sp-top"><b>${ult === null ? "nunca" : ult === 0 ? "hoje" : "há " + ult + " d"}</b></span>${sparkRitmo(se, p.fabrica, L.sw, ymax, tipRitmo(p))}</span>
       </div>`;
     }).join("") + "</div>";
   }
   html += "</div>";
 
-  const amostras = [], linhas = [];
-  for (const d of diasP.slice().sort((a, b) => (a.data < b.data ? 1 : -1))) for (const it of d.itens || []) {
-    if (G.ponto && it.ponto !== G.ponto) continue;
-    let tem = false;
-    for (const pr of PARAM) {
-      const v = num(it[pr.c]); if (v === null) continue;
-      tem = true;
-      const fo = fora(pr.c, v);
-      amostras.push({ c: pr.c, data: d.data, ponto: it.ponto, setor: it.setor, tipo: it.tipo, fab: it.fabrica, v, fora: fo,
-        tip: tip({ valor: fmtNum(v) + (pr.un ? " " + pr.un : "") + (pr.c === "ph" ? " de pH" : ""), titulo: it.setor + " · " + it.tipo, sub: nomeLocal(it.fabrica) + " · " + semana(d.data) + " " + fmt(d.data), extra: fo ? "fora da faixa" : "", serie: it.fabrica }) });
-    }
-    if (tem) linhas.push({ d, it });
-  }
   html += '<div class="chart"><div class="chart-head"><h2>Resultados das análises</h2></div>';
   if (!amostras.length) {
-    html += `<div class="empty"><b>Nenhum resultado ${G.ponto ? "deste ponto " : ""}neste período</b><span class="hint">Quando você preencher cloro livre, pH ou turbidez na aba Coleta, as linhas aparecem aqui, com a faixa da Portaria GM/MS 888/2021 sombreada.</span></div>`;
-  } else if (G.ponto) {
-    const p = info[G.ponto];
-    html += `<p class="hint">Faixa sombreada: valores aceitáveis. O ponto maior é o último resultado; pontos vermelhos estão fora da faixa.</p><div class="sp-list" ${vars}>${eixo}`;
-    for (const pr of PARAM) {
-      const lista = amostras.filter((a) => a.c === pr.c);
-      html += lista.length
-        ? linhaRes(pr.titulo, (pr.un ? pr.un + " · " : "") + "faixa " + LIM[pr.c].ref, p.fabrica, lista, pr.c, dom, L, dominioParam(pr.c, lista.map((a) => a.v)))
-        : `<div class="sp-row"><span class="sp-lbl"><span>${pr.titulo}</span></span><span class="sp-vazio">sem resultados no período</span><span></span></div>`;
-    }
-    html += "</div>";
+    html += `<div class="empty"><b>Nenhum resultado neste período</b><span class="hint">Quando você preencher cloro livre, pH ou turbidez na aba Coleta, as linhas aparecem aqui, com a faixa da Portaria GM/MS 888/2021 sombreada.</span></div>`;
   } else {
     const pr = PARAM.find((x) => x.c === G.param) || PARAM[0];
     const lista = amostras.filter((a) => a.c === pr.c);
@@ -1096,11 +1179,14 @@ function renderGraficos() {
     if (!lista.length) html += `<p class="hint">Sem resultados de ${pr.titulo.toLowerCase()} no período.</p>`;
     else {
       const faixa = dominioParam(pr.c, lista.map((a) => a.v));
-      html += `<p class="hint">Faixa sombreada: valores aceitáveis. Todas as linhas usam a mesma escala, então dá para comparar os pontos.</p>` + chavesHTML(new Set(lista.map((a) => a.fab)));
-      html += `<div class="sp-list" ${vars}>${eixo}` + ids.map((id) => { const p = info[id]; return linhaRes(p.setor, p.tipo, p.fabrica, porPonto[id], pr.c, dom, L, faixa); }).join("") + "</div>";
+      html += `<p class="hint">Cada bolinha é uma amostra, com a data embaixo. A faixa sombreada mostra os valores aceitáveis, e as bolinhas vermelhas estão fora dela.</p>${chavesHTML(new Set(lista.map((a) => a.fab)))}<div class="sp-list" ${vars}>` + ids.map((id) => {
+        const p = info[id], ord = porPonto[id].slice().sort((a, b) => (a.data < b.data ? -1 : 1)), u = ord[ord.length - 1];
+        return `<div class="sp-row${G.ponto === id ? " sel" : ""}" data-sel="${id}" role="button" tabindex="0" aria-pressed="${G.ponto === id}" aria-label="${esc(p.setor + " " + p.tipo + ": último " + pr.titulo + " " + fmtNum(u.v) + " " + pr.un + " em " + fmt(u.data) + (u.fora ? ", fora da faixa" : ""))}">
+          <span class="sp-lbl"><i class="k f${p.fabrica}"></i><span>${esc(p.setor)}<small>${esc(p.tipo)}</small></span></span>
+          <span class="sp-graf"><span class="sp-top${u.fora ? " fora" : ""}"><b>${fmtNum(u.v)}</b><small>${pr.un}${u.fora ? " · fora" : ""}</small></span>${sparkRes(ord, dom, p.fabrica, pr.c, L.sw, faixa)}</span>
+        </div>`;
+      }).join("") + "</div>";
     }
-  }
-  if (amostras.length) {
     html += `<details class="tabela"><summary>Ver tabela dos resultados (${linhas.length} ${linhas.length === 1 ? "amostra" : "amostras"})</summary><div class="tbl-wrap"><table class="res-tbl">
       <thead><tr><th>Data</th><th>Local</th><th>Ponto</th><th class="n">Cloro livre</th><th class="n">pH</th><th class="n">Turbidez</th></tr></thead><tbody>
       ${linhas.map(({ d, it }) => `<tr><td>${fmt(d.data)}</td><td>${it.fabrica === 0 ? "Todo dia" : "Fábrica " + it.fabrica}</td><td>${esc(it.setor + " · " + it.tipo)}</td>${PARAM.map((x) => { const v = num(it[x.c]); const fo = v !== null && fora(x.c, v); return `<td class="n${fo ? " fora" : ""}">${v === null ? "" : fmtNum(v) + (fo ? " (fora)" : "")}</td>`; }).join("")}</tr>`).join("")}
@@ -1109,28 +1195,53 @@ function renderGraficos() {
   html += "</div>";
   html += '<div id="g-tip" role="tooltip" hidden></div>';
   el.innerHTML = html;
-  G.tipAtual = null; G.largura = el.clientWidth;
+  G.tipAtual = null; G.xhAtivo = null; G.largura = el.clientWidth;
 }
-function mostrarTip(alvo) {
-  const d = G.tips[Number(alvo.dataset.tip)], tip = $("#g-tip");
+function abrirTip(d, r) {
+  const tip = $("#g-tip");
   if (!d || !tip) return;
   tip.replaceChildren();
-  const b = document.createElement("b"); b.textContent = d.valor;
+  const sm = document.createElement("small"); sm.textContent = d.sub + (d.extra ? " · " + d.extra : "");
   const l = document.createElement("span"); l.className = "tl";
   const k = document.createElement("i"); k.className = "tip-key f" + d.serie;
-  l.append(k, document.createTextNode(d.titulo));
-  const sm = document.createElement("small"); sm.textContent = d.sub + (d.extra ? " · " + d.extra : "");
-  tip.append(b, l, sm);
-  tip.hidden = false; G.tipAtual = alvo;
-  const box = $("#v-graficos").getBoundingClientRect(), r = alvo.getBoundingClientRect();
+  const b = document.createElement("b"); b.textContent = d.valor;
+  l.append(k, b);
+  const ti = document.createElement("small"); ti.textContent = d.titulo;
+  tip.append(sm, l, ti);
+  tip.hidden = false;
+  const box = $("#v-graficos").getBoundingClientRect();
   const tw = tip.offsetWidth, th = tip.offsetHeight;
-  const sp = alvo.classList.contains("sp-row") ? alvo.querySelector(".spark") : null;
-  const cx = sp ? sp.getBoundingClientRect().right - 6 : r.left + r.width / 2;
-  const left = Math.max(0, Math.min(cx - box.left - tw / 2, box.width - tw));
-  let top = r.top - box.top - th - 6; if (top < 0) top = r.bottom - box.top + 6;
+  const left = Math.max(0, Math.min((r.left + r.right) / 2 - box.left - tw / 2, box.width - tw));
+  let top = r.top - box.top - th - 10; if (top < 0) top = r.bottom - box.top + 10;
   tip.style.left = left + "px"; tip.style.top = top + "px";
 }
-function esconderTip() { const t = $("#g-tip"); if (t) t.hidden = true; G.tipAtual = null; }
+function mostrarTip(alvo) {
+  G.tipAtual = alvo;
+  abrirTip(G.tips[Number(alvo.dataset.tip)], alvo.getBoundingClientRect());
+}
+function crosshair(ev) {
+  const svg = ev.target.closest && ev.target.closest("#v-graficos svg[data-g]");
+  if (!svg) return false;
+  const c = G.charts[svg.dataset.g];
+  if (!c || !c.pts.length) return false;
+  const r = svg.getBoundingClientRect(), k = r.width / c.W, lx = (ev.clientX - r.left) / k;
+  let best = c.pts[0];
+  for (const q of c.pts) if (Math.abs(q.x - lx) < Math.abs(best.x - lx)) best = q;
+  if (G.xhAtivo && G.xhAtivo !== svg) limparCrosshair();
+  const xh = svg.querySelector(".xh"), xd = svg.querySelector(".xh-dot");
+  xh.setAttribute("x1", best.x); xh.setAttribute("x2", best.x); xh.style.display = "";
+  const yy = best.y ?? c.base;
+  if (best.y === null) xd.style.display = "none"; else { xd.setAttribute("cx", best.x); xd.setAttribute("cy", best.y); xd.style.display = ""; }
+  G.xhAtivo = svg; G.tipAtual = null;
+  const px = r.left + best.x * k, py = r.top + yy * k;
+  abrirTip(G.tips[best.tip], { left: px, right: px, top: py - 6, bottom: py + 6 });
+  return true;
+}
+function limparCrosshair() {
+  if (G.xhAtivo) for (const e of G.xhAtivo.querySelectorAll(".xh, .xh-dot")) e.style.display = "none";
+  G.xhAtivo = null;
+}
+function esconderTip() { const t = $("#g-tip"); if (t) t.hidden = true; G.tipAtual = null; limparCrosshair(); }
 
 /* ---------- Ações ---------- */
 async function salvarHoje() {
@@ -1222,6 +1333,15 @@ window.addEventListener("pageshow", verificarVirada);
 setInterval(verificarVirada, 60000);
 
 document.addEventListener("click", async (ev) => {
+  const sel = ev.target.closest && ev.target.closest("#v-graficos [data-sel]");
+  if (sel) {
+    const id = sel.dataset.sel;
+    G.ponto = !id || G.ponto === id ? "" : id;
+    esconderTip(); renderGraficos();
+    if (G.ponto) document.getElementById("det")?.scrollIntoView({ block: "start" });
+    else document.querySelector(`#v-graficos [data-sel="${id}"]`)?.focus();
+    return;
+  }
   const t = ev.target.closest("button, [data-fab]"); if (!t) return;
   if (t.dataset.aba) { trocarAba(t.dataset.aba); return; }
   if (t.id === "b-tema") { aplicarTema(temaEscuro() ? "claro" : "escuro"); return; }
@@ -1318,6 +1438,9 @@ document.getElementById("f-novo").addEventListener("submit", async (ev) => {
   try { await salvarConfig(cfg); $("#n-setor").value = ""; toast(`${setor} · ${tipo} adicionado.`); } catch (e) { toast(msgErro(e)); }
 });
 
+document.addEventListener("keydown", (ev) => {
+  if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('#v-graficos [data-sel][role="button"]')) { ev.preventDefault(); ev.target.click(); }
+});
 document.addEventListener("toggle", (ev) => { if (ev.target.id === "d-outros") S.outrosAberto = ev.target.open; }, true);
 document.addEventListener("click", (ev) => { if (ev.target.id === "f-data" && typeof ev.target.showPicker === "function") { try { ev.target.showPicker(); } catch {} } });
 const vg = document.getElementById("v-graficos");
@@ -1337,7 +1460,9 @@ function alvoTip(ev) {
   return t.closest("#v-graficos [data-tip]");
 }
 vg.addEventListener("pointermove", (ev) => {
-  if (ev.pointerType !== "mouse") return;
+  if (ev.pointerType !== "mouse") { if (G.xhAtivo && ev.buttons) crosshair(ev); return; }
+  if (crosshair(ev)) return;
+  if (G.xhAtivo) esconderTip();
   const a = alvoTip(ev);
   if (a) { if (a !== G.tipAtual) mostrarTip(a); } else if (G.tipAtual) esconderTip();
 });
@@ -1345,8 +1470,8 @@ vg.addEventListener("pointerleave", (ev) => { if (ev.pointerType === "mouse") es
 document.addEventListener("pointerdown", (ev) => {
   if (ev.pointerType === "mouse") return;
   G.toque = Date.now();
-  const a = alvoTip(ev);
-  if (a) mostrarTip(a); else esconderTip();
+  if (crosshair(ev)) return;
+  esconderTip();
 });
 vg.addEventListener("focusin", (ev) => { const a = ev.target.closest("[data-tip]"); if (a) mostrarTip(a); });
 vg.addEventListener("focusout", (ev) => {
