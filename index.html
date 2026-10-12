@@ -167,6 +167,19 @@ textarea { width: 100%; resize: vertical; min-height: 4.5rem; }
 .prog-top b { color: var(--hero-accent); }
 .prog-bar { height: 8px; border-radius: 999px; background: var(--hero-soft); overflow: hidden; }
 .prog-bar i { display: block; height: 100%; border-radius: 999px; background: var(--hero-accent); transition: width .25s ease; }
+.prox { display: block; font-size: .8rem; color: var(--muted); }
+.prox b { color: var(--ink); }
+.agenda { list-style: none; margin: 0; padding: 0; display: grid; }
+.agenda li + li { border-top: 1px solid var(--line); }
+.agenda button { width: 100%; text-align: left; background: none; border: 0; padding: 10px 6px; display: grid; grid-template-columns: 5.4rem minmax(0, 1fr) auto; gap: 10px; align-items: center; cursor: pointer; border-radius: 8px; color: var(--ink); }
+.agenda button:hover { background: var(--bg); }
+.ag-dia { font-family: var(--f-mono); font-weight: 600; font-size: .85rem; }
+.ag-dia small { display: block; font-weight: 400; color: var(--muted); font-size: .75rem; }
+.ag-pts { font-size: .86rem; min-width: 0; overflow-wrap: anywhere; }
+.ag-pts b { display: block; font-size: .9rem; }
+.ag-seta { color: var(--muted); } .ag-seta svg { width: 16px; height: 16px; }
+.tag.previa .tag-row { cursor: default; grid-template-columns: auto minmax(0, 1fr) auto; }
+.hero .seg button:disabled { cursor: default; }
 .lista-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .link { background: none; border: 0; color: var(--accent); font-weight: 700; cursor: pointer; padding: 8px 4px; min-height: 44px; }
 details.outros { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
@@ -617,8 +630,8 @@ function filaDe(fab, ult, ref) {
     .map(({ p, i }) => { const u = ult[p.id] || null; return { p, i, ult: u, dias: u ? diffDias(ref, u) : Infinity }; })
     .sort((a, b) => (b.dias - a.dias) || (a.i - b.i));
 }
-function sugeridos(fab, data) {
-  const ult = ultimas(data);
+function sugeridos(fab, data) { return escolherPontos(fab, data, ultimas(data)); }
+function escolherPontos(fab, data, ult) {
   const ids = filaDe(0, ult, data).map((e) => e.p.id);
   const cont = {};
   for (const e of filaDe(fab, ult, data)) {
@@ -627,6 +640,32 @@ function sugeridos(fab, data) {
     if (cont[e.p.tipo] < n) { cont[e.p.tipo]++; ids.push(e.p.id); }
   }
   return ids;
+}
+function maxPrevia() { return addDias(hojeISO(), 14); }
+function simularAgenda() {
+  const hoje = hojeISO(), limite = maxPrevia();
+  const sim = ultimas(hoje, true);
+  const ativos = S.config.pontos.filter((p) => p.ativo !== false);
+  const ultReal = ultimoDia(addDias(hoje, 1));
+  let ultFab = ultReal ? ultReal.fabrica : null;
+  const agenda = [], prox = {};
+  let d = S.dias[hoje] ? addDias(hoje, 1) : hoje;
+  for (let n = 0; n < 90; n++, d = addDias(d, 1)) {
+    if (d > limite && ativos.every((p) => prox[p.id])) break;
+    if ([0, 6].includes(new Date(utc(d)).getUTCDay())) continue;
+    const fab = ultFab ? 3 - ultFab : 1;
+    const ids = escolherPontos(fab, d, sim);
+    const antes = {};
+    for (const id of ids) { antes[id] = sim[id] || null; sim[id] = d; if (!prox[id]) prox[id] = d; }
+    agenda.push({ data: d, fab, ids, antes });
+    ultFab = fab;
+  }
+  return { agenda, prox };
+}
+function quandoTxt(d) {
+  if (!d) return "sem previsão";
+  const hoje = hojeISO();
+  return d === hoje ? "hoje" : d === addDias(hoje, 1) ? "amanhã" : semana(d) + " " + fmtCurto(d);
 }
 function pontoInfo(id) {
   const p = S.config.pontos.find((x) => x.id === id);
@@ -647,6 +686,7 @@ function marcarRascunho() {
   clearTimeout(marcarRascunho.t); marcarRascunho.t = setTimeout(gravarRascunhos, 300);
 }
 function montarRascunho() {
+  if (S.data > hojeISO()) { S.sel = {}; S.obs = ""; S.dirty = false; return; }
   const reg = S.dias[S.data];
   S.fab = S.fabManual ?? (reg ? reg.fabrica : fabricaSugerida(S.data));
   const r = RASC[S.data + "|" + S.fab];
@@ -713,15 +753,53 @@ function nota(tipo, texto, acao) { return `<div class="note ${tipo}">${tipo === 
 function proxDiaUtil(s) { let d = addDias(s, 1); while ([0, 6].includes(new Date(utc(d)).getUTCDay())) d = addDias(d, 1); return d; }
 function irParaDia(d) {
   guardarRascunho();
-  const hoje = hojeISO();
-  S.data = d > hoje ? hoje : d; S.fabManual = null; S.outrosAberto = false;
+  const max = maxPrevia();
+  S.data = d > max ? max : d; S.fabManual = null; S.outrosAberto = false;
   montarRascunho(); renderHoje();
 }
 function listaNomes(arr) { return arr.length <= 1 ? arr.join("") : arr.slice(0, -1).join(", ") + " e " + arr[arr.length - 1]; }
 
+function renderPrevia(el) {
+  const hoje = hojeISO(), max = maxPrevia();
+  const { agenda } = simularAgenda();
+  const plano = agenda.find((a) => a.data === S.data);
+  const [, mm, dd] = S.data.split("-");
+  const rel = diffDias(S.data, hoje);
+  const proxUtil = agenda.find((a) => a.data > S.data);
+  const info = (id) => S.config.pontos.find((x) => x.id === id) || { id, setor: id, tipo: "", fabrica: 0 };
+  const lista = plano ? plano.ids.map((id) => {
+    const p = info(id), u = plano.antes[id];
+    const real = u && S.dias[u] && (S.dias[u].itens || []).some((it) => it.ponto === id);
+    return `<li class="tag previa"><div class="tag-row">
+      <span class="ico">${ICO[p.tipo] || ICO["Torneira"]}</span>
+      <span class="nm"><span class="setor">${esc(p.setor)}</span><span class="sub">${esc(p.tipo)}${p.fabrica === 0 ? " · todo dia" : ""}${u ? " · última " + (real ? "" : "prevista ") + fmtCurto(u) : " · sem registro"}</span></span>
+      ${idadeHTML({ dias: u ? diffDias(S.data, u) : Infinity })}
+    </div></li>`;
+  }).join("") : "";
+  el.innerHTML = `
+    <div class="hero">
+      <div class="hero-top">
+        <button type="button" class="nav-dia" id="b-dia-ant" data-dia="-1" aria-label="Dia anterior">${SETA_E}</button>
+        <label class="hero-data" for="f-data">
+          <span class="hero-rel">Prévia · ${rel === 1 ? "amanhã" : "daqui a " + rel + " dias"} · ${SEMANA_LONGA[new Date(utc(S.data)).getUTCDay()]}</span>
+          <span class="hero-dia">${Number(dd)} de ${MESES[Number(mm) - 1]}${ICO_CAL}</span>
+          <input type="date" id="f-data" value="${S.data}" max="${max}" aria-label="Escolher a data da coleta">
+        </label>
+        <button type="button" class="nav-dia" id="b-dia-prox" data-dia="1" aria-label="Próximo dia" ${S.data >= max ? "disabled" : ""}>${SETA_D}</button>
+      </div>
+      ${plano ? `<div class="seg" role="radiogroup" aria-label="Fábrica prevista">${[1, 2].map((f) => `<button type="button" role="radio" aria-checked="${plano.fab === f}" disabled>Fábrica ${f}${f === plano.fab ? "<small>prevista</small>" : ""}</button>`).join("")}</div>` : ""}
+      <p class="hero-motivo">${plano ? "Previsão pelo rodízio: dias úteis alternando as fábricas a partir da última coleta salva." : "Fim de semana: nenhuma coleta prevista."}</p>
+    </div>
+    ${nota("info", "Isto é uma previsão. Ela supõe que, em cada dia útil até lá, as coletas sugeridas sejam feitas e salvas. Feriados e faltas mudam a previsão. Uma data futura não pode ser salva.",
+      `<span class="actions"><button class="btn small" type="button" data-ir="${hoje}">Voltar para hoje</button>${!plano && proxUtil ? `<button class="btn small" type="button" data-ir="${proxUtil.data}">Ver ${semana(proxUtil.data)} ${fmtCurto(proxUtil.data)}</button>` : ""}</span>`)}
+    ${plano ? `<div class="block"><div class="lista-head"><h2>Pontos previstos</h2></div><p class="hint">O selo mostra quantos dias o ponto estará sem coleta nesse dia.</p><ul class="tags">${lista}</ul></div>` : ""}
+  `;
+}
+
 function renderHoje() {
   const el = $("#v-hoje");
   if (!S.pronto) return;
+  if (S.data > hojeISO()) { renderPrevia(el); return; }
   const reg = S.dias[S.data];
   const ult = ultimas(S.data);
   const sug = sugeridos(S.fab, S.data);
@@ -773,9 +851,9 @@ function renderHoje() {
         <label class="hero-data" for="f-data">
           <span class="hero-rel">${relTxt} · ${SEMANA_LONGA[new Date(utc(S.data)).getUTCDay()]}</span>
           <span class="hero-dia">${Number(dd)} de ${MESES[Number(mm) - 1]}${ICO_CAL}</span>
-          <input type="date" id="f-data" value="${S.data}" max="${hoje}" aria-label="Escolher a data da coleta">
+          <input type="date" id="f-data" value="${S.data}" max="${maxPrevia()}" aria-label="Escolher a data da coleta">
         </label>
-        <button type="button" class="nav-dia" id="b-dia-prox" data-dia="1" aria-label="Próximo dia" ${S.data >= hoje ? "disabled" : ""}>${SETA_D}</button>
+        <button type="button" class="nav-dia" id="b-dia-prox" data-dia="1" aria-label="Próximo dia" title="${S.data >= hoje ? "Ver a previsão dos próximos dias" : "Próximo dia"}">${SETA_D}</button>
       </div>
       <div class="seg" role="radiogroup" aria-label="Fábrica do dia">
         ${[1, 2].map((f) => `<button type="button" role="radio" id="fab-${f}" data-fab="${f}" aria-checked="${S.fab === f}">Fábrica ${f}${f === fabSug ? "<small>sugerida</small>" : ""}</button>`).join("")}
@@ -809,16 +887,26 @@ function renderPontos() {
   const todos = grupos.filter((g) => g.f !== 0).flatMap((g) => g.itens);
   const pior = todos.slice().sort((a, b) => (b.dias - a.dias) || (a.i - b.i))[0];
   const atrasados = todos.filter((e) => e.dias > 20).length;
+  const { agenda, prox } = simularAgenda();
+  const nomeCurto = (id) => { const p = S.config.pontos.find((x) => x.id === id); return p ? (p.fabrica === 0 ? p.tipo : p.setor + " (" + p.tipo.toLowerCase() + ")") : id; };
+  const agendaHTML = agenda.length ? `<div class="card"><h2>Próximos dias</h2>
+    <p class="hint">Previsão pelo rodízio, contando só dias úteis. Toque num dia para ver os pontos.</p>
+    <ul class="agenda">${agenda.slice(0, 5).map((a) => `<li><button type="button" data-ir="${a.data}">
+      <span class="ag-dia">${a.data === hoje ? "hoje" : a.data === addDias(hoje, 1) ? "amanhã" : SEMANA_LONGA[new Date(utc(a.data)).getUTCDay()]}<small>${a.data === hoje || a.data === addDias(hoje, 1) ? semana(a.data) + " " : ""}${fmtCurto(a.data)}</small></span>
+      <span class="ag-pts"><b>Fábrica ${a.fab}</b>${esc(listaNomes(a.ids.map(nomeCurto)))}</span>
+      <span class="ag-seta">${SETA_D}</span>
+    </button></li>`).join("")}</ul></div>` : "";
   const row = (e) => {
     const w = e.dias === Infinity ? 100 : Math.max(4, Math.min(100, (e.dias / 30) * 100));
     return `<li>
       <span class="ico">${ICO[e.p.tipo] || ICO["Torneira"]}</span>
-      <span class="nm"><span class="setor">${esc(e.p.setor)}</span><span class="sub">${esc(e.p.tipo)}</span></span>
+      <span class="nm"><span class="setor">${esc(e.p.setor)}</span><span class="sub">${esc(e.p.tipo)}</span><span class="prox">próxima: <b>${quandoTxt(prox[e.p.id])}</b></span></span>
       <span class="bar" aria-hidden="true"><i class="${nivel(e.dias)}" style="width:${w}%"></i></span>
       <span class="num">${e.dias === Infinity ? "nunca" : e.dias + " d"}<small>${e.ult ? fmtCurto(e.ult) : "sem registro"}</small></span>
     </li>`;
   };
   el.innerHTML = `
+    ${agendaHTML}
     ${pior ? `<div class="summary">
       <span class="eyebrow">Mais tempo sem coleta</span>
       <span class="big">${esc(pior.p.setor)} · ${esc(pior.p.tipo)}, ${nomeFab(pior.p.fabrica)}</span>
@@ -832,7 +920,7 @@ function renderPontos() {
     <div class="groups">
       ${grupos.map((g) => `<div class="block"><h2>${g.f === 0 ? "Todo dia" : "Fábrica " + g.f}</h2><ul class="rows">${g.itens.map(row).join("")}</ul></div>`).join("")}
     </div>
-    <p class="hint">Dias contados até hoje, ${fmt(hoje)}.</p>
+    <p class="hint">Dias contados até hoje, ${fmt(hoje)}. A próxima coleta é uma previsão pelo rodízio em dias úteis; feriados e faltas atrasam a data.</p>
   `;
 }
 
@@ -1252,6 +1340,7 @@ function esconderTip() { const t = $("#g-tip"); if (t) t.hidden = true; G.tipAtu
 
 /* ---------- Ações ---------- */
 async function salvarHoje() {
+  if (S.data > hojeISO()) return;
   const ids = Object.keys(S.sel);
   if (!ids.length) { toast("Marque pelo menos um ponto coletado."); return; }
   const ruins = ids.flatMap((id) => CAMPOS.filter((c) => invalido(S.sel[id][c])).map((c) => pontoInfo(id).setor + " (" + LIM[c].nome + ")"));
@@ -1356,7 +1445,7 @@ document.addEventListener("click", async (ev) => {
   if (t.dataset.fab) { guardarRascunho(); S.fabManual = Number(t.dataset.fab); montarRascunho(); renderHoje(); $("#fab-" + S.fab)?.focus(); return; }
   if (t.id === "b-salvar") { salvarHoje(); return; }
   if (t.dataset.dia) { irParaDia(addDias(S.data, Number(t.dataset.dia))); $("#" + t.id)?.focus(); return; }
-  if (t.dataset.ir) { irParaDia(t.dataset.ir); window.scrollTo(0, 0); return; }
+  if (t.dataset.ir) { irParaDia(t.dataset.ir); if (S.aba !== "hoje") trocarAba("hoje"); window.scrollTo(0, 0); return; }
   if (t.id === "b-todos") {
     for (const id of S.topoIds || []) S.sel[id] = S.sel[id] || { cloro: "", ph: "", turbidez: "" };
     marcarRascunho(); renderHoje(); return;
