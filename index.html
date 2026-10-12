@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+<title>Rodízio de Coleta de Água</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: uma coluna de bancada (máx. 44rem); cada ponto é uma etiqueta de amostra com a idade da última coleta em destaque à direita */
+:root {
+  --bg: #F2F5F7;
+  --surface: #FFFFFF;
+  --ink: #13202A;
+  --muted: #586976;
+  --line: #D5DEE4;
+  --field-line: #7D8D99;
+  --accent: #A3135F;
+  --accent-soft: #F8E4EF;
+  --on-accent: #FFFFFF;
+  --ok: #1F6E4B;
+  --ok-soft: #DFF0E7;
+  --warn: #8F5B00;
+  --warn-soft: #FAEED6;
+  --bad: #B42318;
+  --bad-soft: #FBE3DF;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A;
+    --accent: #F173B3; --accent-soft: #3A1A2C; --on-accent: #1C0814;
+    --ok: #5CC796; --ok-soft: #12302A; --warn: #E6B556; --warn-soft: #382B10; --bad: #F2806F; --bad-soft: #3C1B17;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A;
+  --accent: #F173B3; --accent-soft: #3A1A2C; --on-accent: #1C0814;
+  --ok: #5CC796; --ok-soft: #12302A; --warn: #E6B556; --warn-soft: #382B10; --bad: #F2806F; --bad-soft: #3C1B17;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.top-in { max-width: 44rem; margin: 0 auto; padding-inline: 16px; padding-block: 14px 0; display: grid; gap: 10px; }
+.brand { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand h1 { margin: 0; font-family: var(--f-display); font-stretch: 118%; font-weight: 800; font-size: 1.35rem; letter-spacing: -0.01em; text-wrap: balance; }
+.brand h1 span { color: var(--accent); }
+.brand .hoje { font-family: var(--f-mono); font-size: .8rem; color: var(--muted); }
+.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.tabs button { background: none; border: 0; padding: 8px 12px 10px; cursor: pointer; color: var(--muted); font-weight: 700; font-size: .95rem; border-bottom: 3px solid transparent; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+main { max-width: 44rem; margin: 0 auto; padding-inline: 16px; padding-block: 18px 96px; }
+section { display: grid; gap: 18px; }
+section > * { min-width: 0; }
+.plan, .hint, .note, .summary .big, .obs, .itens li > span, .nm .setor { overflow-wrap: anywhere; }
+h2 { margin: 0; font-family: var(--f-display); font-stretch: 110%; font-weight: 750; font-size: 1.1rem; text-wrap: balance; }
+h3 { margin: 0; font-family: var(--f-display); font-stretch: 105%; font-weight: 700; font-size: .95rem; text-wrap: balance; }
+.eyebrow { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hint { margin: 0; color: var(--muted); font-size: .9rem; max-width: 62ch; }
+.block { display: grid; gap: 10px; }
+
+.dayhead { display: grid; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; }
+.dayrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field > span { font-size: .8rem; color: var(--muted); font-weight: 700; }
+input[type="date"], input[type="text"], input[type="number"], select, textarea {
+  background: var(--bg); border: 1px solid var(--field-line); border-radius: 8px; padding: 9px 10px; min-width: 0;
+}
+textarea { width: 100%; resize: vertical; min-height: 4.5rem; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--bg); }
+.seg button { border: 0; background: none; padding: 7px 14px; min-height: 44px; border-radius: 999px; font-weight: 700; cursor: pointer; color: var(--muted); }
+.seg button[aria-checked="true"] { background: var(--ink); color: var(--bg); }
+.plan { margin: 0; font-size: 1rem; }
+.plan b { color: var(--accent); }
+
+.note { border-radius: 8px; padding: 10px 12px; font-size: .9rem; }
+.note.info { background: var(--accent-soft); }
+.note.warn { background: var(--warn-soft); color: var(--ink); }
+
+.tags { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.tag { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.tag.on { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+.tag-row { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; }
+.tag-row input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; }
+.ico { width: 28px; height: 28px; display: grid; place-items: center; color: var(--muted); }
+.ico svg { width: 24px; height: 24px; }
+.nm { display: grid; min-width: 0; }
+.nm .setor { font-weight: 700; overflow-wrap: anywhere; }
+.nm .sub { font-size: .82rem; color: var(--muted); }
+.idade { font-family: var(--f-mono); font-weight: 600; font-size: 1.25rem; line-height: 1; text-align: right; font-variant-numeric: tabular-nums; }
+.idade small { display: block; font-size: .65rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; margin-top: 3px; }
+.idade.ok { color: var(--ok); } .idade.warn { color: var(--warn); } .idade.bad { color: var(--bad); }
+.idade.nunca { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+
+.res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0 14px 12px 14px; }
+.res label { display: grid; grid-template-rows: 1fr auto; gap: 3px; font-size: .75rem; color: var(--muted); font-weight: 700; min-width: 0; }
+.res input { width: 100%; font-family: var(--f-mono); font-size: 16px; font-variant-numeric: tabular-nums; padding: 7px 8px; background: var(--bg); border: 1px solid var(--field-line); border-radius: 6px; }
+.res input.fora { border-color: var(--bad); background: var(--bad-soft); }
+.res .ref { font-weight: 400; font-family: var(--f-mono); font-size: .68rem; white-space: nowrap; }
+
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 9px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); padding: 12px 18px; font-size: 1rem; }
+.btn.danger { color: var(--bad); }
+.btn.small { padding: 5px 12px; font-size: .85rem; min-height: 44px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+.groups { display: grid; gap: 22px; }
+.rows { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.rows li { display: grid; grid-template-columns: 28px minmax(0, 1fr) minmax(60px, 30%) 3.5rem; gap: 10px; align-items: center; padding: 10px 12px; border-top: 1px solid var(--line); }
+.rows li:first-child { border-top: 0; }
+.bar { height: 8px; border-radius: 999px; background: var(--bg); overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 999px; }
+.bar i.ok { background: var(--ok); } .bar i.warn { background: var(--warn); } .bar i.bad { background: var(--bad); }
+.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; font-size: .9rem; }
+.num small { display: block; color: var(--muted); font-size: .7rem; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .82rem; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.summary { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 4px; }
+.summary .big { font-family: var(--f-display); font-stretch: 112%; font-weight: 800; font-size: 1.15rem; }
+
+.month { margin-top: 6px; }
+.dia { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; }
+.dia header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.dia time { font-family: var(--f-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+.chip { font-size: .75rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.chip.f1, .chip.f2 { color: var(--ink); }
+.dia .acts { margin-left: auto; display: flex; gap: 6px; }
+.itens { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .92rem; }
+.itens li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 2px 8px; align-items: center; }
+.itens .vals { grid-column: 2; }
+.itens .ico { width: 20px; height: 20px; } .itens .ico svg { width: 18px; height: 18px; }
+.vals { font-family: var(--f-mono); font-size: .8rem; color: var(--muted); }
+.vals .fora { color: var(--bad); font-weight: 600; }
+.obs { margin: 0; font-size: .88rem; color: var(--muted); font-style: italic; }
+.confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--bad-soft); border-radius: 8px; padding: 8px 10px; font-size: .9rem; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 12px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.cfg-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.cfg-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.cfg-list li:first-child { border-top: 0; }
+.cfg-list li.off .nm { opacity: .8; }
+.cfg-list li > .actions { grid-column: 1 / -1; justify-content: flex-end; }
+.cfg-list input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); }
+.addform { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items: end; }
+
+.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: var(--r); padding: 22px 16px; display: grid; gap: 6px; }
+.empty b { font-family: var(--f-display); font-stretch: 110%; }
+
+#toast { position: fixed; left: 16px; right: 16px; margin-inline: auto; width: fit-content; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 700; z-index: 10; }
+
+@media (max-width: 480px) {
+  .rows li { grid-template-columns: 24px minmax(0, 1fr) 3.3rem; }
+  .rows .bar { grid-column: 2 / 4; grid-row: 2; }
+  .rows .ico { width: 24px; }
+  .res { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+}
+@media (max-width: 420px) { .tabs button { padding: 8px 8px 10px; } }
+@media (max-width: 360px) { .tabs { gap: 0; } .tabs button { padding: 8px 7px 10px; font-size: .9rem; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <h1>Coleta de <span>Água</span></h1>
+      <span class="hoje" id="hoje-label"></span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Seções">
+      <button role="tab" id="t-hoje" data-aba="hoje" aria-selected="true">Coleta</button>
+      <button role="tab" id="t-pontos" data-aba="pontos" aria-selected="false">Pontos</button>
+      <button role="tab" id="t-historico" data-aba="historico" aria-selected="false">Histórico</button>
+      <button role="tab" id="t-ajustes" data-aba="ajustes" aria-selected="false">Ajustes</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="v-hoje" role="tabpanel" aria-labelledby="t-hoje">
+    <div class="empty"><b>Carregando os registros</b><span class="hint">Os pontos sugeridos para hoje aparecem aqui assim que os dados chegarem.</span></div>
+  </section>
+
+  <section id="v-pontos" role="tabpanel" aria-labelledby="t-pontos" hidden><div class="empty"><b>Carregando os registros</b><span class="hint">Os dados aparecem aqui assim que chegarem.</span></div></section>
+
+  <section id="v-historico" role="tabpanel" aria-labelledby="t-historico" hidden><div class="empty"><b>Carregando os registros</b><span class="hint">Os dados aparecem aqui assim que chegarem.</span></div></section>
+
+  <section id="v-ajustes" role="tabpanel" aria-labelledby="t-ajustes" hidden>
+    <div class="card">
+      <h2>Quantos pontos por dia</h2>
+      <p class="hint">Além da caixa d'água, que entra todo dia, o rodízio escolhe os pontos parados há mais tempo na fábrica do dia.</p>
+      <div class="grid2">
+        <label class="field" for="r-torneira"><span>Torneiras por dia</span><input type="number" id="r-torneira" min="0" max="10" step="1"></label>
+        <label class="field" for="r-bebedouro"><span>Bebedouros por dia</span><input type="number" id="r-bebedouro" min="0" max="10" step="1"></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Pontos de coleta</h2>
+      <p class="hint">Desmarque um ponto para tirá-lo do rodízio sem apagar o histórico dele.</p>
+      <div id="aj-lista" class="groups"></div>
+      <h3>Adicionar ponto</h3>
+      <form id="f-novo" class="addform">
+        <label class="field" for="n-fab"><span>Onde</span>
+          <select id="n-fab"><option value="1">Fábrica 1</option><option value="2">Fábrica 2</option><option value="0">Todo dia (geral)</option></select>
+        </label>
+        <label class="field" for="n-setor"><span>Setor</span><input type="text" id="n-setor" placeholder="Ex.: Almoxarifado" autocomplete="off"></label>
+        <label class="field" for="n-tipo"><span>Ponto</span>
+          <select id="n-tipo"><option>Bebedouro</option><option>Torneira</option><option>Caixa d'água</option></select>
+        </label>
+        <button class="btn" type="submit" id="b-novo">Adicionar ponto</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Backup</h2>
+      <p class="hint" id="modo-label"></p>
+      <div class="actions">
+        <button class="btn" id="b-backup" type="button">Baixar backup (JSON)</button>
+        <label class="btn" for="f-import">Importar backup</label>
+        <input type="file" id="f-import" accept=".json,application/json" hidden>
+      </div>
+      <div id="import-confirm"></div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+const PADRAO = {
+  pontos: [
+    { id: "geral-ete-caixa-d-agua", fabrica: 0, setor: "ETE", tipo: "Caixa d'água", ativo: true },
+    { id: "f1-producao-bebedouro", fabrica: 1, setor: "Produção", tipo: "Bebedouro", ativo: true },
+    { id: "f1-producao-torneira", fabrica: 1, setor: "Produção", tipo: "Torneira", ativo: true },
+    { id: "f1-corte-bebedouro", fabrica: 1, setor: "Corte", tipo: "Bebedouro", ativo: true },
+    { id: "f1-corte-torneira", fabrica: 1, setor: "Corte", tipo: "Torneira", ativo: true },
+    { id: "f1-bpa-bebedouro", fabrica: 1, setor: "BPA", tipo: "Bebedouro", ativo: true },
+    { id: "f1-lavagem-de-monobloco-bebedouro", fabrica: 1, setor: "Lavagem de Monobloco", tipo: "Bebedouro", ativo: true },
+    { id: "f1-manutencao-bebedouro", fabrica: 1, setor: "Manutenção", tipo: "Bebedouro", ativo: true },
+    { id: "f2-producao-bebedouro", fabrica: 2, setor: "Produção", tipo: "Bebedouro", ativo: true },
+    { id: "f2-producao-torneira", fabrica: 2, setor: "Produção", tipo: "Torneira", ativo: true },
+    { id: "f2-granulado-bebedouro", fabrica: 2, setor: "Granulado", tipo: "Bebedouro", ativo: true },
+    { id: "f2-embalagem-bebedouro", fabrica: 2, setor: "Embalagem", tipo: "Bebedouro", ativo: true },
+    { id: "f2-embalagem-torneira", fabrica: 2, setor: "Embalagem", tipo: "Torneira", ativo: true },
+    { id: "f2-corte-bebedouro", fabrica: 2, setor: "Corte", tipo: "Bebedouro", ativo: true },
+    { id: "f2-corte-torneira", fabrica: 2, setor: "Corte", tipo: "Torneira", ativo: true },
+    { id: "f2-dmp-bebedouro", fabrica: 2, setor: "DMP", tipo: "Bebedouro", ativo: true },
+    { id: "f2-refeitorio-bebedouro", fabrica: 2, setor: "Refeitório", tipo: "Bebedouro", ativo: true }
+  ],
+  regras: { Torneira: 1, Bebedouro: 2 }
+};
+const LIM = {
+  cloro: { nome: "Cloro livre", un: "mg/L", min: 0.2, max: 5, ref: "0,2 a 5" },
+  ph: { nome: "pH", un: "", min: 6, max: 9, ref: "6 a 9" },
+  turbidez: { nome: "Turbidez", un: "uT", min: null, max: 5, ref: "até 5" }
+};
+const CAMPOS = ["cloro", "ph", "turbidez"];
+const ORDEM_TIPO = { "Caixa d'água": 0, "Torneira": 1, "Bebedouro": 2 };
+const ABAS = ["hoje", "pontos", "historico", "ajustes"];
+const SEMANA = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+const ICO = {
+  "Torneira": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h10a4 4 0 0 1 4 4v1.5"/><path d="M9 10V6.5"/><path d="M6 6.5h6"/><circle cx="17" cy="19.5" r="1.3" fill="currentColor" stroke="none"/></svg>',
+  "Bebedouro": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13h16l-2.5 4h-11z"/><path d="M12 17v4"/><path d="M8 21h8"/><path d="M9 13c0-4 3-6.5 7-5.5"/></svg>',
+  "Caixa d'água": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="11" rx="2"/><path d="M5 9c2.3 1 4.7 1 7 0s4.7-1 7 0"/><path d="M8 15v6M16 15v6"/></svg>'
+};
+
+const S = {
+  pronto: false, modo: "local", soLeitura: false,
+  config: null, dias: {},
+  aba: "hoje", data: hojeISO(), fabManual: null, fab: 1, sel: {}, obs: "", dirty: false,
+  confirmando: null, removendo: null, importando: null
+};
+let db = null;
+
+const $ = (s) => document.querySelector(s);
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function pad(n) { return String(n).padStart(2, "0"); }
+function hojeISO() { const d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+function utc(s) { const [y, m, d] = s.split("-").map(Number); return Date.UTC(y, m - 1, d); }
+function diffDias(a, b) { return Math.round((utc(a) - utc(b)) / 86400000); }
+function fmt(s) { const [y, m, d] = s.split("-"); return d + "/" + m + "/" + y; }
+function fmtCurto(s) { const [, m, d] = s.split("-"); return d + "/" + m; }
+function semana(s) { return SEMANA[new Date(utc(s)).getUTCDay()]; }
+function nomeFab(f) { return f === 0 ? "Todo dia" : "Fábrica " + f; }
+function num(v) { if (v === null || v === undefined) return null; if (typeof v === "number") return Number.isFinite(v) ? v : null; const t = String(v).trim().replace(",", "."); if (!/^(\d+(\.\d*)?|\.\d+)$/.test(t)) return null; return Number(t); }
+function invalido(v) { return String(v ?? "").trim() !== "" && num(v) === null; }
+function fmtNum(n) { return n === null || n === undefined ? "" : String(n).replace(".", ","); }
+function fora(campo, v) { const n = num(v); if (n === null) return false; const l = LIM[campo]; return (l.min !== null && n < l.min) || (l.max !== null && n > l.max); }
+function nivel(d) { return d === Infinity || d > 20 ? "bad" : d > 10 ? "warn" : "ok"; }
+function dataValida(s) {
+  if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const [y, m, d] = s.split("-").map(Number); const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+}
+function diasUteisEntre(a, b) { let n = 0; for (let t = utc(a) + 86400000; t < utc(b); t += 86400000) { const w = new Date(t).getUTCDay(); if (w !== 0 && w !== 6) n++; } return n; }
+function slug(s) { return String(s).normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 3200);
+}
+function msgErro(e) {
+  const c = e && e.code;
+  if (c === "invalid_argument") { S.soLeitura = true; renderHoje(); renderTudo(); return "Você tem acesso só de leitura a este site. Peça acesso de edição ao dono."; }
+  if (c === "quota_exceeded") return "O armazenamento está cheio. Baixe um backup e apague dias antigos no Histórico.";
+  if (c === "resource_exhausted") return "Muitas alterações seguidas. Espere alguns segundos e tente de novo.";
+  if (c === "local") return "O navegador não deixou salvar. Verifique se o modo anônimo está desligado.";
+  return "Não foi possível salvar. Verifique a conexão e tente de novo.";
+}
+
+/* ---------- Armazenamento ---------- */
+const LS_KEY = "coleta-agua:v1";
+function lerLocal() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch { return null; } }
+function gravarLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify({ config: S.config, dias: S.dias })); return true; } catch { return false; } }
+
+async function salvarDia(dia) {
+  if (db) return db.collection("dias").doc(dia.data).set(dia);
+  S.dias = { ...S.dias, [dia.data]: dia };
+  if (!gravarLocal()) throw { code: "local" };
+  aoMudarDados();
+}
+async function excluirDia(data) {
+  if (db) return db.collection("dias").doc(data).delete();
+  const m = { ...S.dias }; delete m[data]; S.dias = m;
+  if (!gravarLocal()) throw { code: "local" };
+  aoMudarDados();
+}
+let filaConfig = Promise.resolve();
+async function salvarConfig(cfg) {
+  S.config = cfg;
+  if (db) {
+    aoMudarDados();
+    const p = filaConfig.then(() => db.doc("config/geral").set(cfg));
+    filaConfig = p.catch(() => {});
+    return p;
+  }
+  if (!gravarLocal()) throw { code: "local" };
+  aoMudarDados();
+}
+
+function limparPonto(p) {
+  if (!p || typeof p.id !== "string" || !/^[a-z0-9-]+$/.test(p.id) || typeof p.setor !== "string" || typeof p.tipo !== "string" || ![0, 1, 2].includes(p.fabrica)) return null;
+  return { id: p.id, fabrica: p.fabrica, setor: p.setor.slice(0, 80), tipo: p.tipo.slice(0, 40), ativo: p.ativo !== false };
+}
+function limparRegras(r) {
+  r = r || {};
+  return { Torneira: Math.max(0, Math.min(10, Math.round(Number(r.Torneira)) || 0)), Bebedouro: Math.max(0, Math.min(10, Math.round(Number(r.Bebedouro)) || 0)) };
+}
+function limparDia(d) {
+  if (!d || !dataValida(d.data) || (d.fabrica !== 1 && d.fabrica !== 2) || !Array.isArray(d.itens)) return null;
+  return {
+    data: d.data, fabrica: d.fabrica, obs: typeof d.obs === "string" ? d.obs.slice(0, 500) : "",
+    itens: d.itens.filter((it) => it && typeof it.ponto === "string" && /^[a-z0-9-]+$/.test(it.ponto)).map((it) => ({
+      ponto: it.ponto, setor: String(it.setor ?? "").slice(0, 80), tipo: String(it.tipo ?? "").slice(0, 40),
+      fabrica: [0, 1, 2].includes(it.fabrica) ? it.fabrica : d.fabrica,
+      cloro: num(it.cloro), ph: num(it.ph), turbidez: num(it.turbidez)
+    })),
+    atualizadoEm: typeof d.atualizadoEm === "string" ? d.atualizadoEm : new Date().toISOString()
+  };
+}
+function normalizarConfig(c) {
+  if (!c || !Array.isArray(c.pontos)) return clone(PADRAO);
+  return { pontos: c.pontos.map(limparPonto).filter(Boolean), regras: limparRegras(c.regras) };
+}
+
+async function iniciar() {
+  $("#hoje-label").textContent = semana(hojeISO()) + " " + fmt(hojeISO());
+  try { const a = localStorage.getItem("coleta-agua:aba"); if (ABAS.includes(a)) S.aba = a; } catch {}
+  const h = location.hash.replace("#", ""); if (ABAS.includes(h)) S.aba = h;
+  trocarAba(S.aba);
+  if (window.claude && typeof window.claude.use === "function") {
+    try { db = await window.claude.use("db"); } catch { db = null; }
+  }
+  S.semNuvem = !!window.claude && !db;
+  if (db) {
+    S.modo = "nuvem";
+    assinar();
+    verificarEscrita();
+  } else {
+    S.modo = "local";
+    const j = lerLocal();
+    S.config = normalizarConfig(j && j.config);
+    S.dias = {}; for (const d of Object.values((j && j.dias) || {})) { const v = limparDia(d); if (v) S.dias[v.data] = v; }
+    S.pronto = true;
+    aoMudarDados();
+  }
+}
+function assinar() {
+  let temCfg = false, temDias = false;
+  const erro = () => { toast("A conexão com os registros caiu. Recarregue a página."); };
+  db.doc("config/geral").onSnapshot((snap) => {
+    S.config = normalizarConfig(snap.exists ? snap.data() : null);
+    temCfg = true; S.pronto = temCfg && temDias; if (S.pronto) aoMudarDados();
+  }, erro);
+  db.collection("dias").orderBy("data", "desc").limit(1000).onSnapshot((qs) => {
+    const m = {}; qs.docs.forEach((d) => { const v = limparDia(d.data()); if (v) m[v.data] = v; });
+    S.dias = m;
+    temDias = true; S.pronto = temCfg && temDias; if (S.pronto) aoMudarDados();
+  }, erro);
+}
+async function verificarEscrita() {
+  try {
+    const u = await window.claude.use("user");
+    if (u && (await u.can("data.write")) === false) { S.soLeitura = true; if (S.pronto) renderHoje(); renderTudo(); }
+  } catch {}
+}
+
+/* ---------- Regras do rodízio ---------- */
+function ultimas(ate, incluir) {
+  const m = {};
+  for (const d of Object.values(S.dias)) {
+    if (ate && (incluir ? d.data > ate : d.data >= ate)) continue;
+    for (const it of d.itens || []) if (!m[it.ponto] || m[it.ponto] < d.data) m[it.ponto] = d.data;
+  }
+  return m;
+}
+function ultimoDia(antes) {
+  let best = null;
+  for (const d of Object.values(S.dias)) {
+    if (d.data < antes && (d.fabrica === 1 || d.fabrica === 2) && (!best || d.data > best.data)) best = d;
+  }
+  return best;
+}
+function fabricaSugerida(data) { const u = ultimoDia(data); return u ? 3 - u.fabrica : 1; }
+function filaDe(fab, ult, ref) {
+  return S.config.pontos
+    .map((p, i) => ({ p, i }))
+    .filter((x) => x.p.ativo !== false && x.p.fabrica === fab)
+    .map(({ p, i }) => { const u = ult[p.id] || null; return { p, i, ult: u, dias: u ? diffDias(ref, u) : Infinity }; })
+    .sort((a, b) => (b.dias - a.dias) || (a.i - b.i));
+}
+function sugeridos(fab, data) {
+  const ult = ultimas(data);
+  const ids = filaDe(0, ult, data).map((e) => e.p.id);
+  const cont = {};
+  for (const e of filaDe(fab, ult, data)) {
+    const n = Number(S.config.regras[e.p.tipo] || 0);
+    cont[e.p.tipo] = cont[e.p.tipo] || 0;
+    if (cont[e.p.tipo] < n) { cont[e.p.tipo]++; ids.push(e.p.id); }
+  }
+  return ids;
+}
+function pontoInfo(id) {
+  const p = S.config.pontos.find((x) => x.id === id);
+  if (p) return p;
+  const reg = S.dias[S.data];
+  const it = reg && (reg.itens || []).find((x) => x.ponto === id);
+  return it ? { id, setor: it.setor, tipo: it.tipo, fabrica: it.fabrica } : { id, setor: id, tipo: "", fabrica: S.fab };
+}
+
+const RASC = {};
+function guardarRascunho() { if (S.dirty) RASC[S.data + "|" + S.fab] = { sel: clone(S.sel), obs: S.obs }; }
+function montarRascunho() {
+  const reg = S.dias[S.data];
+  S.fab = S.fabManual ?? (reg ? reg.fabrica : fabricaSugerida(S.data));
+  const r = RASC[S.data + "|" + S.fab];
+  if (r) { S.sel = clone(r.sel); S.obs = r.obs; S.dirty = true; return; }
+  S.sel = {};
+  if (reg && S.fab === reg.fabrica) {
+    for (const it of reg.itens || []) S.sel[it.ponto] = { cloro: fmtNum(it.cloro), ph: fmtNum(it.ph), turbidez: fmtNum(it.turbidez) };
+    S.obs = reg.obs || "";
+  } else {
+    for (const id of sugeridos(S.fab, S.data)) S.sel[id] = { cloro: "", ph: "", turbidez: "" };
+    S.obs = "";
+  }
+  S.dirty = false;
+}
+
+/* ---------- Telas ---------- */
+function aoMudarDados() {
+  if (!S.pronto || S.importandoAgora) return;
+  if (!S.dirty) montarRascunho();
+  renderTudo();
+}
+function renderTudo() {
+  if (!S.pronto) return;
+  const a = document.activeElement;
+  const editando = a && a.closest && a.closest("#v-hoje") && a.matches("input:not([type=checkbox]), textarea");
+  if (!S.dirty && !editando) renderHoje();
+  renderPontos(); renderHistorico(); renderAjustes();
+}
+
+function idadeHTML(e) {
+  if (e.dias === Infinity) return '<b class="idade nunca bad">nunca<small>coletado</small></b>';
+  return `<b class="idade ${nivel(e.dias)}">${e.dias}<small>${e.dias === 1 ? "dia" : "dias"}</small></b>`;
+}
+function resHTML(id) {
+  const v = S.sel[id];
+  return '<div class="res">' + CAMPOS.map((c) => {
+    const l = LIM[c];
+    return `<label for="r-${id}-${c}"><span>${l.nome}${l.un ? " (" + l.un + ")" : ""} <span class="ref">${l.ref}</span></span>` +
+      `<input id="r-${id}-${c}" inputmode="decimal" enterkeyhint="next" autocomplete="off" data-ponto="${id}" data-campo="${c}" value="${esc(v[c])}" class="${fora(c, v[c]) || invalido(v[c]) ? "fora" : ""}" ${S.soLeitura ? "disabled" : ""}></label>`;
+  }).join("") + "</div>";
+}
+function tagHTML(e) {
+  const id = e.p.id, on = !!S.sel[id];
+  return `<li class="tag ${on ? "on" : ""}">
+    <label class="tag-row" for="ck-${id}">
+      <input type="checkbox" id="ck-${id}" data-ponto="${id}" ${on ? "checked" : ""} ${S.soLeitura ? "disabled" : ""}>
+      <span class="ico">${ICO[e.p.tipo] || ICO["Torneira"]}</span>
+      <span class="nm"><span class="setor">${esc(e.p.setor)}</span><span class="sub">${esc(e.p.tipo)} · ${nomeFab(e.p.fabrica)}${e.ult ? " · última em " + fmtCurto(e.ult) : ""}</span></span>
+      ${idadeHTML(e)}
+    </label>
+    ${on ? resHTML(id) : ""}
+  </li>`;
+}
+function listaNomes(arr) { return arr.length <= 1 ? arr.join("") : arr.slice(0, -1).join(", ") + " e " + arr[arr.length - 1]; }
+
+function renderHoje() {
+  const el = $("#v-hoje");
+  if (!S.pronto) return;
+  const reg = S.dias[S.data];
+  const ult = ultimas(S.data);
+  const sug = sugeridos(S.fab, S.data);
+  const sugSet = new Set(sug);
+  const diarios = filaDe(0, ult, S.data);
+  const fila = filaDe(S.fab, ult, S.data);
+  const conhecidos = new Set([...diarios, ...fila].map((e) => e.p.id));
+  const extras = Object.keys(S.sel).filter((id) => !conhecidos.has(id)).map((id) => {
+    const p = pontoInfo(id), u = ult[id] || null;
+    return { p, ult: u, dias: u ? diffDias(S.data, u) : Infinity };
+  });
+  const topo = [...diarios, ...fila.filter((e) => sugSet.has(e.p.id)), ...extras];
+  const outros = fila.filter((e) => !sugSet.has(e.p.id));
+  const anterior = ultimoDia(S.data);
+  const fabSug = fabricaSugerida(S.data);
+  const ehHoje = S.data === hojeISO();
+  const fimDeSemana = [0, 6].includes(new Date(utc(S.data)).getUTCDay());
+
+  let motivo = anterior
+    ? `A última coleta registrada foi na Fábrica ${anterior.fabrica}, ${semana(anterior.data)} ${fmt(anterior.data)}. ${ehHoje ? "Hoje" : "Neste dia"} é a vez da Fábrica ${fabSug}.`
+    : "Nenhuma coleta anterior registrada. Comece pela Fábrica 1.";
+  if (S.fab !== fabSug) motivo = `Você escolheu a Fábrica ${S.fab}. Pelo rodízio seria a Fábrica ${fabSug}.`;
+
+  const porTipo = (t) => fila.filter((e) => sugSet.has(e.p.id) && e.p.tipo === t).map((e) => e.p.setor);
+  const partes = [];
+  if (diarios.length) partes.push(listaNomes(diarios.map((e) => `${e.p.tipo.toLowerCase()} (${e.p.setor})`)));
+  const tor = porTipo("Torneira"), beb = porTipo("Bebedouro");
+  if (tor.length) partes.push(`torneira${tor.length > 1 ? "s" : ""} ${listaNomes(tor)}`);
+  if (beb.length) partes.push(`bebedouro${beb.length > 1 ? "s" : ""} ${listaNomes(beb)}`);
+
+  const lacuna = anterior ? diasUteisEntre(anterior.data, S.data) : 0;
+  const nSel = Object.keys(S.sel).length;
+
+  el.innerHTML = `
+    <div class="dayhead">
+      <div class="dayrow">
+        <label class="field" for="f-data"><span>Data da coleta</span><input type="date" id="f-data" value="${S.data}" max="${hojeISO()}"></label>
+        <div class="field"><span id="lbl-fab">Fábrica do dia</span>
+          <div class="seg" role="radiogroup" aria-labelledby="lbl-fab">
+            <button type="button" role="radio" id="fab-1" data-fab="1" aria-checked="${S.fab === 1}">Fábrica 1</button>
+            <button type="button" role="radio" id="fab-2" data-fab="2" aria-checked="${S.fab === 2}">Fábrica 2</button>
+          </div>
+        </div>
+      </div>
+      <p class="hint">${esc(motivo)}</p>
+      <p class="plan">Coletar ${semana(S.data)} ${fmtCurto(S.data)}: <b>${esc(listaNomes(partes)) || "nenhum ponto ativo"}</b>.</p>
+    </div>
+    ${reg ? `<div class="note info">A coleta de ${fmt(S.data)} já está registrada (Fábrica ${reg.fabrica}). Corrija o que precisar e salve de novo.</div>` : ""}
+    ${S.semNuvem ? '<div class="note warn">Não foi possível conectar ao armazenamento compartilhado. O que você salvar agora fica só neste navegador.</div>' : ""}
+    ${fimDeSemana ? '<div class="note warn">Esta data cai num fim de semana. Confira se é o dia certo.</div>' : ""}
+    ${!reg && lacuna >= 2 ? `<div class="note warn">Faltam ${lacuna} dias úteis sem registro entre ${fmt(anterior.data)} e ${fmt(S.data)}. Se você coletou nesses dias, lance cada um escolhendo a data acima, para o rodízio ficar certo.</div>` : ""}
+    ${S.soLeitura ? '<div class="note warn">Você está vendo este site só para leitura. As coletas não podem ser salvas daqui.</div>' : ""}
+    <div class="block">
+      <h2>${ehHoje ? "Pontos de hoje" : "Pontos do dia"}</h2>
+      <p class="hint">Marque o que você coletou. Os resultados são opcionais; valores fora da faixa ficam em vermelho.</p>
+      <ul class="tags">${topo.map(tagHTML).join("")}</ul>
+    </div>
+    <label class="field" for="f-obs"><span>Observação do dia (opcional)</span><textarea id="f-obs" ${S.soLeitura ? "disabled" : ""}>${esc(S.obs)}</textarea></label>
+    <div class="actions">
+      <button class="btn primary" type="button" id="b-salvar" ${S.soLeitura ? "disabled" : ""}>${reg ? "Atualizar" : "Salvar"} coleta de ${fmtCurto(S.data)} · ${nSel} ${nSel === 1 ? "ponto" : "pontos"}</button>
+    </div>
+    ${outros.length ? `<div class="block">
+      <h2>Outros pontos da Fábrica ${S.fab}</h2>
+      <p class="hint">Do mais antigo para o mais recente. Marque aqui se precisou coletar um ponto diferente do sugerido.</p>
+      <ul class="tags">${outros.map(tagHTML).join("")}</ul>
+    </div>` : ""}
+  `;
+}
+
+function renderPontos() {
+  const el = $("#v-pontos");
+  const hoje = hojeISO();
+  const ult = ultimas(hoje, true);
+  const grupos = [1, 2, 0].map((f) => ({ f, itens: filaDe(f, ult, hoje) })).filter((g) => g.itens.length);
+  const todos = grupos.filter((g) => g.f !== 0).flatMap((g) => g.itens);
+  const pior = todos.slice().sort((a, b) => (b.dias - a.dias) || (a.i - b.i))[0];
+  const atrasados = todos.filter((e) => e.dias > 20).length;
+  const row = (e) => {
+    const w = e.dias === Infinity ? 100 : Math.max(4, Math.min(100, (e.dias / 30) * 100));
+    return `<li>
+      <span class="ico">${ICO[e.p.tipo] || ICO["Torneira"]}</span>
+      <span class="nm"><span class="setor">${esc(e.p.setor)}</span><span class="sub">${esc(e.p.tipo)}</span></span>
+      <span class="bar" aria-hidden="true"><i class="${nivel(e.dias)}" style="width:${w}%"></i></span>
+      <span class="num">${e.dias === Infinity ? "nunca" : e.dias + " d"}<small>${e.ult ? fmtCurto(e.ult) : "sem registro"}</small></span>
+    </li>`;
+  };
+  el.innerHTML = `
+    ${pior ? `<div class="summary">
+      <span class="eyebrow">Mais tempo sem coleta</span>
+      <span class="big">${esc(pior.p.setor)} · ${esc(pior.p.tipo)}, ${nomeFab(pior.p.fabrica)}</span>
+      <span class="hint">${pior.dias === Infinity ? "Nunca coletado." : pior.dias + " dias desde " + fmt(pior.ult) + "."} ${atrasados ? atrasados + (atrasados === 1 ? " ponto está" : " pontos estão") + " há mais de 20 dias sem coleta." : ""}</span>
+    </div>` : '<div class="empty"><b>Nenhum ponto ativo</b><span class="hint">Cadastre os pontos de coleta em Ajustes.</span></div>'}
+    <div class="legend">
+      <span style="--c: var(--ok)">até 10 dias</span>
+      <span style="--c: var(--warn)">11 a 20 dias</span>
+      <span style="--c: var(--bad)">mais de 20 dias</span>
+    </div>
+    <div class="groups">
+      ${grupos.map((g) => `<div class="block"><h2>${g.f === 0 ? "Todo dia" : "Fábrica " + g.f}</h2><ul class="rows">${g.itens.map(row).join("")}</ul></div>`).join("")}
+    </div>
+    <p class="hint">Dias contados até hoje, ${fmt(hoje)}.</p>
+  `;
+}
+
+function valsHTML(it) {
+  const partes = CAMPOS.filter((c) => it[c] !== null && it[c] !== undefined).map((c) => {
+    const l = LIM[c];
+    const txt = (c === "ph" ? "pH " + fmtNum(it[c]) : fmtNum(it[c]) + " " + l.un + (c === "cloro" ? " Cl" : ""));
+    return `<span class="${fora(c, it[c]) ? "fora" : ""}">${esc(txt)}</span>`;
+  });
+  return partes.length ? `<span class="vals">${partes.join(" · ")}</span>` : "";
+}
+function renderHistorico() {
+  const el = $("#v-historico");
+  const dias = Object.values(S.dias).sort((a, b) => (a.data < b.data ? 1 : -1));
+  let html = `<div class="actions"><button class="btn" type="button" id="b-csv" ${dias.length ? "" : "disabled"}>Baixar planilha (CSV)</button><span class="hint">${dias.length} ${dias.length === 1 ? "dia registrado" : "dias registrados"}</span></div>`;
+  if (!dias.length) {
+    html += '<div class="empty"><b>Nenhuma coleta registrada ainda</b><span class="hint">Salve a primeira coleta na aba Coleta do dia e ela aparece aqui.</span></div>';
+  }
+  let mes = "";
+  for (const d of dias) {
+    const m = d.data.slice(0, 7);
+    if (m !== mes) { mes = m; html += `<h3 class="month">${MESES[Number(m.slice(5)) - 1]} de ${m.slice(0, 4)}</h3>`; }
+    const itens = (d.itens || []).slice().sort((a, b) => (a.fabrica - b.fabrica) || ((ORDEM_TIPO[a.tipo] ?? 9) - (ORDEM_TIPO[b.tipo] ?? 9)));
+    html += `<article class="dia">
+      <header>
+        <time datetime="${d.data}">${semana(d.data)} ${fmt(d.data)}</time>
+        <span class="chip f${d.fabrica}">Fábrica ${d.fabrica}</span>
+        <span class="acts">
+          <button class="btn small" type="button" data-abrir="${d.data}">Editar</button>
+          ${S.soLeitura ? "" : `<button class="btn small danger" type="button" data-excluir="${d.data}">Excluir</button>`}
+        </span>
+      </header>
+      <ul class="itens">${itens.map((it) => `<li><span class="ico">${ICO[it.tipo] || ICO["Torneira"]}</span><span>${esc(it.setor)} · ${esc(it.tipo)}</span>${valsHTML(it)}</li>`).join("") || '<li class="hint">Nenhum ponto coletado.</li>'}</ul>
+      ${d.obs ? `<p class="obs">${esc(d.obs)}</p>` : ""}
+      ${S.confirmando === d.data ? `<div class="confirm"><span>Excluir a coleta de ${fmt(d.data)}?</span><button class="btn small danger" type="button" data-excluir-sim="${d.data}">Sim, excluir</button><button class="btn small" type="button" data-cancelar="1">Cancelar</button></div>` : ""}
+    </article>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderAjustes() {
+  const focado = document.activeElement && document.activeElement.id;
+  if (focado !== "r-torneira") $("#r-torneira").value = S.config.regras.Torneira ?? 0;
+  if (focado !== "r-bebedouro") $("#r-bebedouro").value = S.config.regras.Bebedouro ?? 0;
+  ["r-torneira", "r-bebedouro", "n-fab", "n-setor", "n-tipo", "b-novo", "f-import"].forEach((id) => { $("#" + id).disabled = S.soLeitura; });
+  $("#modo-label").textContent = S.modo === "nuvem"
+    ? "Os registros ficam guardados neste site e aparecem em qualquer aparelho em que você abrir este link com a sua conta. O backup serve para guardar uma cópia ou levar os dados para outro lugar."
+    : "Os registros ficam guardados só neste navegador. Baixe um backup de vez em quando para não perder nada.";
+  const grupos = [1, 2, 0].map((f) => ({ f, pts: S.config.pontos.filter((p) => p.fabrica === f) })).filter((g) => g.pts.length);
+  $("#aj-lista").innerHTML = grupos.map((g) => `<div class="block"><h3>${g.f === 0 ? "Todo dia" : "Fábrica " + g.f}</h3><ul class="cfg-list">${g.pts.map((p) => `
+    <li class="${p.ativo === false ? "off" : ""}">
+      <input type="checkbox" id="at-${p.id}" data-ativo="${p.id}" ${p.ativo === false ? "" : "checked"} ${S.soLeitura ? "disabled" : ""} aria-label="${esc(p.setor)} ${esc(p.tipo)} no rodízio">
+      <label class="nm" for="at-${p.id}"><span class="setor">${esc(p.setor)}</span><span class="sub">${esc(p.tipo)}${p.ativo === false ? " · fora do rodízio" : ""}</span></label>
+      ${S.soLeitura ? "<span></span>" : S.removendo === p.id
+        ? `<span class="actions"><button class="btn small danger" type="button" data-remover-sim="${p.id}">Remover</button><button class="btn small" type="button" data-cancelar="1">Cancelar</button></span>`
+        : `<button class="btn small" type="button" data-remover="${p.id}">Remover</button>`}
+    </li>`).join("")}</ul></div>`).join("");
+  const ic = $("#import-confirm");
+  ic.innerHTML = S.importando
+    ? `<div class="confirm"><span>Importar ${S.importando.dias.length} dias e ${S.importando.config.pontos.length} pontos? Dias com a mesma data serão substituídos.</span><button class="btn small" type="button" id="b-import-sim">Importar</button><button class="btn small" type="button" data-cancelar="1">Cancelar</button></div>`
+    : "";
+}
+
+function trocarAba(aba) {
+  S.aba = aba;
+  for (const b of document.querySelectorAll(".tabs button")) b.setAttribute("aria-selected", String(b.dataset.aba === aba));
+  for (const id of ABAS) $("#v-" + id).hidden = id !== aba;
+  document.querySelector('.tabs [aria-selected="true"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  try { localStorage.setItem("coleta-agua:aba", aba); } catch {}
+}
+
+/* ---------- Ações ---------- */
+async function salvarHoje() {
+  const ids = Object.keys(S.sel);
+  if (!ids.length) { toast("Marque pelo menos um ponto coletado."); return; }
+  const ruins = ids.flatMap((id) => CAMPOS.filter((c) => invalido(S.sel[id][c])).map((c) => pontoInfo(id).setor + " (" + LIM[c].nome + ")"));
+  if (ruins.length) { toast("Valor inválido em " + listaNomes(ruins) + ". Use números como 0,8."); return; }
+  const itens = ids.map((id) => {
+    const p = pontoInfo(id), v = S.sel[id];
+    return { ponto: id, setor: p.setor, tipo: p.tipo, fabrica: p.fabrica, cloro: num(v.cloro), ph: num(v.ph), turbidez: num(v.turbidez) };
+  }).sort((a, b) => (a.fabrica - b.fabrica) || ((ORDEM_TIPO[a.tipo] ?? 9) - (ORDEM_TIPO[b.tipo] ?? 9)));
+  const dia = { data: S.data, fabrica: S.fab, itens, obs: S.obs.trim(), atualizadoEm: new Date().toISOString() };
+  const b = $("#b-salvar"); if (b) b.disabled = true;
+  try {
+    await salvarDia(dia);
+    delete RASC[S.data + "|" + S.fab];
+    S.dirty = false; S.fabManual = null;
+    const nFora = itens.reduce((n, it) => n + CAMPOS.filter((c) => fora(c, it[c])).length, 0);
+    toast(`Coleta de ${fmt(S.data)} salva.` + (nFora ? ` ${nFora} ${nFora === 1 ? "valor fora" : "valores fora"} da faixa: avise o responsável.` : ""));
+    montarRascunho(); renderTudo();
+  } catch (e) {
+    toast(msgErro(e));
+    if (b) b.disabled = S.soLeitura;
+  }
+}
+
+function paraCSV() {
+  const linhas = [["Data", "Fábrica do dia", "Setor", "Ponto", "Local", "Cloro livre (mg/L)", "pH", "Turbidez (uT)", "Observação"]];
+  const dias = Object.values(S.dias).sort((a, b) => (a.data < b.data ? -1 : 1));
+  for (const d of dias) for (const it of d.itens || []) {
+    linhas.push([fmt(d.data), "Fábrica " + d.fabrica, it.setor, it.tipo, nomeFab(it.fabrica), fmtNum(it.cloro), fmtNum(it.ph), fmtNum(it.turbidez), d.obs || ""]);
+  }
+  return "﻿" + linhas.map((l) => l.map((c) => { const s = String(c ?? ""); const s2 = /^[=+\-@]/.test(s) ? "'" + s : s; return /[;"\r\n]/.test(s2) ? '"' + s2.replace(/"/g, '""') + '"' : s2; }).join(";")).join("\r\n");
+}
+async function oferecerArquivo(nome, texto) {
+  let dl = null;
+  if (window.claude && typeof window.claude.use === "function") { try { dl = await window.claude.use("downloads"); } catch { dl = null; } }
+  if (dl) {
+    try { await dl.save({ filename: nome, data: texto }); toast("Arquivo pronto."); }
+    catch (e) { if (!e || e.code !== "declined") toast("Não foi possível gerar o arquivo aqui."); }
+    return;
+  }
+  if (!window.claude) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([texto], { type: "text/plain;charset=utf-8" }));
+    a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+    return;
+  }
+  toast("Este navegador não permite baixar arquivos daqui.");
+}
+
+function validarImport(j) {
+  if (!j || typeof j !== "object" || !j.config || !Array.isArray(j.config.pontos)) return null;
+  const pontos = j.config.pontos.map(limparPonto).filter(Boolean);
+  const lista = Array.isArray(j.dias) ? j.dias : Object.values(j.dias || {});
+  const dias = lista.map(limparDia).filter(Boolean);
+  return pontos.length ? { config: { pontos, regras: limparRegras(j.config.regras) }, dias } : null;
+}
+async function importar() {
+  const imp = S.importando; if (!imp) return;
+  S.importando = null; renderAjustes();
+  try {
+    if (db) {
+      S.importandoAgora = true;
+      await salvarConfig(imp.config);
+      let i = 0;
+      for (const d of imp.dias) { toast(`Importando ${++i} de ${imp.dias.length}…`); await salvarDia(d); }
+      S.importandoAgora = false; S.dirty = false; aoMudarDados();
+    } else {
+      S.config = imp.config;
+      const m = { ...S.dias }; for (const d of imp.dias) m[d.data] = d; S.dias = m;
+      if (!gravarLocal()) throw { code: "local" };
+      S.dirty = false; aoMudarDados();
+    }
+    toast(`Backup importado: ${imp.dias.length} dias.`);
+  } catch (e) { S.importandoAgora = false; aoMudarDados(); toast(msgErro(e)); }
+}
+
+let hojeAtual = hojeISO();
+function verificarVirada() {
+  const h = hojeISO(); if (h === hojeAtual) return;
+  const antigo = hojeAtual; hojeAtual = h;
+  $("#hoje-label").textContent = semana(h) + " " + fmt(h);
+  if (S.data === antigo && !S.dirty) { S.data = h; S.fabManual = null; if (S.pronto) { montarRascunho(); renderHoje(); } }
+  renderTudo();
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) verificarVirada(); });
+window.addEventListener("pageshow", verificarVirada);
+setInterval(verificarVirada, 60000);
+
+document.addEventListener("click", async (ev) => {
+  const t = ev.target.closest("button, [data-fab]"); if (!t) return;
+  if (t.dataset.aba) { trocarAba(t.dataset.aba); return; }
+  if (t.dataset.fab) { guardarRascunho(); S.fabManual = Number(t.dataset.fab); montarRascunho(); renderHoje(); $("#fab-" + S.fab)?.focus(); return; }
+  if (t.id === "b-salvar") { salvarHoje(); return; }
+  if (t.id === "b-csv") { oferecerArquivo(`coleta_agua_${hojeISO()}.csv`, paraCSV()); return; }
+  if (t.id === "b-backup") { oferecerArquivo(`coleta_agua_backup_${hojeISO()}.json`, JSON.stringify({ config: S.config, dias: Object.values(S.dias) }, null, 1)); return; }
+  if (t.id === "b-import-sim") { importar(); return; }
+  if (t.dataset.cancelar) { S.confirmando = null; S.removendo = null; S.importando = null; renderHistorico(); renderAjustes(); return; }
+  if (t.dataset.abrir) { guardarRascunho(); S.data = t.dataset.abrir; S.fabManual = null; montarRascunho(); renderHoje(); trocarAba("hoje"); window.scrollTo(0, 0); return; }
+  if (t.dataset.excluir) { S.confirmando = t.dataset.excluir; renderHistorico(); return; }
+  if (t.dataset.excluirSim) {
+    const d = t.dataset.excluirSim; S.confirmando = null;
+    try { await excluirDia(d); toast(`Coleta de ${fmt(d)} excluída.`); } catch (e) { toast(msgErro(e)); }
+    renderHistorico(); return;
+  }
+  if (t.dataset.remover) { S.removendo = t.dataset.remover; renderAjustes(); return; }
+  if (t.dataset.removerSim) {
+    if (!S.pronto) return;
+    const cfg = clone(S.config); cfg.pontos = cfg.pontos.filter((p) => p.id !== t.dataset.removerSim); S.removendo = null;
+    try { await salvarConfig(cfg); toast("Ponto removido. O histórico dele continua salvo."); } catch (e) { toast(msgErro(e)); }
+    return;
+  }
+});
+
+document.addEventListener("change", async (ev) => {
+  const t = ev.target;
+  if (t.id === "f-data") { guardarRascunho(); S.data = dataValida(t.value) ? t.value : hojeISO(); S.fabManual = null; montarRascunho(); renderHoje(); $("#f-data")?.focus(); return; }
+  if (t.matches('#v-hoje input[type="checkbox"][data-ponto]')) {
+    const id = t.dataset.ponto;
+    if (t.checked) S.sel[id] = S.sel[id] || { cloro: "", ph: "", turbidez: "" }; else delete S.sel[id];
+    S.dirty = true; renderHoje(); $("#ck-" + id)?.focus(); return;
+  }
+  if (t.dataset.ativo) {
+    if (!S.pronto) return;
+    const cfg = clone(S.config); const p = cfg.pontos.find((x) => x.id === t.dataset.ativo); if (!p) return;
+    p.ativo = t.checked;
+    try { await salvarConfig(cfg); } catch (e) { toast(msgErro(e)); renderAjustes(); }
+    return;
+  }
+  if (t.id === "r-torneira" || t.id === "r-bebedouro") {
+    if (!S.pronto) return;
+    const cfg = clone(S.config); const tipo = t.id === "r-torneira" ? "Torneira" : "Bebedouro";
+    cfg.regras[tipo] = Math.max(0, Math.min(10, Math.round(Number(t.value) || 0)));
+    try { await salvarConfig(cfg); toast("Regra do rodízio atualizada."); } catch (e) { toast(msgErro(e)); }
+    return;
+  }
+  if (t.id === "f-import") {
+    const f = t.files && t.files[0]; t.value = ""; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      let j = null; try { j = JSON.parse(String(r.result)); } catch {}
+      const imp = validarImport(j);
+      if (!imp) { toast("Esse arquivo não é um backup desta página."); return; }
+      S.importando = imp; renderAjustes();
+    };
+    r.readAsText(f);
+  }
+});
+
+document.addEventListener("input", (ev) => {
+  const t = ev.target;
+  if (t.dataset && t.dataset.campo) {
+    const v = S.sel[t.dataset.ponto]; if (!v) return;
+    v[t.dataset.campo] = t.value; S.dirty = true;
+    t.classList.toggle("fora", fora(t.dataset.campo, t.value) || invalido(t.value));
+    return;
+  }
+  if (t.id === "f-obs") { S.obs = t.value; S.dirty = true; }
+});
+
+document.getElementById("f-novo").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  if (!S.pronto) { toast("Aguarde os registros carregarem."); return; }
+  const setor = $("#n-setor").value.trim();
+  if (!setor) { toast("Escreva o nome do setor."); $("#n-setor").focus(); return; }
+  const fabrica = Number($("#n-fab").value), tipo = $("#n-tipo").value;
+  const cfg = clone(S.config);
+  const base = (fabrica === 0 ? "geral" : "f" + fabrica) + "-" + (slug(setor) || "ponto-" + Date.now().toString(36)) + "-" + slug(tipo);
+  if (cfg.pontos.some((p) => p.id === base)) { toast("Esse ponto já existe."); return; }
+  cfg.pontos.push({ id: base, fabrica, setor, tipo, ativo: true });
+  try { await salvarConfig(cfg); $("#n-setor").value = ""; toast(`${setor} · ${tipo} adicionado.`); } catch (e) { toast(msgErro(e)); }
+});
+
+iniciar();
+</script>
+</body>
+</html>
