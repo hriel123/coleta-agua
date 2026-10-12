@@ -1137,18 +1137,23 @@ function renderGraficos() {
     const vmax = Math.max(7, ...se.map((q) => q.v ?? 0));
     html += `<div class="chart det" id="det">
       <div class="chart-head"><div><h2>${esc(p.setor + " · " + p.tipo)}</h2><span class="hint">${nomeLocal(p.fabrica)} · ${n} ${n === 1 ? "coleta" : "coletas"} no período${u ? ", a última em " + fmt(u) : ""}</span></div><button type="button" class="link" data-sel="">Fechar</button></div>
-      <h3>Dias sem coleta</h3>
-      <p class="hint">A área sobe a cada dia sem coleta e volta a zero no dia em que o ponto é coletado. Cada linha vertical é uma coleta, com a data embaixo.</p>
-      ${grande({ id: "ritmo", W: L.inner, dom, fab: p.fabrica, hi: vmax, rotulo: "Dias sem coleta de " + p.setor + " " + p.tipo, pts: se.map((q) => ({ data: q.data, v: q.v, marca: q.coleta, tip: tr(q) })) })}`;
+`;
+    let temRes = false;
     for (const pr of PARAM) {
       const lista = amostras.filter((a) => a.ponto === G.ponto && a.c === pr.c).sort((a, b) => (a.data < b.data ? -1 : 1));
       if (!lista.length) continue;
+      temRes = true;
       const fx = dominioParam(pr.c, lista.map((a) => a.v));
       html += `<h3>${pr.titulo}${pr.un ? ` <span class="un">${pr.un}</span>` : ""}</h3>` + grande({ id: "r-" + pr.c, h: 180, W: L.inner, dom, fab: p.fabrica, lo: fx.lo, hi: fx.hi, faixa: LIM[pr.c], rotulo: pr.titulo + " de " + p.setor + " " + p.tipo, pts: lista.map((a) => ({ data: a.data, v: a.v, marca: true, fora: a.fora, tip: a.tip })) });
     }
-    html += "</div>";
+    if (!temRes) html += `<div class="note info">${ICO_INFO}<div class="note-txt"><span>Este ponto ainda não tem cloro, pH ou turbidez registrados no período. Preencha os resultados ao salvar a coleta na aba Coleta, ou em Histórico, tocando em Editar no dia.</span></div></div>`;
+    html += `<h3>Dias sem coleta</h3>
+      <p class="hint">A área sobe a cada dia sem coleta e volta a zero no dia em que o ponto é coletado. Cada linha vertical é uma coleta, com a data embaixo.</p>
+      ${grande({ id: "ritmo", W: L.inner, dom, fab: p.fabrica, hi: vmax, rotulo: "Dias sem coleta de " + p.setor + " " + p.tipo, pts: se.map((q) => ({ data: q.data, v: q.v, marca: q.coleta, tip: tr(q) })) })}
+    </div>`;
   }
 
+  const iRitmo = html.length;
   const grupos = [1, 2, 0].map((f) => ({ f, ps: Object.values(info).filter((p) => p.fabrica === f && (p.ativo !== false || noPeriodo[p.id])) })).filter((g) => g.ps.length);
   const ymax = Math.max(7, ...grupos.flatMap((g) => g.ps.flatMap((p) => series[p.id].map((q) => q.v ?? 0))));
   html += `<div class="chart"><div class="chart-head"><h2>Ritmo de coleta</h2><span class="un">dias sem coleta</span></div>
@@ -1164,9 +1169,10 @@ function renderGraficos() {
   }
   html += "</div>";
 
-  html += '<div class="chart"><div class="chart-head"><h2>Resultados das análises</h2></div>';
+  const iRes = html.length;
+  html += '<div class="chart"><div class="chart-head"><h2>Resultados das análises</h2><span class="un">concentração medida</span></div>';
   if (!amostras.length) {
-    html += `<div class="empty"><b>Nenhum resultado neste período</b><span class="hint">Quando você preencher cloro livre, pH ou turbidez na aba Coleta, as linhas aparecem aqui, com a faixa da Portaria GM/MS 888/2021 sombreada.</span></div>`;
+    html += `<div class="empty"><b>Ainda não há resultados neste período</b><span class="hint">Aqui aparecem o cloro livre (mg/L), o pH e a turbidez (uT) de cada ponto ao longo do tempo, com a faixa aceitável da Portaria GM/MS 888/2021 sombreada. Para preencher, marque o ponto na aba Coleta e digite os valores medidos. Para coletas já salvas, abra o Histórico e toque em Editar no dia.</span><span class="actions"><button type="button" class="btn small" data-aba="hoje">Ir para Coleta</button><button type="button" class="btn small" data-aba="historico">Abrir Histórico</button></span></div>`;
   } else {
     const pr = PARAM.find((x) => x.c === G.param) || PARAM[0];
     const lista = amostras.filter((a) => a.c === pr.c);
@@ -1193,6 +1199,7 @@ function renderGraficos() {
       </tbody></table></div></details>`;
   }
   html += "</div>";
+  html = html.slice(0, iRitmo) + html.slice(iRes) + html.slice(iRitmo, iRes);
   html += '<div id="g-tip" role="tooltip" hidden></div>';
   el.innerHTML = html;
   G.tipAtual = null; G.xhAtivo = null; G.largura = el.clientWidth;
