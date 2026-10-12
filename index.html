@@ -24,6 +24,8 @@
   --grid: #E3E9EE;
   --axis: #B9C5CE;
   --band: rgba(31, 110, 75, 0.09);
+  --scroll-thumb: #A7B5BF;
+  --scroll-thumb-hover: #7D8D99;
   --hero-bg: #13202A;
   --hero-fg: #F4F7F9;
   --hero-muted: #A9B8C3;
@@ -47,19 +49,41 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --grid: #22303A; --axis: #3A4A56; --band: rgba(92, 199, 150, 0.10); --hero-bg: #1B2A35; --hero-line: #34495A;
+    --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --grid: #22303A; --axis: #3A4A56; --band: rgba(92, 199, 150, 0.10); --hero-bg: #1B2A35; --hero-line: #34495A; --scroll-thumb: #3B4E5C; --scroll-thumb-hover: #557083;
     --accent: #F173B3; --accent-soft: #3A1A2C; --on-accent: #1C0814;
     --ok: #5CC796; --ok-soft: #12302A; --warn: #E6B556; --warn-soft: #382B10; --bad: #F2806F; --bad-soft: #3C1B17;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --grid: #22303A; --axis: #3A4A56; --band: rgba(92, 199, 150, 0.10); --hero-bg: #1B2A35; --hero-line: #34495A;
+  --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --grid: #22303A; --axis: #3A4A56; --band: rgba(92, 199, 150, 0.10); --hero-bg: #1B2A35; --hero-line: #34495A; --scroll-thumb: #3B4E5C; --scroll-thumb-hover: #557083;
   --accent: #F173B3; --accent-soft: #3A1A2C; --on-accent: #1C0814;
   --ok: #5CC796; --ok-soft: #12302A; --warn: #E6B556; --warn-soft: #382B10; --bad: #F2806F; --bad-soft: #3C1B17;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+html { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) var(--bg); }
+.tbl-wrap, textarea { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
+@supports not (scrollbar-color: red blue) {
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 999px; border: 3px solid var(--bg); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scroll-thumb-hover); }
+}
+@supports (appearance: base-select) {
+  .filtros select, .filtros ::picker(select) { appearance: base-select; }
+  .filtros select { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+  .filtros select::picker-icon { color: var(--muted); transition: rotate .2s; }
+  .filtros select:open::picker-icon { rotate: 180deg; }
+  .filtros ::picker(select) { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 6px; margin-block: 6px; max-height: min(60vh, 420px); overflow-y: auto; box-shadow: 0 12px 32px rgba(0, 0, 0, .22); scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
+  .filtros option { padding: 9px 10px; border-radius: 8px; font-size: .95rem; gap: 8px; }
+  .filtros option:hover, .filtros option:focus-visible { background: var(--bg); outline: none; }
+  .filtros option:checked { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+  .filtros option::checkmark { color: var(--accent); }
+  .filtros optgroup { font-weight: 700; font-size: .78rem; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; padding: 10px 10px 2px; }
+  .filtros optgroup option { text-transform: none; letter-spacing: normal; color: var(--ink); font-weight: 400; }
+  .filtros optgroup option:checked { font-weight: 700; }
+}
 [hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5; }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -236,28 +260,33 @@ details.outros .tags { padding: 0 10px 10px; }
 .keys span { display: inline-flex; align-items: center; gap: 6px; }
 .keys i, .tip-key { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
 .f0.k, .tip-key.f0 { background: var(--s3); } .f1.k, .tip-key.f1 { background: var(--s1); } .f2.k, .tip-key.f2 { background: var(--s2); }
-.tk { fill: var(--muted); font-family: var(--f-mono); font-size: 11px; }
-.gl { stroke: var(--grid); stroke-width: 1; }
-.bl { stroke: var(--axis); stroke-width: 1; }
 .band { fill: var(--band); }
-.lim { stroke: var(--ok); stroke-width: 1; opacity: .55; }
-.lim-t { fill: var(--muted); font-family: var(--f-mono); font-size: 10px; }
-.dot { stroke: var(--surface); stroke-width: 2; }
-.dot.f0 { fill: var(--s3); } .dot.f1 { fill: var(--s1); } .dot.f2 { fill: var(--s2); }
-.dot.fora { stroke: var(--bad); stroke-width: 2.5; }
-.ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.ln.f0 { stroke: var(--s3); } .ln.f1 { stroke: var(--s1); } .ln.f2 { stroke: var(--s2); }
-.hit { fill: transparent; cursor: pointer; outline: none; }
-.hit:focus-visible { stroke: var(--accent); stroke-width: 2; }
-.hb { display: grid; gap: 6px; }
-.hb-row { display: grid; grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr); gap: 10px; align-items: center; padding: 3px 4px; border-radius: 6px; cursor: default; }
-.hb-row:hover, .hb-row:focus-visible { background: var(--bg); }
-.hb-lbl { font-size: .88rem; overflow-wrap: anywhere; line-height: 1.25; }
-.hb-lbl small { display: block; color: var(--muted); font-size: .75rem; }
-.hb-track { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.hb-bar { display: block; flex: none; height: 14px; border-radius: 0 4px 4px 0; }
-.hb-bar.f0 { background: var(--s3); } .hb-bar.f1 { background: var(--s1); } .hb-bar.f2 { background: var(--s2); }
-.hb-val { font-family: var(--f-mono); font-size: .85rem; font-variant-numeric: tabular-nums; }
+.hit { fill: transparent; cursor: pointer; }
+.sp-list { display: grid; }
+.sp-eixo, .sp-row { display: grid; grid-template-columns: var(--lw) var(--sw) minmax(0, 1fr); gap: 10px; align-items: center; padding-inline: 4px; }
+.sp-eixo { font-family: var(--f-mono); font-size: .7rem; color: var(--muted); padding-bottom: 4px; }
+.sp-eixo > span:nth-child(2) { display: flex; justify-content: space-between; }
+.sp-row { padding-block: 9px; border-top: 1px solid var(--line); border-radius: 8px; cursor: default; }
+.sp-row:hover, .sp-row:focus-visible { background: var(--bg); }
+.sp-lbl { display: flex; gap: 8px; align-items: flex-start; min-width: 0; font-size: .88rem; line-height: 1.25; overflow-wrap: anywhere; }
+.sp-lbl .k { flex: none; width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; }
+.sp-lbl small { display: block; color: var(--muted); font-size: .75rem; }
+.spark { display: block; overflow: visible; }
+.sp-vazio { font-size: .78rem; color: var(--muted); }
+.sp-val { text-align: right; font-family: var(--f-mono); font-weight: 600; font-size: .95rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.sp-val small { display: block; font-weight: 400; font-size: .7rem; color: var(--muted); }
+.sp-val.fora, .sp-val.fora small { color: var(--bad); }
+.sp-base { stroke: var(--axis); stroke-width: 1; }
+.sp-tick.f0, .sp-dot.f0, .sp-area.f0 { fill: var(--s3); } .sp-tick.f1, .sp-dot.f1, .sp-area.f1 { fill: var(--s1); } .sp-tick.f2, .sp-dot.f2, .sp-area.f2 { fill: var(--s2); }
+.sp-tick { opacity: .75; } .sp-tick.ult { opacity: 1; }
+.sp-line { fill: none; stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; }
+.sp-line.f0 { stroke: var(--s3); } .sp-line.f1 { stroke: var(--s1); } .sp-line.f2 { stroke: var(--s2); }
+.sp-area { opacity: .13; }
+.sp-dot { stroke: var(--surface); stroke-width: 2; }
+.sp-dot.fora { fill: var(--bad); }
+.seg-param { display: grid; grid-template-columns: repeat(3, auto); width: 100%; }
+.seg-param button { padding: 7px 8px; }
+.res-resumo { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; font-size: .85rem; color: var(--muted); }
 #g-tip { position: absolute; z-index: 4; pointer-events: none; background: var(--ink); color: var(--bg); padding: 7px 10px; border-radius: 8px; font-size: .8rem; max-width: 230px; display: grid; gap: 2px; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
 #g-tip b { font-family: var(--f-mono); font-size: 1rem; }
 #g-tip .tl { display: flex; align-items: center; gap: 6px; font-weight: 700; }
@@ -902,7 +931,7 @@ function iniciarTema() {
 }
 
 /* ---------- Gráficos ---------- */
-const G = { periodo: "tudo", ponto: "", tips: [] };
+const G = { periodo: "tudo", ponto: "", param: "cloro", tips: [] };
 const PARAM = [
   { c: "cloro", titulo: "Cloro livre", un: "mg/L" },
   { c: "ph", titulo: "pH", un: "" },
@@ -924,42 +953,58 @@ function periodoG() {
 function chavesHTML(fabs) {
   return '<div class="keys">' + [0, 1, 2].filter((f) => fabs.has(f)).map((f) => `<span><i class="k f${f}"></i>${nomeLocal(f)}</span>`).join("") + "</div>";
 }
-function graficoSVG(pr, lista, dom, W) {
-  const H = 190, ml = 40, mr = 12, mt = 14, mb = 26, iw = W - ml - mr, ih = H - mt - mb;
-  const lim = LIM[pr.c], vs = lista.map((a) => a.v);
-  let lo, hi;
-  if (pr.c === "ph") { lo = Math.min(Math.min(...vs), lim.min) - 0.5; hi = Math.max(Math.max(...vs), lim.max) + 0.5; }
-  else { lo = 0; hi = Math.max(Math.max(...vs) * 1.2, pr.c === "cloro" ? 0.5 : 1); }
-  const step = passoBom(hi - lo, 4);
-  lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+function layoutSpark(el) {
+  const inner = Math.max(240, Math.floor(el.clientWidth) - 30);
+  const lw = Math.round(Math.min(170, Math.max(96, inner * 0.36)));
+  const vw = inner < 360 ? 52 : 70;
+  return { lw, sw: Math.max(64, inner - lw - vw - 28) };
+}
+function dominioParam(c, vs) {
+  const lim = LIM[c];
+  if (c === "ph") return { lo: Math.min(Math.min(...vs), lim.min) - 0.5, hi: Math.max(Math.max(...vs), lim.max) + 0.5 };
+  return { lo: 0, hi: Math.max(Math.max(...vs) * 1.15, c === "cloro" ? 0.5 : 1) };
+}
+function cadenciaSVG(datas, fab, dom, sw) {
+  const H = 24, px = 3, base = H - 3;
   const t0 = utc(dom.ini), t1 = utc(dom.fim);
-  const x = (s) => ml + ((utc(s) - t0) / (t1 - t0)) * iw;
-  const y = (v) => mt + (1 - (v - lo) / (hi - lo)) * ih;
-  const r1 = (n) => Math.round(n * 10) / 10;
+  const x = (s) => px + ((utc(s) - t0) / (t1 - t0)) * (sw - 2 * px);
+  const ord = datas.slice().sort();
+  let g = `<line class="sp-base" x1="0" x2="${sw}" y1="${base}" y2="${base}"/>`;
+  ord.forEach((d, i) => {
+    const ult = i === ord.length - 1, h = ult ? 17 : 11;
+    g += `<rect class="sp-tick f${fab}${ult ? " ult" : ""}" x="${(x(d) - 1.5).toFixed(1)}" y="${base - h}" width="3" height="${h}" rx="1.5"/>`;
+  });
+  return `<svg class="spark" width="${sw}" height="${H}" viewBox="0 0 ${sw} ${H}" aria-hidden="true">${g}</svg>`;
+}
+function sparkSVG(c, ord, dom, sw, faixa, fab) {
+  const H = 40, px = 5, py = 6;
+  const t0 = utc(dom.ini), t1 = utc(dom.fim), lim = LIM[c];
+  const x = (s) => +(px + ((utc(s) - t0) / (t1 - t0)) * (sw - 2 * px)).toFixed(1);
+  const y = (v) => +(py + (1 - (v - faixa.lo) / (faixa.hi - faixa.lo)) * (H - 2 * py)).toFixed(1);
   let g = "";
-  const bLo = Math.max(lo, lim.min ?? lo), bHi = Math.min(hi, lim.max ?? hi);
-  if (bHi > bLo) g += `<rect class="band" x="${ml}" y="${r1(y(bHi))}" width="${iw}" height="${r1(y(bLo) - y(bHi))}"/>`;
-  for (let i = 0, v = lo; v <= hi + step / 1000; i++, v = lo + i * step) {
-    const yy = r1(y(v));
-    if (i > 0) g += `<line class="gl" x1="${ml}" x2="${ml + iw}" y1="${yy}" y2="${yy}"/>`;
-    g += `<text class="tk" x="${ml - 6}" y="${yy}" text-anchor="end" dominant-baseline="middle">${fmtEixo(v)}</text>`;
+  const bLo = Math.max(faixa.lo, lim.min ?? faixa.lo), bHi = Math.min(faixa.hi, lim.max ?? faixa.hi);
+  if (bHi > bLo) g += `<rect class="band" x="0" y="${y(bHi)}" width="${sw}" height="${(y(bLo) - y(bHi)).toFixed(1)}" rx="4"/>`;
+  const pts = ord.map((a) => [x(a.data), y(a.v)]);
+  if (pts.length > 1) {
+    g += `<path class="sp-area f${fab}" d="M${pts[0][0]},${H - py} L${pts.map((q) => q.join(",")).join(" L")} L${pts[pts.length - 1][0]},${H - py} Z"/>`;
+    g += `<polyline class="sp-line f${fab}" points="${pts.map((q) => q.join(",")).join(" ")}"/>`;
   }
-  g += `<line class="bl" x1="${ml}" x2="${ml + iw}" y1="${r1(y(lo))}" y2="${r1(y(lo))}"/>`;
-  for (const [val, nome] of [[lim.min, "mín."], [lim.max, "máx."]]) {
-    if (val === null || val <= lo || val >= hi) continue;
-    const yy = r1(y(val));
-    g += `<line class="lim" x1="${ml}" x2="${ml + iw}" y1="${yy}" y2="${yy}"/><text class="lim-t" x="${ml + iw}" y="${yy - 4}" text-anchor="end">${nome} ${fmtEixo(val)}</text>`;
-  }
-  const nX = W < 420 ? 3 : 5;
-  for (let i = 0; i < nX; i++) {
-    const s = isoUtc(Math.round((t0 + (t1 - t0) * i / (nX - 1)) / 86400000) * 86400000);
-    g += `<text class="tk" x="${r1(x(s))}" y="${H - 6}" text-anchor="${i === 0 ? "start" : i === nX - 1 ? "end" : "middle"}">${fmtCurto(s)}</text>`;
-  }
-  const ord = lista.slice().sort((a, b) => (a.data < b.data ? -1 : 1));
-  if (G.ponto && ord.length > 1) g += `<polyline class="ln f${ord[0].fab}" points="${ord.map((a) => r1(x(a.data)) + "," + r1(y(a.v))).join(" ")}"/>`;
-  for (const a of ord) g += `<circle class="dot f${a.fab}${a.fora ? " fora" : ""}" cx="${r1(x(a.data))}" cy="${r1(y(a.v))}" r="${a.fora ? 5.5 : 4.5}"/>`;
-  for (const a of ord) g += `<circle class="hit" cx="${r1(x(a.data))}" cy="${r1(y(a.v))}" r="12" tabindex="0" data-tip="${a.tip}" aria-label="${esc(a.setor + " " + a.tipo + ", " + fmt(a.data) + ": " + fmtNum(a.v) + " " + pr.un + (a.fora ? ", fora da faixa" : ""))}"/>`;
-  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(pr.titulo + ": " + lista.length + " amostras")}">${g}</svg>`;
+  ord.forEach((a, i) => {
+    const ult = i === ord.length - 1;
+    if (a.fora) g += `<circle class="sp-dot fora" cx="${pts[i][0]}" cy="${pts[i][1]}" r="${ult ? 4 : 3.5}"/>`;
+    else if (ult) g += `<circle class="sp-dot f${fab}" cx="${pts[i][0]}" cy="${pts[i][1]}" r="4"/>`;
+  });
+  ord.forEach((a, i) => { g += `<circle class="hit" cx="${pts[i][0]}" cy="${pts[i][1]}" r="10" data-tip="${a.tip}"/>`; });
+  return `<svg class="spark" width="${sw}" height="${H}" viewBox="0 0 ${sw} ${H}" aria-hidden="true">${g}</svg>`;
+}
+function linhaRes(lbl, sub, fab, lista, c, dom, L, faixa) {
+  const ord = lista.slice().sort((a, b) => (a.data < b.data ? -1 : 1)), u = ord[ord.length - 1];
+  const un = PARAM.find((pr) => pr.c === c).un;
+  return `<div class="sp-row" tabindex="0" data-tip="${u.tip}" aria-label="${esc(lbl + " " + sub + ": último valor " + fmtNum(u.v) + " " + un + " em " + fmt(u.data) + (u.fora ? ", fora da faixa" : ""))}">
+    <span class="sp-lbl"><i class="k f${fab}"></i><span>${esc(lbl)}<small>${esc(sub)}</small></span></span>
+    ${sparkSVG(c, ord, dom, L.sw, faixa, fab)}
+    <span class="sp-val${u.fora ? " fora" : ""}">${fmtNum(u.v)}<small>${u.fora ? "fora · " : ""}${fmtCurto(u.data)}</small></span>
+  </div>`;
 }
 function renderGraficos() {
   const el = $("#v-graficos");
@@ -970,10 +1015,13 @@ function renderGraficos() {
   for (const d of Object.values(S.dias)) for (const it of d.itens || []) if (!info[it.ponto]) info[it.ponto] = { id: it.ponto, setor: it.setor, tipo: it.tipo, fabrica: it.fabrica, ativo: false };
   if (G.ponto && !info[G.ponto]) G.ponto = "";
   const diasP = Object.values(S.dias).filter((d) => d.data >= dom.ini && d.data <= dom.fim);
-  const cont = {}, ult = {};
-  for (const d of diasP) for (const it of d.itens || []) { cont[it.ponto] = (cont[it.ponto] || 0) + 1; if (!ult[it.ponto] || ult[it.ponto] < d.data) ult[it.ponto] = d.data; }
+  const datasPonto = {};
+  for (const d of diasP) for (const it of d.itens || []) (datasPonto[it.ponto] = datasPonto[it.ponto] || []).push(d.data);
   G.tips = [];
   const tip = (o) => { G.tips.push(o); return G.tips.length - 1; };
+  const L = layoutSpark(el);
+  const vars = `style="--lw:${L.lw}px;--sw:${L.sw}px"`;
+  const eixo = `<div class="sp-eixo" aria-hidden="true"><span></span><span><span>${fmtCurto(dom.ini)}</span><span>${fmtCurto(dom.fim)}</span></span><span></span></div>`;
 
   const opts = [0, 1, 2].map((f) => {
     const ps = Object.values(info).filter((p) => p.fabrica === f);
@@ -989,30 +1037,28 @@ function renderGraficos() {
   </div>
   <p class="hint">De ${fmt(dom.ini)} a ${fmt(dom.fim)}: ${diasP.length} ${diasP.length === 1 ? "dia" : "dias"} com coleta.</p>`;
 
-  html += '<div class="chart"><div class="chart-head"><h2>Coletas por ponto</h2></div>';
-  if (G.ponto) {
-    const p = info[G.ponto], n = cont[G.ponto] || 0;
-    html += `<p class="plan">${esc(p.setor + " · " + p.tipo)} (${nomeLocal(p.fabrica)}): <b>${n} ${n === 1 ? "coleta" : "coletas"}</b> no período${ult[G.ponto] ? ", a última em " + fmt(ult[G.ponto]) : ""}.</p>`;
-  } else {
-    const diarios = Object.values(info).filter((p) => p.fabrica === 0 && (p.ativo !== false || cont[p.id]));
-    if (diarios.length) html += `<p class="hint">${diarios.map((p) => `${esc(p.tipo)} (${esc(p.setor)}): ${cont[p.id] || 0} ${(cont[p.id] || 0) === 1 ? "coleta" : "coletas"}`).join(" · ")}. Entra todo dia, por isso fica fora das barras.</p>`;
-    const grupos = [1, 2].map((f) => ({ f, ps: Object.values(info).filter((p) => p.fabrica === f && (p.ativo !== false || cont[p.id])).map((p, i) => ({ p, i, n: cont[p.id] || 0 })).sort((a, b) => (b.n - a.n) || (a.i - b.i)) })).filter((g) => g.ps.length);
-    const max = Math.max(1, ...grupos.flatMap((g) => g.ps.map((e) => e.n)));
-    html += '<p class="hint">Barras curtas mostram os pontos que estão ficando para trás no rodízio.</p>' + chavesHTML(new Set(grupos.map((g) => g.f)));
-    for (const g of grupos) {
-      html += `<h3>Fábrica ${g.f}</h3><div class="hb">` + g.ps.map((e) => {
-        const t = tip({ valor: e.n + (e.n === 1 ? " coleta" : " coletas"), titulo: e.p.setor + " · " + e.p.tipo, sub: nomeLocal(e.p.fabrica), extra: ult[e.p.id] ? "última em " + fmt(ult[e.p.id]) : "nenhuma no período", serie: e.p.fabrica });
-        return `<div class="hb-row" tabindex="0" data-tip="${t}" aria-label="${esc(e.p.setor + " " + e.p.tipo + ": " + e.n + " coletas")}">
-          <span class="hb-lbl">${esc(e.p.setor)}<small>${esc(e.p.tipo)}</small></span>
-          <span class="hb-track"><i class="hb-bar f${e.p.fabrica}" style="width:${e.n ? `max(4px, calc((100% - 2.5rem) * ${(e.n / max).toFixed(3)}))` : "0"}"></i><b class="hb-val">${e.n}</b></span>
-        </div>`;
-      }).join("") + "</div>";
-    }
+  const grupos = (G.ponto ? [info[G.ponto].fabrica] : [1, 2, 0])
+    .map((f) => ({ f, ps: Object.values(info).filter((p) => p.fabrica === f && (G.ponto ? p.id === G.ponto : (p.ativo !== false || datasPonto[p.id]))) }))
+    .filter((g) => g.ps.length);
+  html += `<div class="chart"><div class="chart-head"><h2>Ritmo de coleta</h2><span class="un">cada traço é uma coleta</span></div>`;
+  if (!G.ponto) html += '<p class="hint">Traços espaçados por igual mostram o rodízio em dia. Um vazio longo no fim indica um ponto ficando para trás.</p>' + chavesHTML(new Set(grupos.map((g) => g.f)));
+  for (const g of grupos) {
+    if (!G.ponto) html += `<h3>${nomeLocal(g.f)}</h3>`;
+    html += `<div class="sp-list" ${vars}>${eixo}` + g.ps.map((p) => {
+      const ds = datasPonto[p.id] || [];
+      const u = ds.length ? ds.slice().sort()[ds.length - 1] : null;
+      const atras = u ? diffDias(dom.fim, u) : null;
+      const t = tip({ valor: ds.length + (ds.length === 1 ? " coleta" : " coletas"), titulo: p.setor + " · " + p.tipo, sub: nomeLocal(p.fabrica), extra: u ? "última em " + fmt(u) : "nenhuma no período", serie: p.fabrica });
+      return `<div class="sp-row" tabindex="0" data-tip="${t}" aria-label="${esc(p.setor + " " + p.tipo + ": " + ds.length + " coletas no período" + (u ? ", última em " + fmt(u) : ""))}">
+        <span class="sp-lbl"><i class="k f${p.fabrica}"></i><span>${esc(p.setor)}<small>${esc(p.tipo)}</small></span></span>
+        ${ds.length ? cadenciaSVG(ds, p.fabrica, dom, L.sw) : '<span class="sp-vazio">nenhuma coleta no período</span>'}
+        <span class="sp-val">${ds.length}×<small>${u ? (atras === 0 ? "hoje" : "há " + atras + " d") : "nunca"}</small></span>
+      </div>`;
+    }).join("") + "</div>";
   }
   html += "</div>";
 
-  const amostras = [];
-  const linhas = [];
+  const amostras = [], linhas = [];
   for (const d of diasP.slice().sort((a, b) => (a.data < b.data ? 1 : -1))) for (const it of d.itens || []) {
     if (G.ponto && it.ponto !== G.ponto) continue;
     let tem = false;
@@ -1020,32 +1066,50 @@ function renderGraficos() {
       const v = num(it[pr.c]); if (v === null) continue;
       tem = true;
       const fo = fora(pr.c, v);
-      amostras.push({ c: pr.c, data: d.data, setor: it.setor, tipo: it.tipo, fab: it.fabrica, v, fora: fo,
+      amostras.push({ c: pr.c, data: d.data, ponto: it.ponto, setor: it.setor, tipo: it.tipo, fab: it.fabrica, v, fora: fo,
         tip: tip({ valor: fmtNum(v) + (pr.un ? " " + pr.un : "") + (pr.c === "ph" ? " de pH" : ""), titulo: it.setor + " · " + it.tipo, sub: nomeLocal(it.fabrica) + " · " + semana(d.data) + " " + fmt(d.data), extra: fo ? "fora da faixa" : "", serie: it.fabrica }) });
     }
     if (tem) linhas.push({ d, it });
   }
-  html += '<h2>Resultados das análises</h2>';
+  html += '<div class="chart"><div class="chart-head"><h2>Resultados das análises</h2></div>';
   if (!amostras.length) {
-    html += `<div class="empty"><b>Nenhum resultado ${G.ponto ? "deste ponto " : ""}neste período</b><span class="hint">Quando você preencher cloro livre, pH ou turbidez na aba Coleta, os gráficos aparecem aqui, com a faixa da Portaria GM/MS 888/2021 marcada.</span></div>`;
-  } else {
-    const W = Math.max(240, Math.floor(el.clientWidth) - 30);
-    if (!G.ponto) html += chavesHTML(new Set(amostras.map((a) => a.fab)));
+    html += `<div class="empty"><b>Nenhum resultado ${G.ponto ? "deste ponto " : ""}neste período</b><span class="hint">Quando você preencher cloro livre, pH ou turbidez na aba Coleta, as linhas aparecem aqui, com a faixa da Portaria GM/MS 888/2021 sombreada.</span></div>`;
+  } else if (G.ponto) {
+    const p = info[G.ponto];
+    html += `<p class="hint">Faixa sombreada: valores aceitáveis. O ponto maior é o último resultado; pontos vermelhos estão fora da faixa.</p><div class="sp-list" ${vars}>${eixo}`;
     for (const pr of PARAM) {
       const lista = amostras.filter((a) => a.c === pr.c);
-      const nFora = lista.filter((a) => a.fora).length;
-      html += `<div class="chart"><div class="chart-head"><h3>${pr.titulo}${pr.un ? ` <span class="un">${pr.un}</span>` : ""}</h3>
-        ${nFora ? `<span class="alerta">${ICO_ALERTA}${nFora} ${nFora === 1 ? "amostra fora" : "amostras fora"} da faixa</span>` : `<span class="un">faixa: ${LIM[pr.c].ref}${pr.un ? " " + pr.un : ""}</span>`}</div>
-        ${lista.length ? graficoSVG(pr, lista, dom, W) : `<p class="hint">Sem resultados de ${pr.titulo.toLowerCase()} no período.</p>`}</div>`;
+      html += lista.length
+        ? linhaRes(pr.titulo, (pr.un ? pr.un + " · " : "") + "faixa " + LIM[pr.c].ref, p.fabrica, lista, pr.c, dom, L, dominioParam(pr.c, lista.map((a) => a.v)))
+        : `<div class="sp-row"><span class="sp-lbl"><span>${pr.titulo}</span></span><span class="sp-vazio">sem resultados no período</span><span></span></div>`;
     }
+    html += "</div>";
+  } else {
+    const pr = PARAM.find((x) => x.c === G.param) || PARAM[0];
+    const lista = amostras.filter((a) => a.c === pr.c);
+    const nFora = lista.filter((a) => a.fora).length;
+    const porPonto = {};
+    for (const a of lista) (porPonto[a.ponto] = porPonto[a.ponto] || []).push(a);
+    const ids = Object.values(info).sort((a, b) => a.fabrica - b.fabrica).map((p) => p.id).filter((id) => porPonto[id]);
+    html += `<div class="seg seg-param" role="radiogroup" aria-label="Parâmetro">${PARAM.map((x) => `<button type="button" role="radio" id="g-par-${x.c}" data-param="${x.c}" aria-checked="${pr.c === x.c}">${x.titulo}</button>`).join("")}</div>
+      <div class="res-resumo"><span>${lista.length} ${lista.length === 1 ? "amostra" : "amostras"} · faixa ${LIM[pr.c].ref}${pr.un ? " " + pr.un : ""}</span>${nFora ? `<span class="alerta">${ICO_ALERTA}${nFora} fora da faixa</span>` : ""}</div>`;
+    if (!lista.length) html += `<p class="hint">Sem resultados de ${pr.titulo.toLowerCase()} no período.</p>`;
+    else {
+      const faixa = dominioParam(pr.c, lista.map((a) => a.v));
+      html += `<p class="hint">Faixa sombreada: valores aceitáveis. Todas as linhas usam a mesma escala, então dá para comparar os pontos.</p>` + chavesHTML(new Set(lista.map((a) => a.fab)));
+      html += `<div class="sp-list" ${vars}>${eixo}` + ids.map((id) => { const p = info[id]; return linhaRes(p.setor, p.tipo, p.fabrica, porPonto[id], pr.c, dom, L, faixa); }).join("") + "</div>";
+    }
+  }
+  if (amostras.length) {
     html += `<details class="tabela"><summary>Ver tabela dos resultados (${linhas.length} ${linhas.length === 1 ? "amostra" : "amostras"})</summary><div class="tbl-wrap"><table class="res-tbl">
       <thead><tr><th>Data</th><th>Local</th><th>Ponto</th><th class="n">Cloro livre</th><th class="n">pH</th><th class="n">Turbidez</th></tr></thead><tbody>
-      ${linhas.map(({ d, it }) => `<tr><td>${fmt(d.data)}</td><td>${it.fabrica === 0 ? "Todo dia" : "Fábrica " + it.fabrica}</td><td>${esc(it.setor + " · " + it.tipo)}</td>${PARAM.map((pr) => { const v = num(it[pr.c]); const fo = v !== null && fora(pr.c, v); return `<td class="n${fo ? " fora" : ""}">${v === null ? "" : fmtNum(v) + (fo ? " (fora)" : "")}</td>`; }).join("")}</tr>`).join("")}
+      ${linhas.map(({ d, it }) => `<tr><td>${fmt(d.data)}</td><td>${it.fabrica === 0 ? "Todo dia" : "Fábrica " + it.fabrica}</td><td>${esc(it.setor + " · " + it.tipo)}</td>${PARAM.map((x) => { const v = num(it[x.c]); const fo = v !== null && fora(x.c, v); return `<td class="n${fo ? " fora" : ""}">${v === null ? "" : fmtNum(v) + (fo ? " (fora)" : "")}</td>`; }).join("")}</tr>`).join("")}
       </tbody></table></div></details>`;
   }
+  html += "</div>";
   html += '<div id="g-tip" role="tooltip" hidden></div>';
-  G.tipAtual = null; G.largura = el.clientWidth;
   el.innerHTML = html;
+  G.tipAtual = null; G.largura = el.clientWidth;
 }
 function mostrarTip(alvo) {
   const d = G.tips[Number(alvo.dataset.tip)], tip = $("#g-tip");
@@ -1060,7 +1124,8 @@ function mostrarTip(alvo) {
   tip.hidden = false; G.tipAtual = alvo;
   const box = $("#v-graficos").getBoundingClientRect(), r = alvo.getBoundingClientRect();
   const tw = tip.offsetWidth, th = tip.offsetHeight;
-  const cx = alvo.classList.contains("hb-row") ? (alvo.querySelector(".hb-val")?.getBoundingClientRect().right ?? r.right) - 20 : r.left + r.width / 2;
+  const sp = alvo.classList.contains("sp-row") ? alvo.querySelector(".spark") : null;
+  const cx = sp ? sp.getBoundingClientRect().right - 6 : r.left + r.width / 2;
   const left = Math.max(0, Math.min(cx - box.left - tw / 2, box.width - tw));
   let top = r.top - box.top - th - 6; if (top < 0) top = r.bottom - box.top + 6;
   tip.style.left = left + "px"; tip.style.top = top + "px";
@@ -1160,6 +1225,7 @@ document.addEventListener("click", async (ev) => {
   const t = ev.target.closest("button, [data-fab]"); if (!t) return;
   if (t.dataset.aba) { trocarAba(t.dataset.aba); return; }
   if (t.id === "b-tema") { aplicarTema(temaEscuro() ? "claro" : "escuro"); return; }
+  if (t.dataset.param) { G.param = t.dataset.param; renderGraficos(); $("#" + t.id)?.focus(); return; }
   if (t.dataset.fab) { guardarRascunho(); S.fabManual = Number(t.dataset.fab); montarRascunho(); renderHoje(); $("#fab-" + S.fab)?.focus(); return; }
   if (t.id === "b-salvar") { salvarHoje(); return; }
   if (t.dataset.dia) { irParaDia(addDias(S.data, Number(t.dataset.dia))); $("#" + t.id)?.focus(); return; }
@@ -1256,16 +1322,19 @@ document.addEventListener("toggle", (ev) => { if (ev.target.id === "d-outros") S
 document.addEventListener("click", (ev) => { if (ev.target.id === "f-data" && typeof ev.target.showPicker === "function") { try { ev.target.showPicker(); } catch {} } });
 const vg = document.getElementById("v-graficos");
 function alvoTip(ev) {
-  const a = ev.target.closest && ev.target.closest("#v-graficos [data-tip]");
-  if (a) return a;
-  const svg = ev.target.closest && ev.target.closest("#v-graficos svg");
-  if (!svg) return null;
-  let best = null, bd = 28 * 28;
-  for (const h of svg.querySelectorAll(".hit")) {
-    const r = h.getBoundingClientRect(), dx = r.left + r.width / 2 - ev.clientX, dy = r.top + r.height / 2 - ev.clientY, d = dx * dx + dy * dy;
-    if (d < bd) { bd = d; best = h; }
+  const t = ev.target;
+  if (!t || !t.closest) return null;
+  if (t.classList && t.classList.contains("hit")) return t;
+  const svg = t.closest("#v-graficos svg");
+  if (svg) {
+    let best = null, bd = 24 * 24;
+    for (const h of svg.querySelectorAll(".hit")) {
+      const r = h.getBoundingClientRect(), dx = r.left + r.width / 2 - ev.clientX, dy = r.top + r.height / 2 - ev.clientY, d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; best = h; }
+    }
+    if (best) return best;
   }
-  return best;
+  return t.closest("#v-graficos [data-tip]");
 }
 vg.addEventListener("pointermove", (ev) => {
   if (ev.pointerType !== "mouse") return;
