@@ -180,6 +180,14 @@ textarea { width: 100%; resize: vertical; min-height: 4.5rem; }
 .ag-seta { color: var(--muted); } .ag-seta svg { width: 16px; height: 16px; }
 .tag.previa .tag-row { cursor: default; grid-template-columns: auto minmax(0, 1fr) auto; }
 .hero .seg button:disabled { cursor: default; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 8px 14px; min-height: 40px; cursor: pointer; }
+.chips button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+.semcol-form { display: grid; gap: 12px; padding: 0 14px 14px; }
+.semcol-card { border-style: dashed; }
+.semcol-card h2 { font-size: 1.5rem; }
+.chip.sc { border-style: dashed; }
+.ag-pts.sc b { color: var(--muted); }
 .lista-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .link { background: none; border: 0; color: var(--accent); font-weight: 700; cursor: pointer; padding: 8px 4px; min-height: 44px; }
 details.outros { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
@@ -496,7 +504,8 @@ function dataValida(s) {
   const [y, m, d] = s.split("-").map(Number); const dt = new Date(Date.UTC(y, m - 1, d));
   return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
 }
-function diasUteisEntre(a, b) { let n = 0; for (let t = utc(a) + 86400000; t < utc(b); t += 86400000) { const w = new Date(t).getUTCDay(); if (w !== 0 && w !== 6) n++; } return n; }
+function diasUteisEntre(a, b) { let n = 0; for (let t = utc(a) + 86400000; t < utc(b); t += 86400000) { const w = new Date(t).getUTCDay(); if (w !== 0 && w !== 6 && !semColetaEm(isoUtc(t))) n++; } return n; }
+function semColetaEm(d) { const r = S.dias[d]; return !!(r && r.semColeta); }
 function slug(s) { return String(s).normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
 
 function toast(msg) {
@@ -550,7 +559,12 @@ function limparRegras(r) {
   r = r || {};
   return { Torneira: Math.max(0, Math.min(10, Math.round(Number(r.Torneira)) || 0)), Bebedouro: Math.max(0, Math.min(10, Math.round(Number(r.Bebedouro)) || 0)) };
 }
+const MOTIVOS = ["Feriado", "Falta", "Fábrica parada", "Outro"];
 function limparDia(d) {
+  if (d && d.semColeta === true && dataValida(d.data)) {
+    return { data: d.data, semColeta: true, motivo: MOTIVOS.includes(d.motivo) ? d.motivo : "Outro", fabrica: null, itens: [],
+      obs: typeof d.obs === "string" ? d.obs.slice(0, 500) : "", atualizadoEm: typeof d.atualizadoEm === "string" ? d.atualizadoEm : new Date().toISOString() };
+  }
   if (!d || !dataValida(d.data) || (d.fabrica !== 1 && d.fabrica !== 2) || !Array.isArray(d.itens)) return null;
   return {
     data: d.data, fabrica: d.fabrica, obs: typeof d.obs === "string" ? d.obs.slice(0, 500) : "",
@@ -657,6 +671,7 @@ function simularAgenda() {
   for (let n = 0; n < 90; n++, d = addDias(d, 1)) {
     if (d > limite && ativos.every((p) => prox[p.id])) break;
     if ([0, 6].includes(new Date(utc(d)).getUTCDay())) continue;
+    if (semColetaEm(d)) { agenda.push({ data: d, semColeta: true, motivo: S.dias[d].motivo, ids: [] }); continue; }
     const fab = ultFab ? 3 - ultFab : 1;
     const ids = escolherPontos(fab, d, sim);
     const antes = {};
@@ -692,7 +707,7 @@ function marcarRascunho() {
 function montarRascunho() {
   if (S.data > hojeISO()) { S.sel = {}; S.obs = ""; S.dirty = false; return; }
   const reg = S.dias[S.data];
-  S.fab = S.fabManual ?? (reg ? reg.fabrica : fabricaSugerida(S.data));
+  S.fab = S.fabManual ?? (reg && reg.fabrica ? reg.fabrica : fabricaSugerida(S.data));
   const r = RASC[S.data + "|" + S.fab];
   if (r && reg && reg.atualizadoEm && r.em && reg.atualizadoEm > r.em) { delete RASC[S.data + "|" + S.fab]; gravarRascunhos(); }
   else if (r && r.sel && typeof r.sel === "object") { S.sel = clone(r.sel); S.obs = typeof r.obs === "string" ? r.obs : ""; S.dirty = true; return; }
@@ -754,22 +769,63 @@ const SETA_D = SVG_A + '<path d="M9 5l7 7-7 7"/></svg>';
 const ICO_CAL = SVG_A + '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
 const ICO_INFO = SVG_A + '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r=".7" fill="currentColor"/></svg>';
 function nota(tipo, texto, acao) { return `<div class="note ${tipo}">${tipo === "info" ? ICO_INFO : ICO_ALERTA}<div class="note-txt"><span>${texto}</span>${acao || ""}</div></div>`; }
-function proxDiaUtil(s) { let d = addDias(s, 1); while ([0, 6].includes(new Date(utc(d)).getUTCDay())) d = addDias(d, 1); return d; }
+function proxDiaUtil(s) { let d = addDias(s, 1); while ([0, 6].includes(new Date(utc(d)).getUTCDay()) || semColetaEm(d)) d = addDias(d, 1); return d; }
 function irParaDia(d) {
   guardarRascunho();
   const max = maxPrevia();
-  S.data = d > max ? max : d; S.fabManual = null; S.outrosAberto = false;
+  S.data = d > max ? max : d; S.fabManual = null; S.outrosAberto = false; S.semColAberto = false; S.motivo = null;
   montarRascunho(); renderHoje();
 }
 function listaNomes(arr) { return arr.length <= 1 ? arr.join("") : arr.slice(0, -1).join(", ") + " e " + arr[arr.length - 1]; }
 
+function semColetaForm() {
+  if (S.soLeitura) return "";
+  return `<details class="outros" id="d-semcol" ${S.semColAberto ? "open" : ""}>
+    <summary><span>Não houve coleta neste dia?<small>Feriado, falta ou fábrica parada: o dia não conta no rodízio</small></span></summary>
+    <div class="semcol-form">
+      <div class="chips" role="group" aria-label="Motivo">${MOTIVOS.map((m) => `<button type="button" data-motivo="${m}" aria-pressed="${S.motivo === m}">${m}</button>`).join("")}</div>
+      <button class="btn" type="button" id="b-semcol" ${S.motivo ? "" : "disabled"}>Marcar ${semana(S.data)} ${fmtCurto(S.data)} sem coleta</button>
+    </div>
+  </details>`;
+}
+function renderSemColeta(el, reg) {
+  const hoje = hojeISO(), max = maxPrevia();
+  const [, mm, dd] = S.data.split("-");
+  const rel = diffDias(hoje, S.data);
+  const relTxt = rel === 0 ? "Hoje" : rel === 1 ? "Ontem" : rel > 1 ? `Há ${rel} dias` : rel === -1 ? "Amanhã" : `Daqui a ${-rel} dias`;
+  const prox = proxDiaUtil(S.data);
+  el.innerHTML = `
+    <div class="hero">
+      <div class="hero-top">
+        <button type="button" class="nav-dia" id="b-dia-ant" data-dia="-1" aria-label="Dia anterior">${SETA_E}</button>
+        <label class="hero-data" for="f-data">
+          <span class="hero-rel">${relTxt} · ${SEMANA_LONGA[new Date(utc(S.data)).getUTCDay()]}</span>
+          <span class="hero-dia">${Number(dd)} de ${MESES[Number(mm) - 1]}${ICO_CAL}</span>
+          <input type="date" id="f-data" value="${S.data}" max="${max}" aria-label="Escolher a data da coleta">
+        </label>
+        <button type="button" class="nav-dia" id="b-dia-prox" data-dia="1" aria-label="Próximo dia" ${S.data >= max ? "disabled" : ""}>${SETA_D}</button>
+      </div>
+    </div>
+    <div class="card semcol-card">
+      <span class="eyebrow">Dia sem coleta</span>
+      <h2>${esc(reg.motivo)}</h2>
+      ${reg.obs ? `<p class="obs">${esc(reg.obs)}</p>` : ""}
+      <p class="hint">Este dia não conta no rodízio nem como atraso. A próxima coleta continua de onde parou.</p>
+      <div class="actions">
+        ${S.soLeitura ? "" : '<button class="btn" type="button" id="b-desfazer-semcol">Desfazer</button>'}
+        ${prox <= max ? `<button class="link" type="button" data-ir="${prox}">Ir para ${semana(prox)} ${fmtCurto(prox)}</button>` : ""}
+      </div>
+    </div>
+  `;
+}
 function renderPrevia(el) {
+  if (semColetaEm(S.data)) { renderSemColeta(el, S.dias[S.data]); return; }
   const hoje = hojeISO(), max = maxPrevia();
   const { agenda } = simularAgenda();
-  const plano = agenda.find((a) => a.data === S.data);
+  const plano = agenda.find((a) => a.data === S.data && !a.semColeta);
   const [, mm, dd] = S.data.split("-");
   const rel = diffDias(S.data, hoje);
-  const proxUtil = agenda.find((a) => a.data > S.data);
+  const proxUtil = agenda.find((a) => a.data > S.data && !a.semColeta);
   const info = (id) => S.config.pontos.find((x) => x.id === id) || { id, setor: id, tipo: "", fabrica: 0 };
   const lista = plano ? plano.ids.map((id) => {
     const p = info(id), u = plano.antes[id];
@@ -796,7 +852,7 @@ function renderPrevia(el) {
     </div>
     ${nota("info", "Previsão: supõe que as coletas sugeridas até lá sejam feitas. Data futura não pode ser salva.",
       `<span class="actions"><button class="link" type="button" data-ir="${hoje}">Voltar para hoje</button>${!plano && proxUtil ? `<button class="link" type="button" data-ir="${proxUtil.data}">Ver ${semana(proxUtil.data)} ${fmtCurto(proxUtil.data)}</button>` : ""}</span>`)}
-    ${plano ? `<div class="block"><div class="lista-head"><h2>Pontos previstos</h2></div><p class="hint">O selo mostra quantos dias o ponto estará sem coleta nesse dia.</p><ul class="tags">${lista}</ul></div>` : ""}
+    ${plano ? `<div class="block"><div class="lista-head"><h2>Pontos previstos</h2></div><p class="hint">O selo mostra quantos dias o ponto estará sem coleta nesse dia.</p><ul class="tags">${lista}</ul></div>${semColetaForm()}` : ""}
   `;
 }
 
@@ -805,6 +861,7 @@ function renderHoje() {
   if (!S.pronto) return;
   if (S.data > hojeISO()) { renderPrevia(el); return; }
   const reg = S.dias[S.data];
+  if (reg && reg.semColeta) { renderSemColeta(el, reg); return; }
   const ult = ultimas(S.data);
   const sug = sugeridos(S.fab, S.data);
   const sugSet = new Set(sug);
@@ -877,6 +934,7 @@ function renderHoje() {
       <summary><span>Coletou outro ponto da Fábrica ${S.fab}?<small>${outros.length} ${outros.length === 1 ? "ponto" : "pontos"}, do mais antigo ao mais recente</small></span></summary>
       <ul class="tags">${outros.map(tagHTML).join("")}</ul>
     </details>` : ""}
+    ${reg ? "" : semColetaForm()}
     <label class="field" for="f-obs"><span>Observação do dia (opcional)</span><textarea id="f-obs" placeholder="Ex.: bebedouro do DMP em manutenção" ${S.soLeitura ? "disabled" : ""}>${esc(S.obs)}</textarea></label>
     <div class="savebar"><button class="btn primary" type="button" id="b-salvar" ${S.soLeitura || !nSel ? "disabled" : ""}>${nSel ? `${reg ? "Atualizar" : "Salvar"} coleta · ${nSel} ${nSel === 1 ? "ponto" : "pontos"}` : "Marque os pontos coletados"}</button></div>
   `;
@@ -896,7 +954,7 @@ function renderPontos() {
     <p class="hint">Previsão pelo rodízio, contando só dias úteis. Toque num dia para ver os pontos.</p>
     <ul class="agenda">${agenda.slice(0, 5).map((a) => `<li><button type="button" data-ir="${a.data}">
       <span class="ag-dia">${a.data === hoje ? "hoje" : a.data === addDias(hoje, 1) ? "amanhã" : SEMANA_LONGA[new Date(utc(a.data)).getUTCDay()]}<small>${a.data === hoje || a.data === addDias(hoje, 1) ? semana(a.data) + " " : ""}${fmtCurto(a.data)}</small></span>
-      <span class="ag-pts"><b>Fábrica ${a.fab}</b>${esc(listaNomes(a.ids.map(nomeCurto)))}</span>
+      ${a.semColeta ? `<span class="ag-pts sc"><b>Sem coleta</b>${esc(a.motivo)}</span>` : `<span class="ag-pts"><b>Fábrica ${a.fab}</b>${esc(listaNomes(a.ids.map(nomeCurto)))}</span>`}
       <span class="ag-seta">${SETA_D}</span>
     </button></li>`).join("")}</ul></div>` : "";
   const row = (e) => {
@@ -946,6 +1004,22 @@ function renderHistorico() {
   for (const d of dias) {
     const m = d.data.slice(0, 7);
     if (m !== mes) { mes = m; html += `<h3 class="month">${MESES[Number(m.slice(5)) - 1]} de ${m.slice(0, 4)}</h3>`; }
+    const confirmar = S.confirmando === d.data ? `<div class="confirm"><span>Excluir o registro de ${fmt(d.data)}?</span><button class="btn small danger" type="button" data-excluir-sim="${d.data}">Sim, excluir</button><button class="btn small" type="button" data-cancelar="1">Cancelar</button></div>` : "";
+    if (d.semColeta) {
+      html += `<article class="dia">
+        <header>
+          <time datetime="${d.data}">${semana(d.data)} ${fmt(d.data)}</time>
+          <span class="chip sc">Sem coleta · ${esc(d.motivo)}</span>
+          <span class="acts">
+            <button class="btn small" type="button" data-abrir="${d.data}">Abrir</button>
+            ${S.soLeitura ? "" : `<button class="btn small danger" type="button" data-excluir="${d.data}">Excluir</button>`}
+          </span>
+        </header>
+        ${d.obs ? `<p class="obs">${esc(d.obs)}</p>` : ""}
+        ${confirmar}
+      </article>`;
+      continue;
+    }
     const itens = (d.itens || []).slice().sort((a, b) => (a.fabrica - b.fabrica) || ((ORDEM_TIPO[a.tipo] ?? 9) - (ORDEM_TIPO[b.tipo] ?? 9)));
     html += `<article class="dia">
       <header>
@@ -1219,7 +1293,7 @@ function renderGraficos() {
     </select></label>
     <label class="field" for="g-ponto"><span>Ponto</span><select id="g-ponto"><option value="">Todos os pontos</option>${opts}</select></label>
   </div>
-  <p class="hint">De ${fmt(dom.ini)} a ${fmt(dom.fim)}: ${diasP.length} ${diasP.length === 1 ? "dia" : "dias"} com coleta.${G.ponto ? "" : " Toque num ponto para ver o gráfico dele em detalhe."}</p>`;
+  <p class="hint">De ${fmt(dom.ini)} a ${fmt(dom.fim)}: ${diasP.filter((d) => !d.semColeta).length} ${diasP.filter((d) => !d.semColeta).length === 1 ? "dia" : "dias"} com coleta.${G.ponto ? "" : " Toque num ponto para ver o gráfico dele em detalhe."}</p>`;
 
   if (G.ponto) {
     const p = info[G.ponto], se = series[G.ponto], u = (todas[G.ponto] || []).filter((d) => d <= dom.fim).pop();
@@ -1341,6 +1415,20 @@ function limparCrosshair() {
 function esconderTip() { const t = $("#g-tip"); if (t) t.hidden = true; G.tipAtual = null; limparCrosshair(); }
 
 /* ---------- Ações ---------- */
+async function salvarSemColeta() {
+  if (!S.motivo) { toast("Escolha o motivo."); return; }
+  const atual = S.dias[S.data];
+  if (atual && !atual.semColeta) { toast("Este dia já tem coleta salva. Para marcar sem coleta, exclua o registro no Histórico."); return; }
+  const dia = { data: S.data, semColeta: true, motivo: S.motivo, fabrica: null, itens: [], obs: S.obs.trim(), atualizadoEm: new Date().toISOString() };
+  const b = $("#b-semcol"); if (b) b.disabled = true;
+  try {
+    await salvarDia(dia);
+    delete RASC[S.data + "|" + S.fab]; gravarRascunhos();
+    S.dirty = false; S.semColAberto = false;
+    toast(`${semana(S.data)} ${fmt(S.data)} marcado sem coleta (${S.motivo}).`);
+    S.motivo = null; montarRascunho(); renderTudo(); renderHoje();
+  } catch (e) { toast(msgErro(e)); if (b) b.disabled = false; }
+}
 async function salvarHoje() {
   if (S.data > hojeISO()) return;
   const ids = Object.keys(S.sel);
@@ -1369,9 +1457,13 @@ async function salvarHoje() {
 function paraCSV() {
   const linhas = [["Data", "Fábrica do dia", "Setor", "Ponto", "Local", "Cloro livre (mg/L)", "pH", "Turbidez (uT)", "Observação"]];
   const dias = Object.values(S.dias).sort((a, b) => (a.data < b.data ? -1 : 1));
+  for (const d of dias) {
+    if (d.semColeta) linhas.push([fmt(d.data), "Sem coleta", "", "", "", "", "", "", d.motivo + (d.obs ? ": " + d.obs : "")]);
+  }
   for (const d of dias) for (const it of d.itens || []) {
     linhas.push([fmt(d.data), "Fábrica " + d.fabrica, it.setor, it.tipo, nomeFab(it.fabrica), fmtNum(it.cloro), fmtNum(it.ph), fmtNum(it.turbidez), d.obs || ""]);
   }
+  linhas.splice(1, linhas.length - 1, ...linhas.slice(1).sort((a, b) => { const k = (x) => x[0].split("/").reverse().join(""); return k(a) < k(b) ? -1 : k(a) > k(b) ? 1 : 0; }));
   return "﻿" + linhas.map((l) => l.map((c) => { const s = String(c ?? ""); const s2 = /^[=+\-@]/.test(s) ? "'" + s : s; return /[;"\r\n]/.test(s2) ? '"' + s2.replace(/"/g, '""') + '"' : s2; }).join(";")).join("\r\n");
 }
 async function oferecerArquivo(nome, texto) {
@@ -1446,6 +1538,14 @@ document.addEventListener("click", async (ev) => {
   if (t.dataset.param) { G.param = t.dataset.param; renderGraficos(); $("#" + t.id)?.focus(); return; }
   if (t.dataset.fab) { guardarRascunho(); S.fabManual = Number(t.dataset.fab); montarRascunho(); renderHoje(); $("#fab-" + S.fab)?.focus(); return; }
   if (t.id === "b-salvar") { salvarHoje(); return; }
+  if (t.dataset.motivo) { S.motivo = S.motivo === t.dataset.motivo ? null : t.dataset.motivo; S.semColAberto = true; renderHoje(); document.querySelector(`[data-motivo="${t.dataset.motivo}"]`)?.focus(); return; }
+  if (t.id === "b-semcol") { salvarSemColeta(); return; }
+  if (t.id === "b-desfazer-semcol") {
+    t.disabled = true;
+    try { await excluirDia(S.data); toast(`Marcação de ${fmt(S.data)} removida.`); S.motivo = null; montarRascunho(); renderTudo(); renderHoje(); }
+    catch (e) { toast(msgErro(e)); t.disabled = false; }
+    return;
+  }
   if (t.dataset.dia) { irParaDia(addDias(S.data, Number(t.dataset.dia))); $("#" + t.id)?.focus(); return; }
   if (t.dataset.ir) { irParaDia(t.dataset.ir); if (S.aba !== "hoje") trocarAba("hoje"); window.scrollTo(0, 0); return; }
   if (t.id === "b-todos") {
@@ -1539,7 +1639,7 @@ document.getElementById("f-novo").addEventListener("submit", async (ev) => {
 document.addEventListener("keydown", (ev) => {
   if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('#v-graficos [data-sel][role="button"]')) { ev.preventDefault(); ev.target.click(); }
 });
-document.addEventListener("toggle", (ev) => { if (ev.target.id === "d-outros") S.outrosAberto = ev.target.open; }, true);
+document.addEventListener("toggle", (ev) => { if (ev.target.id === "d-outros") S.outrosAberto = ev.target.open; if (ev.target.id === "d-semcol") S.semColAberto = ev.target.open; }, true);
 document.addEventListener("click", (ev) => { if (ev.target.id === "f-data" && typeof ev.target.showPicker === "function") { try { ev.target.showPicker(); } catch {} } });
 const vg = document.getElementById("v-graficos");
 function alvoTip(ev) {
