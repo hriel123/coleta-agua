@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="coleta-api" content="">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4C23 17 12 29 12 41a20 20 0 0 0 40 0C52 29 41 17 32 4z' fill='%23A3135F'/%3E%3Cpath d='M22 41a10 10 0 0 0 10 10' fill='none' stroke='%23ffffff' stroke-width='4.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
 <title>Rodízio de Coleta de Água</title>
@@ -117,7 +118,7 @@ h3 .un { font-family: var(--f-body); font-weight: 400; font-size: .8rem; color: 
 .dayrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
 .field { display: grid; gap: 4px; min-width: 0; }
 .field > span { font-size: .8rem; color: var(--muted); font-weight: 700; }
-input[type="date"], input[type="time"], input[type="text"], input[type="number"], select, textarea {
+input[type="date"], input[type="time"], input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea {
   background: var(--bg); border: 1px solid var(--field-line); border-radius: 8px; padding: 9px 10px; min-width: 0;
 }
 textarea { width: 100%; resize: vertical; min-height: 4.5rem; }
@@ -214,6 +215,23 @@ textarea { width: 100%; resize: vertical; min-height: 4.5rem; }
 #folha { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, .45); display: grid; place-items: end center; padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
 .folha-in { background: var(--surface); color: var(--ink); border-radius: 16px; padding: 16px; width: min(100%, 36rem); display: grid; gap: 10px; box-shadow: 0 12px 40px rgba(0, 0, 0, .35); }
 .folha-in textarea { min-height: 12rem; font-family: var(--f-mono); font-size: .85rem; }
+#login { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px 16px; background: var(--bg); }
+.login-card { width: 100%; max-width: 24rem; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 1px 3px rgba(15, 23, 42, .06); padding: 24px; display: grid; gap: 18px; }
+.login-marca { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-stretch: 110%; font-weight: 800; font-size: 1.15rem; }
+.login-logo { width: 36px; height: 36px; border-radius: 12px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; flex: none; }
+.login-logo svg { width: 20px; height: 20px; }
+.login-seg { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+.login-seg button[aria-checked="true"] { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+#f-login { display: grid; gap: 14px; }
+#f-login input { width: 100%; }
+#f-login input.invalido { border-color: var(--bad); }
+.erro { color: var(--bad); font-size: .8rem; font-weight: 400; }
+.erro:empty { display: none; }
+.login-erro { margin: 0; background: var(--bad-soft); color: var(--bad); border-radius: 12px; padding: 10px 12px; font-size: .9rem; }
+#b-login { width: 100%; }
+body.sem-conta > header, body.sem-conta > main { display: none; }
+.sync { font-size: .75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); white-space: nowrap; }
+.sync.off { background: var(--warn-soft); color: var(--warn); }
 .lista-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .link { background: none; border: 0; color: var(--accent); font-weight: 700; cursor: pointer; padding: 8px 4px; min-height: 44px; }
 details.outros { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
@@ -392,12 +410,31 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
 </style>
 </head>
 <body>
+<section id="login" hidden>
+  <div class="login-card">
+    <div class="login-marca"><span class="login-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-3 4.4-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-3-6.6-6-11z"/><path d="M9 14.5a3 3 0 0 0 3 3"/></svg></span><span>Coleta de Água</span></div>
+    <div class="seg login-seg" role="radiogroup" aria-label="Acesso">
+      <button type="button" role="radio" id="lm-entrar" data-login-modo="entrar" aria-checked="true">Entrar</button>
+      <button type="button" role="radio" id="lm-criar" data-login-modo="criar" aria-checked="false">Criar conta</button>
+    </div>
+    <form id="f-login" novalidate>
+      <label class="field" for="l-nome" id="l-nome-campo" hidden><span>Nome</span><input type="text" id="l-nome" autocomplete="name" maxlength="80"><small class="erro" id="e-nome"></small></label>
+      <label class="field" for="l-email"><span>E-mail</span><input type="email" id="l-email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false"><small class="erro" id="e-email"></small></label>
+      <label class="field" for="l-senha"><span>Senha</span><input type="password" id="l-senha" autocomplete="current-password"><small class="erro" id="e-senha"></small></label>
+      <p class="login-erro" id="l-erro" role="alert" hidden></p>
+      <p class="hint" id="l-espera" hidden>O servidor pode levar até 1 minuto para acordar no primeiro acesso do dia.</p>
+      <button class="btn primary" type="submit" id="b-login">Entrar</button>
+    </form>
+  </div>
+</section>
+
 <header class="top">
   <div class="top-in">
     <div class="brand">
       <h1>Coleta de <span>Água</span></h1>
       <div class="brand-r">
         <span class="hoje" id="hoje-label"></span>
+        <span class="sync" id="sync" role="status" hidden></span>
         <button type="button" class="tema" id="b-tema" aria-label="Usar tema escuro"></button>
       </div>
     </div>
@@ -454,6 +491,12 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
       <label class="field" for="tema-sel"><span>Tema</span>
         <select id="tema-sel"><option value="auto">Automático (igual ao aparelho)</option><option value="claro">Claro</option><option value="escuro">Escuro</option></select>
       </label>
+    </div>
+
+    <div class="card" id="conta-card" hidden>
+      <h2>Conta</h2>
+      <p class="hint" id="conta-info"></p>
+      <div id="conta-acoes"></div>
     </div>
 
     <div class="card">
@@ -555,6 +598,7 @@ function toast(msg) {
   clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 3200);
 }
 function msgErro(e) {
+  if (e && e.status !== undefined) return e.status === 401 ? "Sua sessão expirou. Entre de novo." : traduzirErro(e);
   const c = e && e.code;
   if (c === "invalid_argument") { S.soLeitura = true; renderHoje(); renderTudo(); return "Você tem acesso só de leitura a este site. Peça acesso de edição ao dono."; }
   if (c === "quota_exceeded") return "O armazenamento está cheio. Baixe um backup e apague dias antigos no Histórico.";
@@ -569,12 +613,14 @@ function lerLocal() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "n
 function gravarLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify({ config: S.config, dias: S.dias })); return true; } catch { return false; } }
 
 async function salvarDia(dia) {
+  if (S.modo === "servidor") { enfileirar({ op: "dia", data: dia.data, corpo: dia }); return; }
   if (db) return db.collection("dias").doc(dia.data).set(dia);
   S.dias = { ...S.dias, [dia.data]: dia };
   if (!gravarLocal()) throw { code: "local" };
   aoMudarDados();
 }
 async function excluirDia(data) {
+  if (S.modo === "servidor") { enfileirar({ op: "del", data }); return; }
   if (db) return db.collection("dias").doc(data).delete();
   const m = { ...S.dias }; delete m[data]; S.dias = m;
   if (!gravarLocal()) throw { code: "local" };
@@ -583,6 +629,7 @@ async function excluirDia(data) {
 let filaConfig = Promise.resolve();
 async function salvarConfig(cfg) {
   S.config = cfg;
+  if (S.modo === "servidor") { enfileirar({ op: "config", corpo: cfg }); return; }
   if (db) {
     aoMudarDados();
     const p = filaConfig.then(() => db.doc("config/geral").set(cfg));
@@ -591,6 +638,203 @@ async function salvarConfig(cfg) {
   }
   if (!gravarLocal()) throw { code: "local" };
   aoMudarDados();
+}
+
+/* ---------- Conta e servidor ---------- */
+const API_URL = ((document.querySelector('meta[name="coleta-api"]') || {}).content || "").trim().replace(/\/+$/, "");
+const TOKEN_KEY = "coleta-agua:token", CONTA_KEY = "coleta-agua:conta";
+const SRV = { token: null, conta: null, fila: [], enviando: false, erro: "", acordando: false, tmr: null, tmrSync: null };
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ERROS_SERVIDOR = {
+  "invalid credentials": "E-mail ou senha incorretos.",
+  "invalid email format": "Informe um e-mail válido.",
+  "password must be at least 6 characters long": "A senha deve ter pelo menos 6 caracteres.",
+  "name, email and password are required": "Preencha nome, e-mail e senha.",
+  "email and password are required": "Preencha e-mail e senha.",
+  "email already registered": "Este e-mail já está cadastrado.",
+  "too many attempts, please try again later": "Muitas tentativas. Espere alguns minutos e tente de novo."
+};
+function lsGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
+function lsSet(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch {} }
+function kCache() { return "coleta-agua:cache:" + SRV.conta.id; }
+function kFila() { return "coleta-agua:pendentes:" + SRV.conta.id; }
+async function apiReq(path, { method = "GET", body } = {}) {
+  const headers = { "Content-Type": "application/json" };
+  if (SRV.token) headers.Authorization = "Bearer " + SRV.token;
+  let res;
+  try { res = await fetch(API_URL + path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined }); }
+  catch { const e = new Error("network"); e.status = 0; throw e; }
+  if (res.status === 204) return null;
+  const data = await res.json().catch(() => null);
+  if (!res.ok) { const e = new Error((data && data.error) || "HTTP " + res.status); e.status = res.status; throw e; }
+  return data;
+}
+function traduzirErro(e) {
+  if (e && e.status === 0) return "Não foi possível falar com o servidor. Verifique a internet e tente de novo.";
+  return ERROS_SERVIDOR[e && e.message] || "Algo deu errado no servidor. Tente de novo em instantes.";
+}
+function gravarCache() { if (SRV.conta) lsSet(kCache(), JSON.stringify({ config: S.config, dias: S.dias })); }
+function gravarFila() { if (SRV.conta) lsSet(kFila(), JSON.stringify(SRV.fila)); }
+function aplicarOp(op) {
+  if (op.op === "dia") S.dias = { ...S.dias, [op.data]: op.corpo };
+  else if (op.op === "del") { const m = { ...S.dias }; delete m[op.data]; S.dias = m; }
+  else if (op.op === "config") S.config = op.corpo;
+}
+function enfileirar(op) {
+  op.k = op.op === "config" ? "config" : "dia:" + op.data;
+  SRV.fila = SRV.fila.filter((x) => x.k !== op.k);
+  SRV.fila.push(op);
+  aplicarOp(op); gravarCache(); gravarFila(); aoMudarDados(); mostrarSync();
+  enviarFila();
+}
+async function enviarFila() {
+  if (SRV.enviando || !SRV.token) return;
+  SRV.enviando = true; clearTimeout(SRV.tmr); mostrarSync();
+  try {
+    while (SRV.fila.length) {
+      const op = SRV.fila[0];
+      try {
+        if (op.op === "dia") await apiReq("/dados/dias/" + op.data, { method: "PUT", body: op.corpo });
+        else if (op.op === "del") await apiReq("/dados/dias/" + op.data, { method: "DELETE" });
+        else await apiReq("/dados/config", { method: "PUT", body: op.corpo });
+      } catch (e) {
+        if (e.status === 401) { sessaoExpirada(); return; }
+        if (e.status >= 400 && e.status < 500) { SRV.fila = SRV.fila.filter((x) => x !== op); gravarFila(); toast("O servidor recusou uma alteração de " + (op.data ? fmt(op.data) : "ajustes") + "."); continue; }
+        SRV.erro = "offline"; SRV.tmr = setTimeout(enviarFila, 20000); return;
+      }
+      SRV.fila = SRV.fila.filter((x) => x !== op); gravarFila();
+    }
+    SRV.erro = "";
+  } finally { SRV.enviando = false; mostrarSync(); }
+}
+async function sincronizarDoServidor() {
+  const lento = setTimeout(() => { SRV.acordando = true; mostrarSync(); }, 3000);
+  try {
+    const d = await apiReq("/dados");
+    S.config = normalizarConfig(d && d.config);
+    S.dias = {};
+    for (const x of (d && d.dias) || []) { const v = limparDia(x); if (v) S.dias[v.data] = v; }
+    for (const op of SRV.fila) aplicarOp(op);
+    gravarCache(); S.pronto = true; SRV.erro = "";
+    verificarLegado();
+    aoMudarDados();
+  } finally { clearTimeout(lento); SRV.acordando = false; mostrarSync(); }
+}
+function tentarSincronizar() {
+  clearTimeout(SRV.tmrSync);
+  sincronizarDoServidor().then(() => enviarFila()).catch((e) => {
+    if (e.status === 401) { sessaoExpirada(); return; }
+    SRV.erro = "offline"; mostrarSync();
+    if (!S.pronto) $("#v-hoje").innerHTML = '<div class="empty"><b>Sem conexão com o servidor</b><span class="hint">Tentando de novo a cada 15 segundos. No primeiro acesso do dia o servidor pode levar até 1 minuto para acordar.</span></div>';
+    SRV.tmrSync = setTimeout(tentarSincronizar, 15000);
+  });
+}
+function verificarLegado() {
+  S.legado = null;
+  if (Object.keys(S.dias).length) return;
+  const j = lerLocal();
+  const dias = Object.values((j && j.dias) || {}).map(limparDia).filter(Boolean);
+  if (dias.length) S.legado = { config: j.config && Array.isArray(j.config.pontos) ? normalizarConfig(j.config) : null, dias };
+}
+function mostrarSync() {
+  const el = $("#sync"); if (!el) return;
+  if (S.modo !== "servidor" || !SRV.conta) { el.hidden = true; return; }
+  const n = SRV.fila.length;
+  el.className = "sync";
+  if (SRV.acordando) { el.textContent = "Conectando…"; el.hidden = false; return; }
+  if (n && SRV.erro === "offline") { el.textContent = n + (n === 1 ? " pendente" : " pendentes"); el.title = n + (n === 1 ? " alteração ainda não enviada ao servidor" : " alterações ainda não enviadas ao servidor"); el.className = "sync off"; el.hidden = false; return; }
+  if (n) { el.textContent = "Salvando…"; el.hidden = false; return; }
+  if (SRV.erro === "offline") { el.textContent = "Sem conexão"; el.className = "sync off"; el.hidden = false; return; }
+  el.hidden = true;
+}
+function iniciarServidor() {
+  S.modo = "servidor";
+  SRV.token = lsGet(TOKEN_KEY);
+  try { SRV.conta = JSON.parse(lsGet(CONTA_KEY) || "null"); } catch { SRV.conta = null; }
+  if (!SRV.token || !SRV.conta || typeof SRV.conta.id !== "number") { mostrarLogin(); return; }
+  entrarApp();
+}
+function entrarApp() {
+  document.body.classList.remove("sem-conta"); $("#login").hidden = true;
+  S.pronto = false; S.dias = {}; S.legado = null;
+  try { SRV.fila = JSON.parse(lsGet(kFila()) || "[]"); if (!Array.isArray(SRV.fila)) SRV.fila = []; } catch { SRV.fila = []; }
+  let c = null; try { c = JSON.parse(lsGet(kCache()) || "null"); } catch {}
+  if (c && c.config) {
+    S.config = normalizarConfig(c.config);
+    for (const x of Object.values(c.dias || {})) { const v = limparDia(x); if (v) S.dias[v.data] = v; }
+    S.pronto = true; aoMudarDados();
+  } else {
+    $("#v-hoje").innerHTML = '<div class="empty"><b>Carregando os seus registros</b><span class="hint">No primeiro acesso do dia o servidor pode levar até 1 minuto para acordar.</span></div>';
+  }
+  mostrarSync();
+  tentarSincronizar();
+}
+function mostrarLogin() {
+  document.body.classList.add("sem-conta"); $("#login").hidden = false;
+  if (SRV.conta && SRV.conta.email && !$("#l-email").value) $("#l-email").value = SRV.conta.email;
+  modoLogin(S.loginModo || "entrar");
+}
+function modoLogin(m) {
+  S.loginModo = m;
+  const criar = m === "criar";
+  $("#lm-entrar").setAttribute("aria-checked", String(!criar));
+  $("#lm-criar").setAttribute("aria-checked", String(criar));
+  $("#l-nome-campo").hidden = !criar;
+  $("#l-senha").setAttribute("autocomplete", criar ? "new-password" : "current-password");
+  $("#b-login").textContent = criar ? "Criar conta" : "Entrar";
+  for (const c of ["nome", "email", "senha"]) { $("#e-" + c).textContent = ""; $("#l-" + c).classList.remove("invalido"); }
+  $("#l-erro").hidden = true;
+}
+async function enviarLogin(ev) {
+  ev.preventDefault();
+  const criar = S.loginModo === "criar";
+  const nome = $("#l-nome").value.trim(), email = $("#l-email").value.trim(), senha = $("#l-senha").value;
+  const erros = {};
+  if (criar && !nome) erros.nome = "Informe seu nome.";
+  if (!EMAIL_RE.test(email)) erros.email = "Informe um e-mail válido.";
+  if (!senha) erros.senha = "Informe sua senha.";
+  else if (criar && senha.length < 6) erros.senha = "A senha deve ter pelo menos 6 caracteres.";
+  for (const c of ["nome", "email", "senha"]) { $("#e-" + c).textContent = erros[c] || ""; $("#l-" + c).classList.toggle("invalido", !!erros[c]); }
+  $("#l-erro").hidden = true;
+  const primeiro = ["nome", "email", "senha"].find((c) => erros[c]);
+  if (primeiro) { $("#l-" + primeiro).focus(); return; }
+  const b = $("#b-login");
+  b.disabled = true; b.textContent = criar ? "Criando conta…" : "Entrando…";
+  const espera = setTimeout(() => { $("#l-espera").hidden = false; }, 3000);
+  try {
+    SRV.token = null;
+    if (criar) await apiReq("/auth/register", { method: "POST", body: { name: nome, email, password: senha } });
+    const r = await apiReq("/auth/login", { method: "POST", body: { email, password: senha } });
+    SRV.token = r.token;
+    const conta = await apiReq("/auth/me");
+    SRV.conta = { id: conta.id, name: conta.name, email: conta.email };
+    lsSet(TOKEN_KEY, SRV.token); lsSet(CONTA_KEY, JSON.stringify(SRV.conta));
+    $("#l-senha").value = "";
+    entrarApp();
+  } catch (e) {
+    SRV.token = null;
+    $("#l-erro").textContent = traduzirErro(e); $("#l-erro").hidden = false;
+  } finally {
+    clearTimeout(espera); $("#l-espera").hidden = true;
+    b.disabled = false; b.textContent = S.loginModo === "criar" ? "Criar conta" : "Entrar";
+  }
+}
+function sessaoExpirada() {
+  lsSet(TOKEN_KEY, null); SRV.token = null;
+  clearTimeout(SRV.tmr); clearTimeout(SRV.tmrSync);
+  toast("Sua sessão expirou. Entre de novo; nada do que você salvou se perdeu.");
+  mostrarLogin();
+}
+function sairConta() {
+  if (SRV.conta) { lsSet(kCache(), null); lsSet(kFila(), null); }
+  lsSet(TOKEN_KEY, null); lsSet(CONTA_KEY, null);
+  clearTimeout(SRV.tmr); clearTimeout(SRV.tmrSync);
+  for (const k of Object.keys(RASC)) delete RASC[k];
+  gravarRascunhos();
+  SRV.token = null; SRV.conta = null; SRV.fila = []; SRV.erro = "";
+  S.pronto = false; S.dias = {}; S.confirmSair = false; S.legado = null;
+  $("#l-email").value = ""; $("#l-senha").value = "";
+  mostrarLogin(); mostrarSync();
 }
 
 function limparPonto(p) {
@@ -644,6 +888,8 @@ async function iniciar() {
     S.modo = "nuvem";
     assinar();
     verificarEscrita();
+  } else if (!window.claude && API_URL) {
+    iniciarServidor();
   } else {
     S.modo = "local";
     const j = lerLocal();
@@ -995,6 +1241,7 @@ function renderHoje() {
       prox < S.data ? `<button class="link" type="button" data-ir="${prox}">Lançar ${semana(prox)} ${fmtCurto(prox)}</button>` : ""));
   }
   if (S.soLeitura) notas.push(nota("warn", "Você está vendo este site só para leitura. As coletas não podem ser salvas daqui."));
+  if (S.modo === "servidor" && S.legado) notas.unshift(nota("info", `Este aparelho tem ${S.legado.dias.length} dias salvos de antes da conta.`, '<button class="link" type="button" id="b-migrar">Enviar para a minha conta</button>'));
 
   el.innerHTML = `
     <div class="hero">
@@ -1156,7 +1403,18 @@ function renderAjustes() {
   if (focado !== "r-torneira") $("#r-torneira").value = S.config.regras.Torneira ?? 0;
   if (focado !== "r-bebedouro") $("#r-bebedouro").value = S.config.regras.Bebedouro ?? 0;
   ["r-torneira", "r-bebedouro", "n-fab", "n-setor", "n-tipo", "b-novo", "f-import"].forEach((id) => { $("#" + id).disabled = S.soLeitura; });
-  $("#modo-label").textContent = S.modo === "nuvem"
+  const cc = $("#conta-card");
+  cc.hidden = S.modo !== "servidor" || !SRV.conta;
+  if (!cc.hidden) {
+    $("#conta-info").innerHTML = `Conectado como <b>${esc(SRV.conta.name)}</b> (${esc(SRV.conta.email)}). Seus registros ficam salvos na conta e aparecem em qualquer aparelho em que você entrar.`;
+    const n = SRV.fila.length;
+    $("#conta-acoes").innerHTML = S.confirmSair && n
+      ? `<div class="confirm"><span>${n} ${n === 1 ? "alteração ainda não foi enviada" : "alterações ainda não foram enviadas"} e ${n === 1 ? "vai" : "vão"} se perder. Sair mesmo assim?</span><button class="btn small danger" type="button" id="b-sair-forcar">Sair mesmo assim</button><button class="btn small" type="button" data-cancelar="1">Cancelar</button></div>`
+      : '<button class="btn" type="button" id="b-sair">Sair da conta</button>';
+  }
+  $("#modo-label").textContent = S.modo === "servidor"
+    ? "Não é preciso fazer backup: tudo fica salvo na sua conta. O arquivo abaixo é só uma cópia extra, se você quiser guardar."
+    : S.modo === "nuvem"
     ? "Os registros ficam guardados neste site e aparecem em qualquer aparelho em que você abrir este link com a sua conta. O backup serve para guardar uma cópia ou levar os dados para outro lugar."
     : "Os registros ficam guardados só neste navegador. Baixe um backup de vez em quando para não perder nada.";
   const grupos = [1, 2, 0].map((f) => ({ f, pts: S.config.pontos.filter((p) => p.fabrica === f) })).filter((g) => g.pts.length);
@@ -1635,6 +1893,13 @@ async function importar() {
   const imp = S.importando; if (!imp) return;
   S.importando = null; renderAjustes();
   try {
+    if (S.modo === "servidor") {
+      toast("Enviando o backup para a sua conta…");
+      await apiReq("/dados/importar", { method: "POST", body: { config: imp.config, dias: imp.dias } });
+      await sincronizarDoServidor();
+      toast(`Backup importado: ${imp.dias.length} dias.`);
+      return;
+    }
     if (db) {
       S.importandoAgora = true;
       await salvarConfig(imp.config);
@@ -1659,7 +1924,13 @@ function verificarVirada() {
   if (S.data === antigo && !S.dirty) { S.data = h; S.fabManual = null; if (S.pronto) { montarRascunho(); renderHoje(); } }
   renderTudo();
 }
-document.addEventListener("visibilitychange", () => { if (document.hidden) { clearTimeout(marcarRascunho.t); gravarRascunhos(); } else verificarVirada(); });
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { clearTimeout(marcarRascunho.t); gravarRascunhos(); return; }
+  verificarVirada();
+  if (S.modo === "servidor" && SRV.token && S.pronto && !SRV.enviando && !SRV.fila.length) tentarSincronizar();
+});
+window.addEventListener("online", () => { if (S.modo === "servidor" && SRV.token) { SRV.erro = ""; enviarFila(); } });
+document.getElementById("f-login").addEventListener("submit", enviarLogin);
 window.addEventListener("pagehide", () => { clearTimeout(marcarRascunho.t); gravarRascunhos(); });
 window.addEventListener("pageshow", verificarVirada);
 setInterval(verificarVirada, 60000);
@@ -1710,7 +1981,21 @@ document.addEventListener("click", async (ev) => {
   if (t.dataset.ncLimpar) { const id = t.dataset.ncLimpar; delete S.nc[id]; marcarRascunho(); renderHoje(); document.querySelector(`[data-nc-abrir="${id}"]`)?.focus(); return; }
   if (t.id === "b-backup") { oferecerArquivo(`coleta_agua_backup_${hojeISO()}.json`, JSON.stringify({ config: S.config, dias: Object.values(S.dias) }, null, 1)); return; }
   if (t.id === "b-import-sim") { importar(); return; }
-  if (t.dataset.cancelar) { S.confirmando = null; S.removendo = null; S.importando = null; renderHistorico(); renderAjustes(); return; }
+  if (t.dataset.loginModo) { modoLogin(t.dataset.loginModo); $(t.dataset.loginModo === "criar" ? "#l-nome" : "#l-email").focus(); return; }
+  if (t.id === "b-sair") { if (SRV.fila.length) { S.confirmSair = true; renderAjustes(); } else sairConta(); return; }
+  if (t.id === "b-sair-forcar") { sairConta(); return; }
+  if (t.id === "b-migrar") {
+    const j = S.legado; if (!j) return;
+    t.disabled = true;
+    try {
+      await apiReq("/dados/importar", { method: "POST", body: { config: j.config, dias: j.dias } });
+      lsSet(LS_KEY, null); S.legado = null;
+      await sincronizarDoServidor();
+      toast(`${j.dias.length} dias enviados para a sua conta.`);
+    } catch (e) { toast(msgErro(e)); t.disabled = false; }
+    return;
+  }
+  if (t.dataset.cancelar) { S.confirmSair = false; S.confirmando = null; S.removendo = null; S.importando = null; renderHistorico(); renderAjustes(); return; }
   if (t.dataset.abrir) { guardarRascunho(); S.data = t.dataset.abrir; S.fabManual = null; montarRascunho(); renderHoje(); trocarAba("hoje"); window.scrollTo(0, 0); return; }
   if (t.dataset.excluir) { S.confirmando = t.dataset.excluir; renderHistorico(); return; }
   if (t.dataset.excluirSim) {
