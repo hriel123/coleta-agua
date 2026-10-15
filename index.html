@@ -4,61 +4,69 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="coleta-api" content="https://coleta-agua-api.onrender.com">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4C23 17 12 29 12 41a20 20 0 0 0 40 0C52 29 41 17 32 4z' fill='%23A3135F'/%3E%3Cpath d='M22 41a10 10 0 0 0 10 10' fill='none' stroke='%23ffffff' stroke-width='4.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2322d3ee'/%3E%3Cstop offset='1' stop-color='%2334d399'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M32 4C23 17 12 29 12 41a20 20 0 0 0 40 0C52 29 41 17 32 4z' fill='url(%23g)'/%3E%3Cpath d='M22 41a10 10 0 0 0 10 10' fill='none' stroke='%230a1322' stroke-width='4.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
 <title>Rodízio de Coleta de Água</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
 <style>
-/* Layout: uma coluna de bancada (máx. 44rem); cada ponto é uma etiqueta de amostra com a idade da última coleta em destaque à direita */
+/* Layout: painel de monitoramento; no computador, barra lateral fixa e cartões em grade; no celular, uma coluna e abas embaixo */
 :root {
-  --bg: #F2F5F7;
+  --bg: #F2F5FA;
   --surface: #FFFFFF;
-  --ink: #13202A;
-  --muted: #586976;
-  --line: #D5DEE4;
-  --field-line: #7D8D99;
-  --s1: #2a78d6;
-  --s2: #eb6834;
-  --s3: #1baf7a;
-  --grid: #E3E9EE;
-  --axis: #B9C5CE;
-  --scroll-thumb: #A7B5BF;
-  --scroll-thumb-hover: #7D8D99;
-  --hero-bg: #13202A;
-  --hero-fg: #F4F7F9;
-  --hero-muted: #A9B8C3;
-  --hero-line: #33444F;
-  --hero-soft: rgba(255, 255, 255, 0.08);
-  --hero-accent: #F48CC0;
-  --hero-on-accent: #2A0718;
-  --accent: #A3135F;
-  --accent-soft: #F8E4EF;
+  --surface-2: #F6F8FC;
+  --ink: #0F1B2D;
+  --muted: #5A6B82;
+  --line: #DCE3ED;
+  --field-line: #8494AA;
+  --s1: #3b82f6;
+  --s2: #0d9488;
+  --s3: #7f9f10;
+  --grid: #E6EBF2;
+  --axis: #C2CCD9;
+  --scroll-thumb: #B5C1D1;
+  --scroll-thumb-hover: #8494AA;
+  --hero-bg: #0F1D33;
+  --hero-fg: #EEF4FB;
+  --hero-muted: #9FB0C7;
+  --hero-line: #26385A;
+  --hero-soft: rgba(255, 255, 255, 0.06);
+  --hero-accent: #22D3EE;
+  --hero-on-accent: #04202A;
+  --accent: #0B7A96;
+  --accent-2: #0D9488;
+  --accent-soft: #E0F4F8;
   --on-accent: #FFFFFF;
-  --ok: #1F6E4B;
-  --ok-soft: #DFF0E7;
-  --warn: #8F5B00;
-  --warn-soft: #FAEED6;
-  --bad: #B42318;
-  --bad-soft: #FBE3DF;
-  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
-  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --r: 10px;
+  --glow: rgba(34, 211, 238, 0.18);
+  --ok: #15803D;
+  --ok-soft: #DCF5E5;
+  --warn: #A16207;
+  --warn-soft: #FDF1D6;
+  --bad: #B91C1C;
+  --bad-soft: #FCE4E4;
+  --shadow: 0 1px 2px rgba(15, 27, 45, 0.05), 0 6px 18px rgba(15, 27, 45, 0.06);
+  --f-display: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-body: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r: 14px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --grid: #22303A; --axis: #3A4A56; --hero-bg: #0A1015; --hero-line: #34495A; --scroll-thumb: #3B4E5C; --scroll-thumb-hover: #557083;
-    --accent: #F173B3; --accent-soft: #3A1A2C; --on-accent: #1C0814;
-    --ok: #5CC796; --ok-soft: #12302A; --warn: #E6B556; --warn-soft: #382B10; --bad: #F2806F; --bad-soft: #3C1B17;
+    --bg: #0A1322; --surface: #101B2E; --surface-2: #14223A; --ink: #E6EDF7; --muted: #8FA1B9; --line: #1F2D45; --field-line: #3A4D69;
+    --grid: #1A273D; --axis: #2B3C56; --scroll-thumb: #2B3C56; --scroll-thumb-hover: #3A4D69; --hero-bg: #0F1D33; --hero-line: #23365A;
+    --accent: #22D3EE; --accent-2: #2DD4BF; --accent-soft: rgba(34, 211, 238, 0.12); --on-accent: #04202A; --glow: rgba(34, 211, 238, 0.2);
+    --ok: #34D399; --ok-soft: rgba(52, 211, 153, 0.14); --warn: #FBBF24; --warn-soft: rgba(251, 191, 36, 0.13); --bad: #F87171; --bad-soft: rgba(248, 113, 113, 0.14);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0D151B; --surface: #15212A; --ink: #E3EBF0; --muted: #93A4B1; --line: #263540; --field-line: #61788A; --s1: #3987e5; --s2: #d95926; --s3: #199e70; --grid: #22303A; --axis: #3A4A56; --hero-bg: #0A1015; --hero-line: #34495A; --scroll-thumb: #3B4E5C; --scroll-thumb-hover: #557083;
-  --accent: #F173B3; --accent-soft: #3A1A2C; --on-accent: #1C0814;
-  --ok: #5CC796; --ok-soft: #12302A; --warn: #E6B556; --warn-soft: #382B10; --bad: #F2806F; --bad-soft: #3C1B17;
+  --bg: #0A1322; --surface: #101B2E; --surface-2: #14223A; --ink: #E6EDF7; --muted: #8FA1B9; --line: #1F2D45; --field-line: #3A4D69;
+  --grid: #1A273D; --axis: #2B3C56; --scroll-thumb: #2B3C56; --scroll-thumb-hover: #3A4D69; --hero-bg: #0F1D33; --hero-line: #23365A;
+  --accent: #22D3EE; --accent-2: #2DD4BF; --accent-soft: rgba(34, 211, 238, 0.12); --on-accent: #04202A; --glow: rgba(34, 211, 238, 0.2);
+  --ok: #34D399; --ok-soft: rgba(52, 211, 153, 0.14); --warn: #FBBF24; --warn-soft: rgba(251, 191, 36, 0.13); --bad: #F87171; --bad-soft: rgba(248, 113, 113, 0.14);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -71,18 +79,18 @@ html { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) var(--bg); }
   ::-webkit-scrollbar-thumb:hover { background: var(--scroll-thumb-hover); }
 }
 @supports (appearance: base-select) {
-  .filtros select, .filtros ::picker(select) { appearance: base-select; }
-  .filtros select { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
-  .filtros select::picker-icon { color: var(--muted); transition: rotate .2s; }
-  .filtros select:open::picker-icon { rotate: 180deg; }
-  .filtros ::picker(select) { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 6px; margin-block: 6px; max-height: min(60vh, 420px); overflow-y: auto; box-shadow: 0 12px 32px rgba(0, 0, 0, .22); scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
-  .filtros option { padding: 9px 10px; border-radius: 8px; font-size: .95rem; gap: 8px; }
-  .filtros option:hover, .filtros option:focus-visible { background: var(--bg); outline: none; }
-  .filtros option:checked { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
-  .filtros option::checkmark { color: var(--accent); }
-  .filtros optgroup { font-weight: 700; font-size: .78rem; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; padding: 10px 10px 2px; }
-  .filtros optgroup option { text-transform: none; letter-spacing: normal; color: var(--ink); font-weight: 400; }
-  .filtros optgroup option:checked { font-weight: 700; }
+  select, ::picker(select) { appearance: base-select; }
+  select { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+  select::picker-icon { color: var(--muted); transition: rotate .2s; }
+  select:open::picker-icon { rotate: 180deg; }
+  ::picker(select) { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 6px; margin-block: 6px; max-height: min(60vh, 420px); overflow-y: auto; box-shadow: 0 12px 32px rgba(0, 0, 0, .22); scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
+  option { padding: 9px 10px; border-radius: 8px; font-size: .95rem; gap: 8px; }
+  option:hover, option:focus-visible { background: var(--bg); outline: none; }
+  option:checked { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+  option::checkmark { color: var(--accent); }
+  optgroup { font-weight: 700; font-size: .78rem; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; padding: 10px 10px 2px; }
+  optgroup option { text-transform: none; letter-spacing: normal; color: var(--ink); font-weight: 400; }
+  optgroup option:checked { font-weight: 700; }
 }
 [hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5; }
@@ -122,6 +130,27 @@ input[type="date"], input[type="time"], input[type="text"], input[type="email"],
   background: var(--bg); border: 1px solid var(--field-line); border-radius: 8px; padding: 9px 10px; min-width: 0;
 }
 textarea { width: 100%; resize: vertical; min-height: 4.5rem; }
+input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.field > .passo { font-size: inherit; font-weight: inherit; color: var(--ink); }
+.passo { display: flex; align-items: stretch; border: 1px solid var(--field-line); border-radius: 10px; background: var(--bg); overflow: hidden; }
+.passo:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+.passo input[type="number"] { flex: 1; width: 3rem; border: 0; border-radius: 0; background: none; text-align: center; font-weight: 700; font-size: 1.05rem; }
+.passo input[type="number"]:focus-visible { outline: none; }
+.passo-b { flex: none; width: 46px; min-height: 44px; border: 0; background: var(--surface-2); color: var(--accent); display: grid; place-items: center; cursor: pointer; transition: background .15s; }
+.passo-b:hover { background: var(--accent-soft); }
+.passo-b svg { width: 18px; height: 18px; }
+.passo:has(input:disabled) .passo-b { opacity: .45; pointer-events: none; }
+html.lista-propria select { appearance: none; -moz-appearance: none; min-height: 44px; padding-right: 36px; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237A8BA3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; background-size: 16px 16px; }
+html.lista-propria select[aria-expanded="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+.lista { position: fixed; z-index: 30; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 6px; overflow-y: auto; overscroll-behavior: contain; box-shadow: 0 12px 32px rgba(0, 0, 0, .28); scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) transparent; }
+.lista-op { display: flex; align-items: center; gap: 8px; padding: 9px 12px 9px 10px; border-radius: 8px; font-size: .95rem; cursor: pointer; white-space: nowrap; }
+.lista-op::before { content: ""; flex: none; width: 16px; height: 16px; }
+.lista-op.ativo { background: var(--bg); }
+.lista-op[aria-selected="true"] { background: var(--accent-soft); font-weight: 700; }
+.lista-op[aria-selected="true"]::before { background: var(--accent); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat; }
+.lista-op[aria-disabled="true"] { opacity: .5; cursor: default; }
+.lista-grupo { font-weight: 700; font-size: .78rem; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; padding: 10px 10px 2px; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--bg); }
 .seg button { border: 0; background: none; padding: 7px 14px; min-height: 44px; border-radius: 999px; font-weight: 700; cursor: pointer; color: var(--muted); }
 .seg button[aria-checked="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0, 0, 0, .18), 0 0 0 1px var(--line); }
@@ -133,6 +162,9 @@ textarea { width: 100%; resize: vertical; min-height: 4.5rem; }
 .note-txt { display: flex; flex-wrap: wrap; gap: 0 12px; align-items: center; min-width: 0; }
 .note .link { min-height: 40px; padding: 4px 0; }
 .note.info { background: var(--accent-soft); }
+.note.ok { background: var(--ok-soft); }
+.note.ok > svg { color: var(--ok); }
+.note b { font-weight: 700; }
 .note.warn { background: var(--warn-soft); color: var(--ink); }
 
 .tags { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -232,6 +264,31 @@ textarea { width: 100%; resize: vertical; min-height: 4.5rem; }
 body.sem-conta > header, body.sem-conta > main { display: none; }
 .sync { font-size: .75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); white-space: nowrap; }
 .sync.off { background: var(--warn-soft); color: var(--warn); }
+.hero-fab { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 10px; }
+.hero-fab-rot { color: var(--hero-muted); font-size: 1rem; }
+.hero-fab-nome { font-family: var(--f-display); font-stretch: 110%; font-weight: 800; font-size: 1.7rem; line-height: 1.1; }
+.hero-trocar { background: none; border: 1px solid var(--hero-line); color: var(--hero-fg); border-radius: 999px; padding: 4px 14px; min-height: 36px; font-size: .85rem; font-weight: 700; cursor: pointer; }
+.ajuda { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 12px; }
+.ajuda h2 { font-size: 1.15rem; }
+.ajuda ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; counter-reset: passo; }
+.ajuda li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; align-items: start; counter-increment: passo; }
+.ajuda li::before { content: counter(passo); width: 30px; height: 30px; border-radius: 999px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-weight: 800; }
+.ajuda .btn { justify-self: start; }
+.senha-wrap { position: relative; display: block; }
+.field > span.senha-wrap { font-size: inherit; font-weight: inherit; color: inherit; }
+.senha-wrap input { padding-right: 88px; }
+.ver-senha { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); min-height: 36px; padding: 4px 10px; border: 0; background: none; color: var(--accent); font-weight: 700; cursor: pointer; border-radius: 8px; }
+.login-sub { margin: -8px 0 0; color: var(--muted); font-size: .92rem; }
+details.avancado { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.avancado > summary { cursor: pointer; padding: 14px; font-weight: 700; min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 10px; list-style: none; }
+details.avancado > summary::-webkit-details-marker { display: none; }
+details.avancado > summary small { display: block; font-weight: 400; color: var(--muted); font-size: .82rem; }
+details.avancado > summary::after { content: ""; flex: none; width: 9px; height: 9px; border: solid var(--muted); border-width: 0 2px 2px 0; transform: rotate(45deg); margin: 0 4px 4px 0; }
+details.avancado[open] > summary::after { transform: rotate(-135deg); margin: 4px 4px 0 0; }
+.avancado-in { display: grid; gap: 18px; padding: 0 14px 14px; }
+.avancado-in .card { border-color: var(--line); }
+.resumo-res { display: flex; align-items: center; gap: 12px; }
+.resumo-res .num-g { font-family: var(--f-display); font-weight: 800; font-size: 1.6rem; line-height: 1; }
 .lista-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .link { background: none; border: 0; color: var(--accent); font-weight: 700; cursor: pointer; padding: 8px 4px; min-height: 44px; }
 details.outros { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
@@ -354,9 +411,10 @@ details.outros .tags { padding: 0 10px 10px; }
 .spark { display: block; overflow: visible; }
 .sp-base { stroke: var(--axis); stroke-width: 1; }
 .sp-dt { fill: var(--muted); font-family: var(--f-mono); font-size: 10px; }
-.sp-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.sp-line { fill: none; stroke-width: 2.25; stroke-linejoin: round; stroke-linecap: round; }
+.sp-area { stroke: none; }
 .sp-line.f0 { stroke: var(--s3); } .sp-line.f1 { stroke: var(--s1); } .sp-line.f2 { stroke: var(--s2); }
-.sp-area { opacity: .3; } .sp-area.f0, .sp-dot.f0, .xh-dot.f0 { fill: var(--s3); } .sp-area.f1, .sp-dot.f1, .xh-dot.f1 { fill: var(--s1); } .sp-area.f2, .sp-dot.f2, .xh-dot.f2 { fill: var(--s2); }
+.sp-dot.f0, .xh-dot.f0 { fill: var(--s3); } .sp-dot.f1, .xh-dot.f1 { fill: var(--s1); } .sp-dot.f2, .xh-dot.f2 { fill: var(--s2); }
 .sp-dot { stroke: var(--surface); stroke-width: 2; }
 .sp-row.sel .sp-dot { stroke: var(--accent-soft); }
 .sp-dot.fora { fill: var(--bad); }
@@ -406,6 +464,130 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
   #toast { bottom: auto; top: calc(66px + env(safe-area-inset-top, 0px)); }
 }
 @media (max-width: 340px) { .tabs button { font-size: .66rem; } .hero-dia { font-size: 1.1rem; } }
+.card, .chart, .tag, .rows, .summary, .dia, details.outros, details.avancado, .ajuda, .login-card, .empty { box-shadow: var(--shadow); }
+.chart, .card, .dia, .ajuda, details.outros, details.avancado, .rows, .summary { border-radius: 16px; }
+.hero { background: radial-gradient(120% 140% at 100% 0%, var(--glow), transparent 55%), var(--hero-bg); border-radius: 20px; }
+.brand h1 { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; }
+.brand h1 span { color: var(--accent); }
+.brand h1 .marca { color: var(--ink); white-space: nowrap; }
+.brand h1 .agua { color: var(--accent); }
+.logo-gota { width: 34px; height: 34px; flex: none; display: grid; place-items: center; }
+.logo-gota svg { width: 30px; height: 30px; }
+.login-logo { background: linear-gradient(135deg, #22d3ee, #34d399); color: #04202a; }
+.sync::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: currentColor; margin-right: 7px; vertical-align: 1px; }
+.sync.on { background: var(--ok-soft); color: var(--ok); }
+.lado-status { display: none; }
+.prog-anel { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 14px; align-items: center; }
+.anel { width: 76px; height: 76px; display: block; }
+.anel-fundo { fill: none; stroke: var(--hero-line); stroke-width: 10; }
+.anel-valor { fill: none; stroke: url(#g-anel); stroke-width: 10; stroke-linecap: round; transition: stroke-dasharray .4s ease; }
+.anel-caixa { position: relative; width: 76px; height: 76px; }
+.anel-caixa b { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 800; font-size: 1.05rem; }
+.anel-txt b { display: block; font-size: 1.05rem; }
+.anel-txt span { color: var(--hero-muted); font-size: .88rem; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; align-items: center; box-shadow: var(--shadow); min-width: 0; }
+.kpi-ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.kpi-ico svg { width: 22px; height: 22px; }
+.kpi-ico.ok { background: var(--ok-soft); color: var(--ok); } .kpi-ico.bad { background: var(--bad-soft); color: var(--bad); }
+.kpi small { display: block; color: var(--muted); font-size: .8rem; font-weight: 600; }
+.kpi b { display: block; font-size: 1.45rem; font-weight: 800; line-height: 1.15; letter-spacing: -0.01em; }
+.kpi b em { font-style: normal; font-size: .85rem; font-weight: 600; color: var(--muted); margin-left: 4px; }
+.kpi .kpi-sub { display: block; color: var(--muted); font-size: .76rem; }
+.dash { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+.anel-card { display: grid; justify-items: center; gap: 10px; text-align: center; }
+.anel-grande { position: relative; width: 170px; height: 170px; }
+.anel-grande svg { width: 170px; height: 170px; display: block; }
+.anel-grande .anel-fundo { stroke: var(--grid); stroke-width: 14; }
+.anel-grande .anel-valor { stroke-width: 14; }
+.anel-grande b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2.1rem; font-weight: 800; letter-spacing: -0.02em; }
+.alertas-card { display: flex; flex-direction: column; gap: 12px; }
+.alertas-card .chart-head { align-items: center; }
+.h-ico { display: flex; align-items: center; gap: 10px; }
+.al-ico { flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.al-ico svg { width: 18px; height: 18px; }
+.al-ico.bad { background: var(--bad-soft); color: var(--bad); } .al-ico.warn { background: var(--warn-soft); color: var(--warn); } .al-ico.ok { background: var(--ok-soft); color: var(--ok); }
+.al-n { min-width: 26px; height: 26px; padding: 0 8px; border-radius: 999px; display: grid; place-items: center; font-size: .8rem; font-weight: 800; background: var(--warn-soft); color: var(--warn); }
+.al-n.bad { background: var(--bad-soft); color: var(--bad); }
+.alertas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.alertas li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
+.al-txt b { display: block; font-size: .92rem; font-weight: 700; line-height: 1.3; }
+.al-txt small { display: block; color: var(--muted); font-size: .8rem; line-height: 1.35; }
+.alertas .link { min-height: 32px; padding: 2px 0; font-size: .85rem; }
+.al-sub { font-size: .74rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin: 2px 2px -4px; }
+.al-parados { list-style: none; margin: 0; padding: 0; display: grid; }
+.al-parados li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 4px; font-size: .88rem; }
+.al-parados li + li { border-top: 1px solid var(--line); }
+.al-parados li::before { content: ""; width: 8px; height: 8px; border-radius: 999px; margin-left: 1px; background: var(--ok); }
+.al-parados li.warn::before { background: var(--warn); } .al-parados li.bad::before { background: var(--bad); }
+.al-parados small { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+.al-rodape { margin-top: auto; display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px dashed var(--line); color: var(--muted); font-size: .85rem; }
+.al-rodape > svg { flex: none; width: 18px; height: 18px; color: var(--accent); }
+.al-rodape b { color: var(--ink); }
+.al-rodape .link { margin-left: auto; min-height: 32px; padding: 2px 0; font-size: .85rem; white-space: nowrap; }
+.al-vazio { flex: 1; display: grid; justify-items: center; align-content: center; gap: 6px; text-align: center; padding: 6px 8px 10px; }
+.al-vazio .hint { max-width: 32ch; margin: 0 0 8px; }
+.al-ilu { width: 112px; height: 112px; margin-bottom: 4px; }
+.al-ilu .i-fundo { fill: var(--accent-soft); }
+.al-ilu .i-papel { fill: var(--surface); stroke: var(--accent); stroke-width: 2.5; }
+.al-ilu .i-linha { stroke: var(--field-line); stroke-width: 3; stroke-linecap: round; }
+.area-l { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.area-l.f0 { stroke: var(--s3); } .area-l.f1 { stroke: var(--s1); } .area-l.f2 { stroke: var(--s2); }
+.barra.f0 { fill: var(--s3); } .barra.f1 { fill: var(--s1); } .barra.f2 { fill: var(--s2); }
+.chart-head .seg-param { width: auto; }
+#g-tip .tip-linha { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+#g-tip .tip-linha span { color: var(--muted); font-weight: 600; }
+@media (max-width: 719px) {
+  .brand { flex-wrap: nowrap; }
+  .brand h1 { font-size: 1.12rem; gap: 7px; }
+  .logo-gota, .logo-gota svg { width: 26px; height: 26px; }
+  .brand-r { gap: 8px; }
+  .brand-r .tema { width: 40px; height: 40px; }
+  .sync.on { font-size: 0; padding: 0; width: 12px; height: 12px; background: none; }
+  .sync.on::before { width: 10px; height: 10px; margin: 0; }
+}
+@media (max-width: 560px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .kpi { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 12px; }
+  .kpi-ico { width: 36px; height: 36px; border-radius: 10px; }
+  .kpi-ico svg { width: 19px; height: 19px; }
+  .kpi b { font-size: 1.3rem; }
+  .anel-grande, .anel-grande svg { width: 140px; height: 140px; }
+  .anel-grande b { font-size: 1.8rem; }
+}
+@media (min-width: 900px) {
+  .dash.d2 { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+  .dash.d2b { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+}
+@media (min-width: 1024px) {
+  body { padding-left: 248px; }
+  body.sem-conta { padding-left: 0; }
+  .top { position: fixed; top: 0; bottom: 0; left: 0; width: 248px; border-bottom: 0; border-right: 1px solid var(--line); background: var(--surface); }
+  .top-in { height: 100%; max-width: none; margin: 0; padding: 22px 14px; display: flex; flex-direction: column; gap: 20px; }
+  .brand { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .brand h1 { font-size: 1.3rem; }
+  .brand-r { flex-wrap: wrap; }
+  .tabs { flex-direction: column; gap: 4px; overflow: visible; }
+  .tabs button { justify-content: flex-start; gap: 12px; padding: 11px 14px; border-bottom: 0; border-radius: 12px; font-size: .98rem; width: 100%; }
+  .tabs button svg { width: 20px; height: 20px; }
+  .tabs button[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); }
+  .tabs button:hover { background: var(--surface-2); }
+  .lado-status { display: grid; gap: 6px; margin-top: auto; background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px; padding: 14px; font-size: .86rem; color: var(--muted); }
+  .lado-status b { color: var(--ink); }
+  .lado-status .st-on { color: var(--ok); font-weight: 700; }
+  .lado-status .st-off { color: var(--warn); font-weight: 700; }
+  .st-linha { display: flex; align-items: center; gap: 10px; }
+  .st-ico { flex: none; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--ok-soft); color: var(--ok); }
+  .st-ico.off { background: var(--warn-soft); color: var(--warn); }
+  .st-ico svg { width: 17px; height: 17px; }
+  main { max-width: 78rem; padding-inline: 28px; padding-block: 28px 60px; }
+  #toast { left: 264px; }
+  .coleta-grid { display: grid; grid-template-columns: minmax(320px, 400px) minmax(0, 1fr); gap: 22px; align-items: start; }
+  .col-a { position: sticky; top: 24px; }
+  #v-pontos .groups { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+  #v-historico, #v-ajustes { max-width: 52rem; }
+}
+.col-a, .col-b { display: grid; gap: 18px; min-width: 0; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -413,6 +595,7 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
 <section id="login" hidden>
   <div class="login-card">
     <div class="login-marca"><span class="login-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-3 4.4-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-3-6.6-6-11z"/><path d="M9 14.5a3 3 0 0 0 3 3"/></svg></span><span>Coleta de Água</span></div>
+    <p class="login-sub">Entre para guardar suas coletas e ver tudo em qualquer aparelho.</p>
     <div class="seg login-seg" role="radiogroup" aria-label="Acesso">
       <button type="button" role="radio" id="lm-entrar" data-login-modo="entrar" aria-checked="true">Entrar</button>
       <button type="button" role="radio" id="lm-criar" data-login-modo="criar" aria-checked="false">Criar conta</button>
@@ -420,7 +603,7 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
     <form id="f-login" novalidate>
       <label class="field" for="l-nome" id="l-nome-campo" hidden><span>Nome</span><input type="text" id="l-nome" autocomplete="name" maxlength="80"><small class="erro" id="e-nome"></small></label>
       <label class="field" for="l-email"><span>E-mail</span><input type="email" id="l-email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false"><small class="erro" id="e-email"></small></label>
-      <label class="field" for="l-senha"><span>Senha</span><input type="password" id="l-senha" autocomplete="current-password"><small class="erro" id="e-senha"></small></label>
+      <label class="field" for="l-senha"><span>Senha</span><span class="senha-wrap"><input type="password" id="l-senha" autocomplete="current-password"><button type="button" class="ver-senha" id="b-ver-senha" aria-label="Mostrar a senha">Mostrar</button></span><small class="erro" id="e-senha"></small></label>
       <p class="login-erro" id="l-erro" role="alert" hidden></p>
       <p class="hint" id="l-espera" hidden>O servidor pode levar até 1 minuto para acordar no primeiro acesso do dia.</p>
       <button class="btn primary" type="submit" id="b-login">Entrar</button>
@@ -431,20 +614,22 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
 <header class="top">
   <div class="top-in">
     <div class="brand">
-      <h1>Coleta de <span>Água</span></h1>
+      <h1><span class="logo-gota"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="g-logo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs><path d="M12 2.5c-3.2 4.6-6.5 8-6.5 11.7a6.5 6.5 0 0 0 13 0c0-3.7-3.3-7.1-6.5-11.7z" fill="url(#g-logo)"/><path d="M9 15a3 3 0 0 0 3 3" fill="none" stroke="#0a1322" stroke-width="1.8" stroke-linecap="round"/></svg></span><span class="marca">Coleta de <span class="agua">Água</span></span></h1>
       <div class="brand-r">
         <span class="hoje" id="hoje-label"></span>
         <span class="sync" id="sync" role="status" hidden></span>
+        <button type="button" class="tema" id="b-ajuda" aria-label="Como usar o site" title="Como usar">?</button>
         <button type="button" class="tema" id="b-tema" aria-label="Usar tema escuro"></button>
       </div>
     </div>
     <nav class="tabs" role="tablist" aria-label="Seções">
       <button role="tab" id="t-hoje" data-aba="hoje" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-3 4.4-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-3-6.6-6-11z"/><path d="M9.5 14.5l1.8 1.8 3.4-3.6"/></svg><span>Coleta</span></button>
-      <button role="tab" id="t-pontos" data-aba="pontos" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.8-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15.2 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg><span>Pontos</span></button>
-      <button role="tab" id="t-graficos" data-aba="graficos" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 20h17"/><path d="M7 16.5v-5M12 16.5V6M17 16.5v-8"/></svg><span>Gráficos</span></button>
+      <button role="tab" id="t-pontos" data-aba="pontos" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.8-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15.2 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg><span>Agenda</span></button>
+      <button role="tab" id="t-graficos" data-aba="graficos" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 20h17"/><path d="M7 16.5v-5M12 16.5V6M17 16.5v-8"/></svg><span>Resultados</span></button>
       <button role="tab" id="t-historico" data-aba="historico" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/></svg><span>Histórico</span></button>
       <button role="tab" id="t-ajustes" data-aba="ajustes" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg><span>Ajustes</span></button>
     </nav>
+    <div class="lado-status" id="lado-status"></div>
   </div>
 </header>
 
@@ -460,12 +645,28 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
   <section id="v-historico" role="tabpanel" aria-labelledby="t-historico" hidden><div class="empty"><b>Carregando os registros</b><span class="hint">Os dados aparecem aqui assim que chegarem.</span></div></section>
 
   <section id="v-ajustes" role="tabpanel" aria-labelledby="t-ajustes" hidden>
+    <div class="card" id="conta-card" hidden>
+      <h2>Conta</h2>
+      <p class="hint" id="conta-info"></p>
+      <div id="conta-acoes"></div>
+    </div>
+
+    <div class="card">
+      <h2>Aparência</h2>
+      <label class="field" for="tema-sel"><span>Tema</span>
+        <select id="tema-sel"><option value="auto">Automático (igual ao aparelho)</option><option value="claro">Claro</option><option value="escuro">Escuro</option></select>
+      </label>
+    </div>
+
+    <details class="avancado" id="d-avancado">
+      <summary><span>Configurações avançadas<small>Pontos de coleta, regras do rodízio e cópia de segurança</small></span></summary>
+      <div class="avancado-in">
     <div class="card">
       <h2>Quantos pontos por dia</h2>
       <p class="hint">Além da caixa d'água, que entra todo dia, o rodízio escolhe os pontos parados há mais tempo na fábrica do dia.</p>
       <div class="grid2">
-        <label class="field" for="r-torneira"><span>Torneiras por dia</span><input type="number" id="r-torneira" min="0" max="10" step="1"></label>
-        <label class="field" for="r-bebedouro"><span>Bebedouros por dia</span><input type="number" id="r-bebedouro" min="0" max="10" step="1"></label>
+        <label class="field" for="r-torneira"><span>Torneiras por dia</span><span class="passo"><button type="button" class="passo-b" data-passo="r-torneira" data-d="-1" aria-label="Menos um torneira"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button><input type="number" id="r-torneira" min="0" max="10" step="1"><button type="button" class="passo-b" data-passo="r-torneira" data-d="1" aria-label="Mais um torneira"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></button></span></label>
+        <label class="field" for="r-bebedouro"><span>Bebedouros por dia</span><span class="passo"><button type="button" class="passo-b" data-passo="r-bebedouro" data-d="-1" aria-label="Menos um bebedouro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button><input type="number" id="r-bebedouro" min="0" max="10" step="1"><button type="button" class="passo-b" data-passo="r-bebedouro" data-d="1" aria-label="Mais um bebedouro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></button></span></label>
       </div>
     </div>
 
@@ -487,31 +688,26 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
     </div>
 
     <div class="card">
-      <h2>Aparência</h2>
-      <label class="field" for="tema-sel"><span>Tema</span>
-        <select id="tema-sel"><option value="auto">Automático (igual ao aparelho)</option><option value="claro">Claro</option><option value="escuro">Escuro</option></select>
-      </label>
-    </div>
-
-    <div class="card" id="conta-card" hidden>
-      <h2>Conta</h2>
-      <p class="hint" id="conta-info"></p>
-      <div id="conta-acoes"></div>
-    </div>
-
-    <div class="card">
-      <h2>Backup</h2>
+      <h2>Cópia de segurança</h2>
       <p class="hint" id="modo-label"></p>
       <div class="actions">
-        <button class="btn" id="b-backup" type="button">Baixar backup (JSON)</button>
-        <label class="btn" for="f-import">Importar backup</label>
+        <button class="btn" id="b-backup" type="button">Baixar uma cópia</button>
+        <label class="btn" for="f-import">Restaurar de uma cópia</label>
         <input type="file" id="f-import" accept=".json,application/json" hidden>
       </div>
       <div id="import-confirm"></div>
     </div>
+      </div>
+    </details>
   </section>
 </main>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <linearGradient id="g-anel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#34d399"/></linearGradient>
+  <linearGradient id="ga-f0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--s3)" stop-opacity=".42"/><stop offset="1" style="stop-color:var(--s3)" stop-opacity="0"/></linearGradient>
+  <linearGradient id="ga-f1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--s1)" stop-opacity=".42"/><stop offset="1" style="stop-color:var(--s1)" stop-opacity="0"/></linearGradient>
+  <linearGradient id="ga-f2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--s2)" stop-opacity=".42"/><stop offset="1" style="stop-color:var(--s2)" stop-opacity="0"/></linearGradient>
+</defs></svg>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 <div id="folha" hidden><div class="folha-in" role="dialog" aria-modal="true" aria-labelledby="folha-tit">
   <h2 id="folha-tit">Resumo do dia</h2>
@@ -737,6 +933,7 @@ function verificarLegado() {
   if (dias.length) S.legado = { config: j.config && Array.isArray(j.config.pontos) ? normalizarConfig(j.config) : null, dias };
 }
 function mostrarSync() {
+  mostrarStatusLado();
   const el = $("#sync"); if (!el) return;
   if (S.modo !== "servidor" || !SRV.conta) { el.hidden = true; return; }
   const n = SRV.fila.length;
@@ -745,7 +942,17 @@ function mostrarSync() {
   if (n && SRV.erro === "offline") { el.textContent = n + (n === 1 ? " pendente" : " pendentes"); el.title = n + (n === 1 ? " alteração ainda não enviada ao servidor" : " alterações ainda não enviadas ao servidor"); el.className = "sync off"; el.hidden = false; return; }
   if (n) { el.textContent = "Salvando…"; el.hidden = false; return; }
   if (SRV.erro === "offline") { el.textContent = "Sem conexão"; el.className = "sync off"; el.hidden = false; return; }
-  el.hidden = true;
+  el.textContent = "Conectado"; el.className = "sync on"; el.title = "Tudo salvo na sua conta"; el.hidden = false;
+}
+function mostrarStatusLado() {
+  const el = $("#lado-status"); if (!el) return;
+  const n = S.modo === "servidor" ? SRV.fila.length : 0;
+  const off = S.modo === "servidor" && SRV.erro === "offline";
+  const onde = S.modo === "servidor" ? (SRV.conta ? "na conta de <b>" + esc(SRV.conta.name) + "</b>" : "na sua conta") : S.modo === "nuvem" ? "na sua conta do Claude" : "só neste navegador";
+  const ico = off ? '<path d="M3 3l18 18"/><path d="M8.5 6.6A6 6 0 0 1 17.6 10 4 4 0 0 1 20.4 16M17 18H7a4.5 4.5 0 0 1-1.6-8.7"/>'
+    : n ? '<path d="M20 11.5A8 8 0 0 0 5.6 6.8L4 8.5"/><path d="M4 4v4.5h4.5"/><path d="M4 12.5a8 8 0 0 0 14.4 4.7l1.6-1.7"/><path d="M20 20v-4.5h-4.5"/>'
+    : '<path d="M7 18.5a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.6 1.5 4 4 0 0 1-1 7.5z"/><path d="M9.5 13.5l2 2 3.5-3.7"/>';
+  el.innerHTML = `<span class="st-linha"><span class="st-ico ${off || n ? "off" : ""}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ico}</svg></span><span>Status: <span class="${off || n ? "st-off" : "st-on"}">${off ? "sem conexão" : n ? n + (n === 1 ? " alteração pendente" : " alterações pendentes") : "tudo salvo"}</span></span></span><span>Registros salvos ${onde}</span>`;
 }
 function iniciarServidor() {
   S.modo = "servidor";
@@ -1058,6 +1265,7 @@ function aoMudarDados() {
 }
 function renderTudo() {
   if (!S.pronto) return;
+  mostrarStatusLado();
   if (!S.dirty && !editandoHoje()) renderHoje();
   renderPontos(); renderHistorico(); renderAjustes();
   if (S.aba === "graficos") renderGraficos();
@@ -1103,13 +1311,14 @@ const ICO_X = SVG_A + '<path d="M6 6l12 12M18 6L6 18"/></svg>';
 const SETA_E = SVG_A + '<path d="M15 5l-7 7 7 7"/></svg>';
 const SETA_D = SVG_A + '<path d="M9 5l7 7-7 7"/></svg>';
 const ICO_CAL = SVG_A + '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
+const ICO_OK = SVG_A + '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16.5 9.5"/></svg>';
 const ICO_INFO = SVG_A + '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r=".7" fill="currentColor"/></svg>';
-function nota(tipo, texto, acao) { return `<div class="note ${tipo}">${tipo === "info" ? ICO_INFO : ICO_ALERTA}<div class="note-txt"><span>${texto}</span>${acao || ""}</div></div>`; }
+function nota(tipo, texto, acao) { return `<div class="note ${tipo}">${tipo === "info" ? ICO_INFO : tipo === "ok" ? ICO_OK : ICO_ALERTA}<div class="note-txt"><span>${texto}</span>${acao || ""}</div></div>`; }
 function proxDiaUtil(s) { let d = addDias(s, 1); while ([0, 6].includes(new Date(utc(d)).getUTCDay()) || semColetaEm(d)) d = addDias(d, 1); return d; }
 function irParaDia(d) {
   guardarRascunho();
   const max = maxPrevia();
-  S.data = d > max ? max : d; S.fabManual = null; S.outrosAberto = false; S.semColAberto = false; S.motivo = null;
+  S.data = d > max ? max : d; S.fabManual = null; S.outrosAberto = false; S.semColAberto = false; S.motivo = null; S.trocandoFab = false;
   montarRascunho(); renderHoje();
 }
 function listaNomes(arr) { return arr.length <= 1 ? arr.join("") : arr.slice(0, -1).join(", ") + " e " + arr[arr.length - 1]; }
@@ -1183,8 +1392,8 @@ function renderPrevia(el) {
         </label>
         <button type="button" class="nav-dia" id="b-dia-prox" data-dia="1" aria-label="Próximo dia" ${S.data >= max ? "disabled" : ""}>${SETA_D}</button>
       </div>
-      ${plano ? `<div class="seg" role="radiogroup" aria-label="Fábrica prevista">${[1, 2].map((f) => `<button type="button" role="radio" aria-checked="${plano.fab === f}" disabled>Fábrica ${f}${f === plano.fab ? "<small>prevista</small>" : ""}</button>`).join("")}</div>` : ""}
-      <p class="hero-motivo">${plano ? "Previsão pelo rodízio: dias úteis alternando as fábricas a partir da última coleta salva." : "Fim de semana: nenhuma coleta prevista."}</p>
+      ${plano ? `<div class="hero-fab"><span class="hero-fab-rot">Previsto:</span><b class="hero-fab-nome">Fábrica ${plano.fab}</b></div>` : ""}
+      <p class="hero-motivo">${plano ? "As fábricas se alternam a cada dia útil, contando da última coleta salva." : "Fim de semana: nenhuma coleta prevista."}</p>
     </div>
     ${nota("info", "Previsão: supõe que as coletas sugeridas até lá sejam feitas. Data futura não pode ser salva.",
       `<span class="actions"><button class="link" type="button" data-ir="${hoje}">Voltar para hoje</button>${!plano && proxUtil ? `<button class="link" type="button" data-ir="${proxUtil.data}">Ver ${semana(proxUtil.data)} ${fmtCurto(proxUtil.data)}</button>` : ""}</span>`)}
@@ -1220,7 +1429,7 @@ function renderHoje() {
   const relTxt = rel === 0 ? "Hoje" : rel === 1 ? "Ontem" : rel > 1 ? `Há ${rel} dias` : "Data futura";
   const [, mm, dd] = S.data.split("-");
   const motivo = S.fab !== fabSug
-    ? `Você trocou de fábrica. Pelo rodízio seria a Fábrica ${fabSug}.`
+    ? `Você trocou de fábrica. O indicado para este dia é a Fábrica ${fabSug}.`
     : anterior ? `É a vez da Fábrica ${fabSug}: a última coleta foi na Fábrica ${anterior.fabrica}, ${semana(anterior.data)} ${fmtCurto(anterior.data)}.` : "Nenhuma coleta registrada antes desta data.";
   const lacuna = anterior ? diasUteisEntre(anterior.data, S.data) : 0;
   const nSel = Object.keys(S.sel).length;
@@ -1228,7 +1437,8 @@ function renderHoje() {
   const nNc = Object.keys(S.nc).filter((id) => !S.sel[id]).length;
   S.topoIds = topo.map((e) => e.p.id);
   const notas = [];
-  if (reg) {
+  const acabouDeSalvar = !!(S.salvoMsg && S.salvoMsg.data === S.data);
+  if (reg && !acabouDeSalvar) {
     const prox = proxDiaUtil(S.data);
     notas.push(nota("info", `Coleta deste dia já salva (Fábrica ${reg.fabrica}).`,
       `<span class="actions"><button class="link" type="button" data-resumo="${S.data}">Copiar resumo</button>${prox <= hoje && !S.dias[prox] ? `<button class="link" type="button" data-ir="${prox}">Ir para ${semana(prox)} ${fmtCurto(prox)}</button>` : ""}</span>`));
@@ -1241,9 +1451,25 @@ function renderHoje() {
       prox < S.data ? `<button class="link" type="button" data-ir="${prox}">Lançar ${semana(prox)} ${fmtCurto(prox)}</button>` : ""));
   }
   if (S.soLeitura) notas.push(nota("warn", "Você está vendo este site só para leitura. As coletas não podem ser salvas daqui."));
+  if (acabouDeSalvar) {
+    const prox = simularAgenda().agenda.find((a) => a.data > S.data && !a.semColeta);
+    notas.unshift(nota("ok", `<b>Coleta salva!</b> ${prox ? `Próxima: ${quandoTxt(prox.data)}, Fábrica ${prox.fab}.` : ""}`,
+      `<span class="actions">${prox ? `<button class="link" type="button" data-ir="${prox.data}">Ver os pontos</button>` : ""}<button class="link" type="button" data-resumo="${S.data}">Copiar resumo</button></span>`));
+  }
+  if (S.ajuda || !lsGet("coleta-agua:ajuda-ok")) notas.unshift(`<div class="ajuda" id="ajuda">
+      <h2>Como usar em 3 passos</h2>
+      <ol>
+        <li><span>Veja no cartão escuro qual fábrica é hoje e, abaixo, os pontos para coletar.</span></li>
+        <li><span>Depois de coletar, toque no círculo do ponto. Se medir cloro, pH ou turbidez, anote nos campos que aparecem.</span></li>
+        <li><span>No fim, toque em <b>Salvar coleta</b>. Se o dia não teve coleta, use "Não houve coleta neste dia?".</span></li>
+      </ol>
+      <button class="btn" type="button" id="b-ajuda-ok">Entendi</button>
+    </div>`);
   if (S.modo === "servidor" && S.legado) notas.unshift(nota("info", `Este aparelho tem ${S.legado.dias.length} dias salvos de antes da conta.`, '<button class="link" type="button" id="b-migrar">Enviar para a minha conta</button>'));
 
+  const C = 2 * Math.PI * 30, feito = nTopo ? nFeitos / nTopo : 0;
   el.innerHTML = `
+    <div class="coleta-grid"><div class="col-a">
     <div class="hero">
       <div class="hero-top">
         <button type="button" class="nav-dia" id="b-dia-ant" data-dia="-1" aria-label="Dia anterior">${SETA_E}</button>
@@ -1254,18 +1480,21 @@ function renderHoje() {
         </label>
         <button type="button" class="nav-dia" id="b-dia-prox" data-dia="1" aria-label="Próximo dia" title="${S.data >= hoje ? "Ver a previsão dos próximos dias" : "Próximo dia"}">${SETA_D}</button>
       </div>
-      <div class="seg" role="radiogroup" aria-label="Fábrica do dia">
-        ${[1, 2].map((f) => `<button type="button" role="radio" id="fab-${f}" data-fab="${f}" aria-checked="${S.fab === f}">Fábrica ${f}${f === fabSug ? "<small>sugerida</small>" : ""}</button>`).join("")}
-      </div>
+      <div class="hero-fab"><span class="hero-fab-rot">Dia da</span><b class="hero-fab-nome">Fábrica ${S.fab}</b>${S.soLeitura ? "" : `<button type="button" class="hero-trocar" id="b-trocar-fab" aria-expanded="${!!S.trocandoFab}">${S.trocandoFab ? "Fechar" : "Trocar"}</button>`}</div>
+      ${S.trocandoFab ? `<div class="seg" role="radiogroup" aria-label="Fábrica do dia">
+        ${[1, 2].map((f) => `<button type="button" role="radio" id="fab-${f}" data-fab="${f}" aria-checked="${S.fab === f}">Fábrica ${f}${f === fabSug ? "<small>indicada</small>" : ""}</button>`).join("")}
+      </div>` : ""}
       ${S.fab !== fabSug || !anterior ? `<p class="hero-motivo">${esc(motivo)}</p>` : ""}
-      <div class="prog">
-        <span class="prog-n"><b>${nFeitos}</b>/${nTopo}</span>
-        <div class="prog-bar" role="progressbar" aria-label="Pontos coletados" aria-valuemin="0" aria-valuemax="${nTopo}" aria-valuenow="${nFeitos}"><i style="width:${nTopo ? Math.round(nFeitos / nTopo * 100) : 0}%"></i></div>
+      <div class="prog-anel" role="progressbar" aria-label="Pontos coletados" aria-valuemin="0" aria-valuemax="${nTopo}" aria-valuenow="${nFeitos}">
+        <div class="anel-caixa"><svg class="anel" viewBox="0 0 76 76" aria-hidden="true"><circle class="anel-fundo" cx="38" cy="38" r="30"/><circle class="anel-valor" cx="38" cy="38" r="30" transform="rotate(-90 38 38)" stroke-dasharray="${(C * feito).toFixed(1)} ${C.toFixed(1)}" ${feito ? "" : 'style="stroke:none"'}/></svg><b>${Math.round(feito * 100)}%</b></div>
+        <div class="anel-txt"><b>${nFeitos} de ${nTopo} ${nTopo === 1 ? "ponto coletado" : "pontos coletados"}</b><span>${nTopo && nFeitos === nTopo ? "Tudo coletado. Agora é só salvar." : nTopo - nFeitos === 1 ? "Falta 1 ponto." : "Faltam " + (nTopo - nFeitos) + " pontos."}</span></div>
       </div>
     </div>
     ${notas.join("")}
+    </div><div class="col-b">
     <div class="block">
       <div class="lista-head"><h2>${ehHoje ? "Coletar hoje" : "Pontos do dia"}</h2>${!S.soLeitura && nTopo && nFeitos < nTopo ? '<button type="button" class="link" id="b-todos">Marcar todos</button>' : ""}</div>
+      <p class="hint">Toque no círculo depois de coletar cada ponto.</p>
       <ul class="tags">${topo.map((e) => tagHTML(e, true)).join("")}</ul>
     </div>
     ${outros.length ? `<details class="outros" id="d-outros" ${S.outrosAberto || outros.some((e) => S.sel[e.p.id]) ? "open" : ""}>
@@ -1279,6 +1508,7 @@ function renderHoje() {
     </div>
     <label class="field" for="f-obs"><span>Observação do dia (opcional)</span><textarea id="f-obs" placeholder="Ex.: bebedouro do DMP em manutenção" ${S.soLeitura ? "disabled" : ""}>${esc(S.obs)}</textarea></label>
     <div class="savebar"><button class="btn primary" type="button" id="b-salvar" ${S.soLeitura || !(nSel || nNc) ? "disabled" : ""}>${nSel || nNc ? `${reg ? "Atualizar" : "Salvar"} coleta · ${nSel ? nSel + (nSel === 1 ? " ponto" : " pontos") : ""}${nSel && nNc ? " · " : ""}${nNc ? nNc + " não coletado" + (nNc === 1 ? "" : "s") : ""}` : "Marque os pontos coletados"}</button></div>
+    </div></div>
   `;
 }
 
@@ -1325,7 +1555,7 @@ function renderPontos() {
       <span style="--c: var(--warn)">atenção</span>
       <span style="--c: var(--bad)">atrasado (mais de 2 ciclos)</span>
     </div>
-    <p class="hint">O traço em cada barra marca o intervalo esperado pelo rodízio para aquele ponto ("a cada ~8 dias").</p>
+    <p class="hint">O tracinho em cada barra mostra de quanto em quanto tempo o ponto costuma ser coletado.</p>
     <div class="groups">
       ${grupos.map((g) => `<div class="block"><h2>${g.f === 0 ? "Todo dia" : "Fábrica " + g.f}</h2><ul class="rows">${g.itens.map(row).join("")}</ul></div>`).join("")}
     </div>
@@ -1347,12 +1577,12 @@ function renderHistorico() {
   const meses = [...new Set(dias.map((d) => d.data.slice(0, 7)))];
   if (S.csvPeriodo !== "tudo" && S.csvPeriodo !== "30" && !meses.includes(S.csvPeriodo)) S.csvPeriodo = "tudo";
   let html = `<div class="csv-row">
-    <label class="field" for="csv-periodo"><span>Planilha (CSV)</span><select id="csv-periodo">
+    <label class="field" for="csv-periodo"><span>Baixar planilha</span><select id="csv-periodo">
       <option value="tudo" ${S.csvPeriodo === "tudo" ? "selected" : ""}>Todo o histórico</option>
       <option value="30" ${S.csvPeriodo === "30" ? "selected" : ""}>Últimos 30 dias</option>
       ${meses.map((m) => `<option value="${m}" ${S.csvPeriodo === m ? "selected" : ""}>${MESES[Number(m.slice(5)) - 1]} de ${m.slice(0, 4)}</option>`).join("")}
     </select></label>
-    <button class="btn" type="button" id="b-csv" ${dias.length ? "" : "disabled"}>Baixar</button>
+    <button class="btn" type="button" id="b-csv" ${dias.length ? "" : "disabled"}>Baixar (Excel)</button>
   </div>
   <p class="hint">${dias.length} ${dias.length === 1 ? "dia registrado" : "dias registrados"}. Toque num dia para abrir.</p>`;
   if (!dias.length) {
@@ -1469,8 +1699,8 @@ function aplicarTema(pref) {
   if ($("#tema-sel")) $("#tema-sel").value = pref;
 }
 function iniciarTema() {
-  let pref = "auto";
-  try { const v = localStorage.getItem(TEMA_KEY); if (v === "claro" || v === "escuro") pref = v; } catch {}
+  let pref = "escuro";
+  try { const v = localStorage.getItem(TEMA_KEY); if (v === "claro" || v === "escuro" || v === "auto") pref = v; } catch {}
   S.temaPref = "auto";
   if (pref !== "auto") aplicarTema(pref); else botaoTema();
   if (window.matchMedia) { try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", botaoTema); } catch {} }
@@ -1534,12 +1764,24 @@ function rotular(xs, larg, linhas) {
   }
   return pos;
 }
-function caminhos(pts, base, fab) {
+function curva(seg, topo, base) {
+  if (seg.length < 2) return "";
+  const lim = (v) => Math.max(topo, Math.min(base, v));
+  let d = `M${seg[0][0]},${seg[0][1]}`;
+  for (let i = 0; i < seg.length - 1; i++) {
+    const p0 = seg[i - 1] || seg[i], p1 = seg[i], p2 = seg[i + 1], p3 = seg[i + 2] || p2;
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, lim(p1[1] + (p2[1] - p0[1]) / 6)];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, lim(p2[1] - (p3[1] - p1[1]) / 6)];
+    d += ` C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+function caminhos(pts, base, fab, suave, topo = 0) {
   let g = "", seg = [];
   const fecha = () => {
     if (seg.length > 1) {
-      const lin = seg.map((q) => q.join(",")).join(" L");
-      g += `<path class="sp-area f${fab}" d="M${seg[0][0]},${base} L${lin} L${seg[seg.length - 1][0]},${base} Z"/><polyline class="sp-line f${fab}" points="${seg.map((q) => q.join(",")).join(" ")}"/>`;
+      const lin = suave ? curva(seg, topo, base) : "M" + seg.map((q) => q.join(",")).join(" L");
+      g += `<path class="sp-area" fill="url(#ga-f${fab})" d="${lin} L${seg[seg.length - 1][0]},${base} L${seg[0][0]},${base} Z"/><path class="sp-line f${fab}" d="${lin}"/>`;
     }
     seg = [];
   };
@@ -1571,7 +1813,7 @@ function sparkRes(ord, dom, fab, c, sw, faixa) {
   let g = "";
   for (const lv of [lim.min, lim.max]) if (lv !== null && lv > faixa.lo && lv < faixa.hi) g += `<line class="lim" x1="0" x2="${sw}" y1="${y(lv)}" y2="${y(lv)}"/>`;
   g += `<line class="sp-base" x1="0" x2="${sw}" y1="${base}" y2="${base}"/>`;
-  g += caminhos(ord.map((a) => [x(a.data), y(a.v)]), base, fab);
+  g += caminhos(ord.map((a) => [x(a.data), y(a.v)]), base, fab, true, top);
   const pos = rotular(ord.map((a) => x(a.data)), 30, 1);
   ord.forEach((a, k) => {
     g += `<circle class="sp-dot ${a.fora ? "fora" : "f" + fab}" cx="${x(a.data)}" cy="${y(a.v)}" r="3.5"/>`;
@@ -1602,7 +1844,7 @@ function grande(cfg) {
   }
   const marcas = pts.filter((q) => q.marca);
   for (const q of marcas) g += `<line class="mk f${fab}" x1="${x(q.data)}" x2="${x(q.data)}" y1="${mt}" y2="${base}"/>`;
-  g += caminhos(pts.map((q) => (q.v === null ? null : [x(q.data), y(q.v)])), base, fab);
+  g += caminhos(pts.map((q) => (q.v === null ? null : [x(q.data), y(q.v)])), base, fab, !!faixa, mt);
   for (const q of marcas) g += `<circle class="sp-dot ${q.fora ? "fora" : "f" + fab}" cx="${x(q.data)}" cy="${y(q.v ?? lo)}" r="4.5"/>`;
   const pos = rotular(marcas.map((q) => x(q.data)), 32, 2);
   marcas.forEach((q, k) => {
@@ -1614,6 +1856,87 @@ function grande(cfg) {
   g += `<line class="xh" x1="0" x2="0" y1="${mt}" y2="${base}" style="display:none"/><circle class="xh-dot f${fab}" r="5" cx="0" cy="0" style="display:none"/>`;
   G.charts[id] = { W, base, pts: pts.map((q) => ({ x: x(q.data), y: q.v === null ? null : y(q.v), tip: q.tip })) };
   return `<svg class="big" data-g="${id}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(cfg.rotulo)}">${g}</svg>`;
+}
+
+const ICO_BALDE = SVG_A + '<path d="M5 8h14l-1.6 11.2a2 2 0 0 1-2 1.8H8.6a2 2 0 0 1-2-1.8z"/><path d="M4 8a8 3 0 0 1 16 0"/></svg>';
+const ICO_GOTA = SVG_A + '<path d="M12 3c-3 4.4-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-3-6.6-6-11z"/></svg>';
+const ICO_FRASCO = SVG_A + '<path d="M9 3h6M10 3v6L5 18a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M7.5 14h9"/></svg>';
+const ICO_SINO = SVG_A + '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>';
+const ICO_RELOGIO = SVG_A + '<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>';
+const ICO_CALENDARIO = SVG_A + '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
+const ILU_VAZIO = '<svg class="al-ilu" viewBox="0 0 120 120" aria-hidden="true"><circle class="i-fundo" cx="60" cy="60" r="56"/><rect class="i-papel" x="35" y="28" width="50" height="66" rx="9"/><rect class="i-papel" x="48" y="22" width="24" height="12" rx="4"/><path class="i-linha" d="M46 46h28M46 55h18"/><path d="M60 62c-5.2 6.6-9.5 11.2-9.5 16.4a9.5 9.5 0 0 0 19 0c0-5.2-4.3-9.8-9.5-16.4z" fill="url(#g-anel)"/></svg>';
+function mediaDe(lista) { return lista.length ? lista.reduce((a, b) => a + b, 0) / lista.length : null; }
+function areaSerie(cfg) {
+  const { id, W, series, dom, c } = cfg;
+  const H = 240, ml = 36, mr = 14, mt = 16, mb = 30, iw = W - ml - mr, ih = H - mt - mb, base = mt + ih;
+  const vs = series.flatMap((x) => x.pts.map((q) => q.v));
+  if (!vs.length) return "";
+  const fx = dominioParam(c, vs);
+  let lo = fx.lo, hi = fx.hi;
+  const step = passoBom(hi - lo, 4);
+  lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+  const t0 = utc(dom.ini), t1 = utc(dom.fim);
+  const x = (d) => +(ml + ((utc(d) - t0) / (t1 - t0)) * iw).toFixed(1);
+  const y = (v) => +(mt + (1 - (v - lo) / (hi - lo)) * ih).toFixed(1);
+  let g = "";
+  for (let i = 0, v = lo; v <= hi + step / 1000; i++, v = lo + i * step) {
+    const yy = y(v);
+    g += `<line class="${i ? "ax-g" : "ax-b"}" x1="${ml}" x2="${ml + iw}" y1="${yy}" y2="${yy}"/><text class="ax-t" x="${ml - 6}" y="${yy}" text-anchor="end" dominant-baseline="middle">${fmtEixo(v)}</text>`;
+  }
+  const lim = LIM[c];
+  for (const [lv, nome] of [[lim.min, "mín."], [lim.max, "máx."]]) {
+    if (lv === null || lv <= lo || lv >= hi) continue;
+    g += `<line class="lim" x1="${ml}" x2="${ml + iw}" y1="${y(lv)}" y2="${y(lv)}"/><text class="lim-t" x="${ml + iw}" y="${y(lv) - 4}" text-anchor="end">${nome} ${fmtEixo(lv)}</text>`;
+  }
+  const nX = W < 420 ? 3 : W < 700 ? 5 : 7;
+  for (let i = 0; i < nX; i++) {
+    const d = isoUtc(Math.round((t0 + (t1 - t0) * i / (nX - 1)) / 86400000) * 86400000);
+    g += `<text class="ax-t" x="${x(d)}" y="${H - 6}" text-anchor="${i === 0 ? "start" : i === nX - 1 ? "end" : "middle"}">${semana(d)} ${fmtCurto(d)}</text>`;
+  }
+  for (const se of series) {
+    const seg = se.pts.map((q) => [x(q.data), y(q.v)]);
+    if (seg.length > 1) {
+      const lin = curva(seg, mt, base);
+      g += `<path class="sp-area" fill="url(#ga-f${se.fab})" d="${lin} L${seg[seg.length - 1][0]},${base} L${seg[0][0]},${base} Z"/><path class="area-l f${se.fab}" d="${lin}"/>`;
+    }
+    for (const q of se.pts) g += `<circle class="sp-dot ${q.fora ? "fora" : "f" + se.fab}" cx="${x(q.data)}" cy="${y(q.v)}" r="3.5"/>`;
+  }
+  const datas = [...new Set(series.flatMap((se) => se.pts.map((q) => q.data)))].sort();
+  g += `<line class="xh" x1="0" x2="0" y1="${mt}" y2="${base}" style="display:none"/><circle class="xh-dot" r="0" cx="0" cy="0" style="display:none"/>`;
+  G.charts[id] = { W, base, pts: datas.map((d) => ({ x: x(d), y: null, tip: cfg.tipDe(d) })) };
+  return `<svg class="big" data-g="${id}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(cfg.rotulo)}">${g}</svg>`;
+}
+function barrasSemana(cfg) {
+  const { W, semanas, tip } = cfg;
+  const H = 230, ml = 30, mr = 10, mt = 14, mb = 30, iw = W - ml - mr, ih = H - mt - mb, base = mt + ih;
+  const max = Math.max(1, ...semanas.flatMap((s) => [0, 1, 2].map((f) => s.n[f])));
+  const step = passoBom(max, 4), hi = Math.ceil(max / step) * step;
+  const y = (v) => +(mt + (1 - v / hi) * ih).toFixed(1);
+  let g = "";
+  for (let i = 0, v = 0; v <= hi + step / 1000; i++, v = i * step) g += `<line class="${i ? "ax-g" : "ax-b"}" x1="${ml}" x2="${ml + iw}" y1="${y(v)}" y2="${y(v)}"/><text class="ax-t" x="${ml - 6}" y="${y(v)}" text-anchor="end" dominant-baseline="middle">${v}</text>`;
+  const gw = iw / Math.max(1, semanas.length), bw = Math.max(4, Math.min(18, (gw - 14) / 3 - 2));
+  semanas.forEach((s, k) => {
+    const cx = ml + gw * k + gw / 2, x0 = cx - (bw * 3 + 4) / 2;
+    [1, 2, 0].forEach((f, j) => {
+      const v = s.n[f], bx = x0 + j * (bw + 2), by = y(v), h = base - by, r = Math.min(4, h / 2, bw / 2);
+      if (v > 0) g += `<path class="barra f${f}" d="M${bx.toFixed(1)},${base} V${(by + r).toFixed(1)} Q${bx.toFixed(1)},${by} ${(bx + r).toFixed(1)},${by} H${(bx + bw - r).toFixed(1)} Q${(bx + bw).toFixed(1)},${by} ${(bx + bw).toFixed(1)},${(by + r).toFixed(1)} V${base} Z"/>`;
+    });
+    g += `<rect class="hit" x="${(cx - gw / 2).toFixed(1)}" y="${mt}" width="${gw.toFixed(1)}" height="${ih}" data-tip="${tip(s)}"/>`;
+    g += `<text class="ax-t" x="${cx.toFixed(1)}" y="${H - 8}" text-anchor="middle">${fmtCurto(s.ini)}</text>`;
+  });
+  return `<svg class="big" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Coletas por semana">${g}</svg>`;
+}
+function encaixarAlertas() {
+  const card = document.querySelector("#v-graficos .alertas-card"); if (!card) return;
+  const extras = [...card.querySelectorAll(".al-extra")], wrap = card.querySelector(".al-parados-wrap");
+  if (!extras.length) return;
+  const linha = card.parentElement, lado = linha.firstElementChild;
+  if (getComputedStyle(linha).gridTemplateColumns.trim().split(/\s+/).length < 2) { extras.slice(3).forEach((x) => { x.hidden = true; }); return; }
+  linha.style.alignItems = "start";
+  const alvo = lado.offsetHeight;
+  while (card.offsetHeight > alvo && extras.length) extras.pop().hidden = true;
+  linha.style.alignItems = "";
+  wrap.hidden = !card.querySelector(".al-extra:not([hidden])");
 }
 function renderGraficos() {
   const el = $("#v-graficos");
@@ -1664,6 +1987,79 @@ function renderGraficos() {
     <label class="field" for="g-ponto"><span>Ponto</span><select id="g-ponto"><option value="">Todos os pontos</option>${opts}</select></label>
   </div>
   <p class="hint">De ${fmt(dom.ini)} a ${fmt(dom.fim)}: ${diasP.filter((d) => !d.semColeta).length} ${diasP.filter((d) => !d.semColeta).length === 1 ? "dia" : "dias"} com coleta.${G.ponto ? "" : " Toque num ponto para ver o gráfico dele em detalhe."}</p>`;
+  {
+    const larg = Math.floor(el.clientWidth), desk = window.matchMedia("(min-width: 900px)").matches;
+    const nRes = amostras.length, nForaRes = amostras.filter((a) => a.fora).length;
+    const itensP = diasP.filter((d) => !d.semColeta).flatMap((d) => (d.itens || []).map((it) => ({ d: d.data, it })));
+    const med = (c) => mediaDe(amostras.filter((a) => a.c === c).map((a) => a.v));
+    const mCl = med("cloro"), mPh = med("ph");
+    html += `<div class="kpis">
+      <div class="kpi"><span class="kpi-ico">${ICO_BALDE}</span><div><small>Coletas no período</small><b>${itensP.length}</b><span class="kpi-sub">em ${diasP.filter((d) => !d.semColeta).length} dias</span></div></div>
+      <div class="kpi"><span class="kpi-ico">${ICO_GOTA}</span><div><small>Cloro livre médio</small><b>${mCl === null ? "–" : fmtNum(+mCl.toFixed(2))}<em>mg/L</em></b><span class="kpi-sub">normal: 0,2 a 5</span></div></div>
+      <div class="kpi"><span class="kpi-ico">${ICO_FRASCO}</span><div><small>pH médio</small><b>${mPh === null ? "–" : fmtNum(+mPh.toFixed(1))}</b><span class="kpi-sub">normal: 6 a 9</span></div></div>
+      <div class="kpi"><span class="kpi-ico ${nForaRes ? "bad" : "ok"}">${nForaRes ? ICO_ALERTA : ICO_OK}</span><div><small>Fora do normal</small><b>${nForaRes}</b><span class="kpi-sub">${nRes ? "de " + nRes + (nRes === 1 ? " medição" : " medições") : "nenhuma medição anotada"}</span></div></div>
+    </div>`;
+
+    const hojeD = hojeISO(), ultH = ultimas(hojeD, true);
+    const fila = [1, 2].flatMap((f) => filaDe(f, ultH, hojeD));
+    const niv = fila.map((e) => nivelPonto(e.p, e.dias));
+    const nOk = niv.filter((v) => v === "ok").length, nAt = niv.filter((v) => v === "warn").length, nBad = niv.filter((v) => v === "bad").length;
+    const pct = fila.length ? nOk / fila.length : 0, CG = 2 * Math.PI * 70;
+    const anel = `<div class="chart anel-card"><div class="chart-head" style="width:100%"><h2>Pontos em dia</h2></div>
+      <div class="anel-grande"><svg viewBox="0 0 170 170" aria-hidden="true"><circle class="anel-fundo" cx="85" cy="85" r="70"/><circle class="anel-valor" cx="85" cy="85" r="70" transform="rotate(-90 85 85)" stroke-dasharray="${(CG * pct).toFixed(1)} ${CG.toFixed(1)}" ${pct ? "" : 'style="stroke:none"'}/></svg><b>${Math.round(pct * 100)}%</b></div>
+      <p class="hint">${nOk} de ${fila.length} pontos coletados dentro do intervalo do rodízio.<br>${nAt} em atenção · ${nBad} ${nBad === 1 ? "atrasado" : "atrasados"}</p></div>`;
+
+    const pr = PARAM.find((x) => x.c === G.param) || PARAM[0];
+    const doParam = amostras.filter((a) => a.c === pr.c);
+    const porLocal = [1, 2, 0].map((f) => {
+      const porDia = {};
+      for (const a of doParam.filter((a) => a.fab === f)) (porDia[a.data] = porDia[a.data] || []).push(a);
+      return { fab: f, pts: Object.keys(porDia).sort().map((d) => ({ data: d, v: +mediaDe(porDia[d].map((a) => a.v)).toFixed(2), fora: porDia[d].some((a) => a.fora) })) };
+    }).filter((x) => x.pts.length);
+    const tipDia = (d) => tip({ valor: diaLongo(d), titulo: "", sub: pr.titulo + (pr.un ? " (" + pr.un + ")" : ""), extra: "", serie: 1,
+      linhas: porLocal.map((se) => { const q = se.pts.find((x) => x.data === d); return q ? { serie: se.fab, txt: fmtNum(q.v) + (q.fora ? " · fora do normal" : ""), nome: nomeLocal(se.fab) } : null; }).filter(Boolean) });
+    const wArea = Math.max(240, Math.floor((desk ? (larg - 14) * 2 / 3 : larg) - 30));
+    const area = `<div class="chart"><div class="chart-head"><h2>${pr.titulo} ao longo do tempo</h2><div class="seg seg-param" role="radiogroup" aria-label="O que mostrar">${PARAM.map((x) => `<button type="button" role="radio" id="g-par-${x.c}" data-param="${x.c}" aria-checked="${pr.c === x.c}">${x.titulo}</button>`).join("")}</div></div>
+      ${porLocal.length ? chavesHTML(new Set(porLocal.map((x) => x.fab))) + areaSerie({ id: "area", W: wArea, series: porLocal, dom, c: pr.c, tipDe: tipDia, rotulo: pr.titulo + " por local ao longo do tempo" }) + '<p class="hint">Média do dia em cada local. Passe o dedo ou o mouse para ver os valores; as linhas tracejadas vermelhas marcam os limites.</p>' : `<div class="empty"><b>Nenhuma medição de ${pr.titulo.toLowerCase()} neste período</b><span class="hint">Anote os resultados ao marcar os pontos na aba Coleta.</span></div>`}</div>`;
+    html += `<div class="dash d2">${anel}${area}</div>`;
+
+    const semanas = [];
+    for (let t = utc(dom.ini) - ((new Date(utc(dom.ini)).getUTCDay() + 6) % 7) * 86400000; t <= utc(dom.fim); t += 7 * 86400000) {
+      const ini = isoUtc(t), fim = isoUtc(t + 6 * 86400000), n = { 0: 0, 1: 0, 2: 0 };
+      for (const x of itensP) if (x.d >= ini && x.d <= fim) n[[0, 1, 2].includes(x.it.fabrica) ? x.it.fabrica : 0]++;
+      semanas.push({ ini, fim, n });
+    }
+    const wBar = Math.max(240, Math.floor((desk ? (larg - 14) * 3 / 5 : larg) - 30));
+    const barras = `<div class="chart"><div class="chart-head"><h2>Coletas por semana</h2></div>${chavesHTML(new Set([1, 2, 0]))}${barrasSemana({ W: wBar, semanas, tip: (s) => tip({ valor: "Semana de " + fmtCurto(s.ini) + " a " + fmtCurto(s.fim), titulo: "", sub: "coletas", extra: "", serie: 1, linhas: [1, 2, 0].map((f) => ({ serie: f, nome: nomeLocal(f), txt: String(s.n[f]) })) }) })}</div>`;
+
+    const alertas = [];
+    for (const a of amostras.filter((a) => a.fora).slice(0, 3)) {
+      const pa = PARAM.find((x) => x.c === a.c) || {};
+      alertas.push({ k: "bad", ico: ICO_ALERTA, t: `${pa.titulo}: ${fmtNum(a.v)}${pa.un ? " " + pa.un : ""}, fora do normal`, s: `${a.fab ? "Fábrica " + a.fab + " · " : ""}${a.setor} · ${a.tipo} · ${fmtCurto(a.data)}` });
+    }
+    const antes = ultimoDia(addDias(hojeD, 1)), lac = antes ? diasUteisEntre(antes.data, hojeD) : 0;
+    if (lac >= 2) alertas.push({ k: "warn", ico: ICO_CALENDARIO, t: `${lac} dias úteis sem registro`, s: `Último registro em ${fmtCurto(antes.data)}`, a: `<button class="link" type="button" data-ir="${proxDiaUtil(antes.data)}">Lançar</button>` });
+    if (nBad) alertas.push({ k: "warn", ico: ICO_RELOGIO, t: `${nBad} ${nBad === 1 ? "ponto atrasado" : "pontos atrasados"} no rodízio`, s: "Passaram do prazo sem coleta", a: '<button class="link" type="button" data-aba="pontos">Ver agenda</button>' });
+    for (const e of fila) { const av = avisoNC(e.p.id, e.ult, hojeD); if (av) alertas.push({ k: "warn", ico: ICO_ALERTA, t: `${e.p.setor} · ${e.p.tipo}`, s: `${e.p.fabrica ? "Fábrica " + e.p.fabrica + " · " : ""}${av.motivo.toLowerCase()} desde ${fmtCurto(av.data)}` }); }
+    if (!alertas.length) alertas.push({ k: "ok", ico: ICO_OK, t: "Tudo em ordem", s: nRes ? "Resultados normais e rodízio em dia." : "Rodízio em dia." });
+    const temColeta = Object.values(S.dias).some((d) => !d.semColeta && (d.itens || []).length);
+    const nAl = alertas.filter((x) => x.k !== "ok").length, kAl = !temColeta ? "" : alertas.some((x) => x.k === "bad") ? "bad" : nAl ? "warn" : "ok";
+    let corpoAl;
+    if (!temColeta) {
+      corpoAl = `<div class="al-vazio">${ILU_VAZIO}<b>Nenhuma coleta registrada ainda</b><p class="hint">Lance a primeira coleta para ver aqui os resultados fora do normal e os pontos atrasados.</p><button class="btn primary" type="button" data-aba="hoje">Lançar coleta</button></div>`;
+    } else {
+      const prox = simularAgenda().agenda.find((x) => !x.semColeta);
+      const rodape = !nRes
+        ? `<div class="al-rodape">${ICO_FRASCO}<span>Anote <b>cloro, pH e turbidez</b> ao lançar as coletas para receber alertas de resultado aqui.</span></div>`
+        : prox ? `<div class="al-rodape">${ICO_CALENDARIO}<span>Próxima coleta: <b>${quandoTxt(prox.data)}, Fábrica ${prox.fab}</b></span><button class="link" type="button" data-ir="${prox.data}">Ver os pontos</button></div>` : "";
+      const ordemN = { bad: 0, warn: 1, ok: 2 };
+      const parados = fila.map((e, i) => ({ e, nv: niv[i] })).sort((a, b) => (ordemN[a.nv] - ordemN[b.nv]) || (b.e.dias - a.e.dias)).slice(0, 8);
+      const paradosHTML = parados.length ? `<div class="al-parados-wrap"><div class="al-sub">${nBad ? "Mais atrasados" : "Mais tempo sem coleta"}</div><ul class="al-parados">${parados.map(({ e, nv }) => `<li class="al-extra ${nv}"><span>${esc(e.p.setor)} · ${esc(e.p.tipo)}</span><small>Fábrica ${e.p.fabrica} · ${e.dias === Infinity ? "nunca coletado" : e.dias === 0 ? "hoje" : "há " + e.dias + (e.dias === 1 ? " dia" : " dias")}</small></li>`).join("")}</ul></div>` : "";
+      corpoAl = `<ul class="alertas">${alertas.slice(0, 6).map((x) => `<li><span class="al-ico ${x.k}">${x.ico}</span><span class="al-txt"><b>${esc(x.t)}</b><small>${esc(x.s)}</small></span>${x.a || ""}</li>`).join("")}</ul>${paradosHTML}${rodape}`;
+    }
+    const alertasHTML = `<div class="chart alertas-card"><div class="chart-head"><h2 class="h-ico"><span class="al-ico ${kAl}">${ICO_SINO}</span>Alertas</h2>${nAl && temColeta ? `<span class="al-n ${kAl}" aria-label="${nAl} ${nAl === 1 ? "alerta" : "alertas"}">${nAl}</span>` : ""}</div>${corpoAl}</div>`;
+    html += `<div class="dash d2b">${barras}${alertasHTML}</div>`;
+  }
 
   if (G.ponto) {
     const p = info[G.ponto], se = series[G.ponto], u = (todas[G.ponto] || []).filter((d) => d <= dom.fim).pop();
@@ -1690,7 +2086,7 @@ function renderGraficos() {
   const iRitmo = html.length;
   const grupos = [1, 2, 0].map((f) => ({ f, ps: Object.values(info).filter((p) => p.fabrica === f && (p.ativo !== false || noPeriodo[p.id])) })).filter((g) => g.ps.length);
   const ymax = Math.max(7, ...grupos.flatMap((g) => g.ps.flatMap((p) => series[p.id].map((q) => q.v ?? 0))));
-  html += `<div class="chart"><div class="chart-head"><h2>Ritmo de coleta</h2><span class="un">dias sem coleta</span></div>
+  html += `<div class="chart"><div class="chart-head"><h2>Quando cada ponto foi coletado</h2></div>
     <p class="hint">Cada bolinha é uma coleta, com a data embaixo. A área cresce enquanto o ponto fica sem coleta.</p>${chavesHTML(new Set(grupos.map((g) => g.f)))}`;
   for (const g of grupos) {
     html += `<h3>${nomeLocal(g.f)}</h3><div class="sp-list" ${vars}>` + g.ps.map((p) => {
@@ -1704,7 +2100,7 @@ function renderGraficos() {
   html += "</div>";
 
   const iRes = html.length;
-  html += '<div class="chart"><div class="chart-head"><h2>Resultados das análises</h2><span class="un">concentração medida</span></div>';
+  html += '<div class="chart"><div class="chart-head"><h2>Resultados por ponto</h2><span class="un">' + esc((PARAM.find((x) => x.c === G.param) || PARAM[0]).titulo) + '</span></div>';
   if (!amostras.length) {
     html += `<div class="empty"><b>Ainda não há resultados neste período</b><span class="hint">Aqui aparecem o cloro livre (mg/L), o pH e a turbidez (uT) de cada ponto ao longo do tempo, com os limites da Portaria GM/MS 888/2021 marcados. Para preencher, marque o ponto na aba Coleta e digite os valores medidos. Para coletas já salvas, abra o Histórico e toque em Editar no dia.</span><span class="actions"><button type="button" class="btn small" data-aba="hoje">Ir para Coleta</button><button type="button" class="btn small" data-aba="historico">Abrir Histórico</button></span></div>`;
   } else {
@@ -1714,8 +2110,7 @@ function renderGraficos() {
     const porPonto = {};
     for (const a of lista) (porPonto[a.ponto] = porPonto[a.ponto] || []).push(a);
     const ids = Object.values(info).sort((a, b) => a.fabrica - b.fabrica).map((p) => p.id).filter((id) => porPonto[id]);
-    html += `<div class="seg seg-param" role="radiogroup" aria-label="Parâmetro">${PARAM.map((x) => `<button type="button" role="radio" id="g-par-${x.c}" data-param="${x.c}" aria-checked="${pr.c === x.c}">${x.titulo}</button>`).join("")}</div>
-      <div class="res-resumo"><span>${lista.length} ${lista.length === 1 ? "amostra" : "amostras"} · faixa ${LIM[pr.c].ref}${pr.un ? " " + pr.un : ""}</span>${nFora ? `<span class="alerta">${ICO_ALERTA}${nFora} fora da faixa</span>` : ""}</div>`;
+    html += `<div class="res-resumo"><span>${lista.length} ${lista.length === 1 ? "amostra" : "amostras"} · faixa ${LIM[pr.c].ref}${pr.un ? " " + pr.un : ""}</span>${nFora ? `<span class="alerta">${ICO_ALERTA}${nFora} fora da faixa</span>` : ""}</div>`;
     if (!lista.length) html += `<p class="hint">Sem resultados de ${pr.titulo.toLowerCase()} no período.</p>`;
     else {
       const faixa = dominioParam(pr.c, lista.map((a) => a.v));
@@ -1736,6 +2131,7 @@ function renderGraficos() {
   html = html.slice(0, iRitmo) + html.slice(iRes) + html.slice(iRitmo, iRes);
   html += '<div id="g-tip" role="tooltip" hidden></div>';
   el.innerHTML = html;
+  encaixarAlertas();
   G.tipAtual = null; G.xhAtivo = null; G.largura = el.clientWidth;
 }
 function abrirTip(d, r) {
@@ -1748,7 +2144,18 @@ function abrirTip(d, r) {
   const b = document.createElement("b"); b.textContent = d.valor;
   l.append(k, b);
   const ti = document.createElement("small"); ti.textContent = d.titulo;
-  tip.append(sm, l, ti);
+  if (d.linhas) {
+    const cab = document.createElement("b"); cab.textContent = d.valor;
+    const sub = document.createElement("small"); sub.textContent = d.sub;
+    tip.append(cab, sub);
+    for (const x of d.linhas) {
+      const li = document.createElement("span"); li.className = "tip-linha";
+      const kk = document.createElement("i"); kk.className = "tip-key f" + x.serie;
+      const nome = document.createElement("span"); nome.textContent = x.nome;
+      li.append(kk, document.createTextNode(x.txt + " "), nome);
+      tip.append(li);
+    }
+  } else tip.append(sm, l, ti);
   tip.hidden = false;
   const box = $("#v-graficos").getBoundingClientRect();
   const tw = tip.offsetWidth, th = tip.offsetHeight;
@@ -1821,7 +2228,9 @@ async function salvarHoje() {
     delete RASC[S.data + "|" + S.fab]; gravarRascunhos();
     S.dirty = false; S.fabManual = null;
     const nFora = itens.reduce((n, it) => n + CAMPOS.filter((c) => fora(c, it[c])).length, 0);
-    toast(`Coleta de ${fmt(S.data)} salva.` + (nFora ? ` ${nFora} ${nFora === 1 ? "valor fora" : "valores fora"} da faixa: avise o responsável.` : ""));
+    S.salvoMsg = { data: S.data };
+    toast(`Coleta de ${fmt(S.data)} salva.` + (nFora ? ` ${nFora} ${nFora === 1 ? "valor fora" : "valores fora"} do normal: avise o responsável.` : ""));
+    window.scrollTo(0, 0);
     montarRascunho(); renderTudo();
   } catch (e) {
     toast(msgErro(e));
@@ -1953,9 +2362,20 @@ document.addEventListener("click", async (ev) => {
     return;
   }
   if (t.dataset.aba) { trocarAba(t.dataset.aba); return; }
+  if (t.dataset.passo) {
+    const i = $("#" + t.dataset.passo); if (i.disabled) return;
+    const antes = i.value;
+    if (Number(t.dataset.d) > 0) i.stepUp(); else i.stepDown();
+    if (i.value !== antes) i.dispatchEvent(new Event("change", { bubbles: true }));
+    return;
+  }
+  if (t.id === "b-trocar-fab") { S.trocandoFab = !S.trocandoFab; renderHoje(); $("#b-trocar-fab")?.focus(); return; }
+  if (t.id === "b-ajuda") { S.ajuda = true; if (S.aba !== "hoje") trocarAba("hoje"); if (S.pronto) renderHoje(); window.scrollTo(0, 0); return; }
+  if (t.id === "b-ajuda-ok") { S.ajuda = false; lsSet("coleta-agua:ajuda-ok", "1"); renderHoje(); return; }
+  if (t.id === "b-ver-senha") { const i = $("#l-senha"), ver = i.type === "password"; i.type = ver ? "text" : "password"; t.textContent = ver ? "Ocultar" : "Mostrar"; t.setAttribute("aria-label", ver ? "Ocultar a senha" : "Mostrar a senha"); i.focus(); return; }
   if (t.id === "b-tema") { aplicarTema(temaEscuro() ? "claro" : "escuro"); return; }
   if (t.dataset.param) { G.param = t.dataset.param; renderGraficos(); $("#" + t.id)?.focus(); return; }
-  if (t.dataset.fab) { guardarRascunho(); S.fabManual = Number(t.dataset.fab); montarRascunho(); renderHoje(); $("#fab-" + S.fab)?.focus(); return; }
+  if (t.dataset.fab) { guardarRascunho(); S.trocandoFab = false; S.fabManual = Number(t.dataset.fab); montarRascunho(); renderHoje(); $("#fab-" + S.fab)?.focus(); return; }
   if (t.id === "b-salvar") { salvarHoje(); return; }
   if (t.dataset.motivo) { S.motivo = S.motivo === t.dataset.motivo ? null : t.dataset.motivo; S.semColAberto = true; renderHoje(); document.querySelector(`[data-motivo="${t.dataset.motivo}"]`)?.focus(); return; }
   if (t.id === "b-semcol") { salvarSemColeta(); return; }
@@ -2079,6 +2499,81 @@ document.getElementById("f-novo").addEventListener("submit", async (ev) => {
   try { await salvarConfig(cfg); $("#n-setor").value = ""; toast(`${setor} · ${tipo} adicionado.`); } catch (e) { toast(msgErro(e)); }
 });
 
+const LISTA_PROPRIA = !(window.CSS && CSS.supports && CSS.supports("appearance", "base-select")) && !!window.matchMedia && matchMedia("(hover: hover) and (pointer: fine)").matches;
+let LISTA = null;
+function fecharLista(foco) {
+  if (!LISTA) return;
+  const { el, sel } = LISTA; LISTA = null;
+  el.remove(); sel.removeAttribute("aria-expanded");
+  if (foco && sel.isConnected) sel.focus();
+}
+function abrirLista(sel) {
+  fecharLista();
+  const op = (o) => `<div class="lista-op" role="option" data-i="${o.index}" aria-selected="${o.selected}"${o.disabled ? ' aria-disabled="true"' : ""}>${esc(o.textContent)}</div>`;
+  let h = "";
+  for (const f of sel.children) h += f.tagName === "OPTGROUP" ? `<div class="lista-grupo" role="presentation">${esc(f.label)}</div>${[...f.children].map(op).join("")}` : op(f);
+  const el = document.createElement("div");
+  el.className = "lista"; el.setAttribute("role", "listbox"); el.innerHTML = h;
+  document.body.appendChild(el);
+  LISTA = { el, sel, i: sel.selectedIndex };
+  sel.setAttribute("aria-expanded", "true");
+  const r = sel.getBoundingClientRect(), vh = window.innerHeight, vw = document.documentElement.clientWidth;
+  el.style.minWidth = r.width + "px";
+  const abaixo = vh - r.bottom - 14, acima = r.top - 14, cima = abaixo < Math.min(el.scrollHeight, 240) && acima > abaixo;
+  el.style.maxHeight = Math.min(420, Math.max(120, cima ? acima : abaixo)) + "px";
+  el.style.left = Math.max(8, Math.min(r.left, vw - el.offsetWidth - 8)) + "px";
+  if (cima) el.style.bottom = (vh - r.top + 6) + "px"; else el.style.top = (r.bottom + 6) + "px";
+  marcarLista();
+}
+function marcarLista() {
+  for (const o of LISTA.el.querySelectorAll(".lista-op")) o.classList.toggle("ativo", Number(o.dataset.i) === LISTA.i);
+  LISTA.el.querySelector(".lista-op.ativo")?.scrollIntoView({ block: "nearest" });
+}
+function escolherLista(i) {
+  const sel = LISTA.sel, o = sel.options[i];
+  if (!o || o.disabled) return;
+  fecharLista(true);
+  if (sel.selectedIndex !== i) { sel.selectedIndex = i; sel.dispatchEvent(new Event("input", { bubbles: true })); sel.dispatchEvent(new Event("change", { bubbles: true })); }
+}
+if (LISTA_PROPRIA) {
+  document.documentElement.classList.add("lista-propria");
+  document.addEventListener("mousedown", (ev) => {
+    if (LISTA && LISTA.el.contains(ev.target)) { ev.preventDefault(); return; }
+    const sel = ev.target.closest && ev.target.closest("select");
+    if (sel && ev.button === 0 && !sel.disabled && !sel.multiple) {
+      ev.preventDefault();
+      const mesmo = LISTA && LISTA.sel === sel;
+      fecharLista();
+      sel.focus();
+      if (!mesmo) abrirLista(sel);
+      return;
+    }
+    fecharLista();
+  }, true);
+  document.addEventListener("click", (ev) => {
+    const o = LISTA && ev.target.closest && ev.target.closest(".lista-op");
+    if (o && LISTA.el.contains(o)) escolherLista(Number(o.dataset.i));
+  });
+  document.addEventListener("mousemove", (ev) => {
+    const o = LISTA && ev.target.closest && ev.target.closest(".lista-op:not([aria-disabled])");
+    if (o && Number(o.dataset.i) !== LISTA.i) { LISTA.i = Number(o.dataset.i); for (const x of LISTA.el.querySelectorAll(".lista-op")) x.classList.toggle("ativo", x === o); }
+  });
+  document.addEventListener("keydown", (ev) => {
+    if (!LISTA) {
+      const sel = ev.target.closest && ev.target.closest("select");
+      if (sel && !sel.disabled && !sel.multiple && (ev.key === " " || ev.key === "Enter" || ev.key === "F4" || (ev.altKey && ev.key === "ArrowDown"))) { ev.preventDefault(); abrirLista(sel); }
+      return;
+    }
+    const ops = LISTA.sel.options;
+    const mover = (d) => { let i = LISTA.i; do { i += d; } while (ops[i] && ops[i].disabled); if (ops[i]) { LISTA.i = i; marcarLista(); } };
+    if (ev.key === "ArrowDown" || ev.key === "ArrowUp") { ev.preventDefault(); mover(ev.key === "ArrowDown" ? 1 : -1); }
+    else if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); escolherLista(LISTA.i); }
+    else if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); fecharLista(true); }
+    else if (ev.key === "Tab") fecharLista();
+  }, true);
+  window.addEventListener("resize", () => fecharLista());
+  document.addEventListener("scroll", (ev) => { if (LISTA && !LISTA.el.contains(ev.target)) fecharLista(); }, true);
+}
 document.addEventListener("keydown", (ev) => {
   if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('#v-graficos [data-sel][role="button"], #v-historico article[data-abrir]')) { ev.preventDefault(); ev.target.click(); }
   if (ev.key === "Escape" && !$("#folha").hidden) $("#folha").hidden = true;
