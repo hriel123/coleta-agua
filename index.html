@@ -267,7 +267,9 @@ body.sem-conta > header, body.sem-conta > main { display: none; }
 .hero-fab { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 10px; }
 .hero-fab-rot { color: var(--hero-muted); font-size: 1rem; }
 .hero-fab-nome { font-family: var(--f-display); font-stretch: 110%; font-weight: 800; font-size: 1.7rem; line-height: 1.1; }
-.hero-trocar { background: none; border: 1px solid var(--hero-line); color: var(--hero-fg); border-radius: 999px; padding: 4px 14px; min-height: 36px; font-size: .85rem; font-weight: 700; cursor: pointer; }
+.hero-trocar { display: inline-flex; align-items: center; gap: 6px; background: rgba(34, 211, 238, .14); border: 1px solid rgba(34, 211, 238, .5); color: var(--hero-accent); border-radius: 999px; padding: 6px 14px 6px 11px; min-height: 40px; font-size: .88rem; font-weight: 700; cursor: pointer; transition: background .15s, border-color .15s; }
+.hero-trocar:hover { background: rgba(34, 211, 238, .24); border-color: var(--hero-accent); }
+.hero-trocar svg { width: 16px; height: 16px; flex: none; }
 .ajuda { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 12px; }
 .ajuda h2 { font-size: 1.15rem; }
 .ajuda ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; counter-reset: passo; }
@@ -432,6 +434,10 @@ details.outros .tags { padding: 0 10px 10px; }
 .det h3 { margin-top: 6px; }
 .seg-param { display: grid; grid-template-columns: repeat(3, auto); width: 100%; }
 .seg-param button { padding: 7px 8px; }
+.seg.seg-param { border: 0; background: none; padding: 0; gap: 6px; }
+.seg-param button { border: 1px solid var(--field-line); background: var(--surface-2); color: var(--ink); border-radius: 999px; padding: 7px 14px; transition: background .15s, border-color .15s; }
+.seg-param button:hover { border-color: var(--accent); background: var(--accent-soft); }
+.seg-param button[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); box-shadow: none; }
 .res-resumo { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; font-size: .85rem; color: var(--muted); }
 #g-tip { position: absolute; z-index: 4; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--line); padding: 8px 11px; border-radius: 10px; font-size: .8rem; max-width: 260px; display: grid; gap: 2px; box-shadow: 0 8px 24px rgba(0, 0, 0, .28); }
 #g-tip b { font-size: 1rem; }
@@ -1480,7 +1486,7 @@ function renderHoje() {
         </label>
         <button type="button" class="nav-dia" id="b-dia-prox" data-dia="1" aria-label="Próximo dia" title="${S.data >= hoje ? "Ver a previsão dos próximos dias" : "Próximo dia"}">${SETA_D}</button>
       </div>
-      <div class="hero-fab"><span class="hero-fab-rot">Dia da</span><b class="hero-fab-nome">Fábrica ${S.fab}</b>${S.soLeitura ? "" : `<button type="button" class="hero-trocar" id="b-trocar-fab" aria-expanded="${!!S.trocandoFab}">${S.trocandoFab ? "Fechar" : "Trocar"}</button>`}</div>
+      <div class="hero-fab"><span class="hero-fab-rot">Dia da</span><b class="hero-fab-nome">Fábrica ${S.fab}</b>${S.soLeitura ? "" : `<button type="button" class="hero-trocar" id="b-trocar-fab" aria-expanded="${!!S.trocandoFab}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${S.trocandoFab ? '<path d="M6 6l12 12M18 6L6 18"/>' : '<path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/>'}</svg>${S.trocandoFab ? "Fechar" : "Trocar"}</button>`}</div>
       ${S.trocandoFab ? `<div class="seg" role="radiogroup" aria-label="Fábrica do dia">
         ${[1, 2].map((f) => `<button type="button" role="radio" id="fab-${f}" data-fab="${f}" aria-checked="${S.fab === f}">Fábrica ${f}${f === fabSug ? "<small>indicada</small>" : ""}</button>`).join("")}
       </div>` : ""}
