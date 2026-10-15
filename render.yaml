@@ -16,4 +16,14 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
-        value: https://hriel123.github.io
+        value: https://hriel123.github.io,https://coleta-agua.onrender.com
+
+  - type: web
+    name: coleta-agua
+    runtime: static
+    buildCommand: mkdir -p publico && cp index.html publico/
+    staticPublishPath: publico
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
