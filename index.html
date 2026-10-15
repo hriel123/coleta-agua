@@ -2123,7 +2123,24 @@ vg.addEventListener("focusout", (ev) => {
 let tmrResize;
 window.addEventListener("resize", () => { clearTimeout(tmrResize); tmrResize = setTimeout(() => { if (S.aba === "graficos" && vg.clientWidth !== G.largura) renderGraficos(); }, 150); });
 
-iniciar();
+const ENDERECO_NOVO = "https://coleta-agua.onrender.com/";
+function temDadosNesteAparelho() {
+  try {
+    const j = JSON.parse(localStorage.getItem(LS_KEY) || "null");
+    if (j && j.dias && Object.keys(j.dias).length) return true;
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("coleta-agua:pendentes:") && (localStorage.getItem(k) || "[]") !== "[]") return true;
+    }
+  } catch {}
+  return false;
+}
+if (location.hostname === "hriel123.github.io" && !temDadosNesteAparelho()) {
+  location.replace(ENDERECO_NOVO + location.hash);
+} else {
+  iniciar();
+  if (location.hostname === "hriel123.github.io") setTimeout(() => toast("O site mudou para coleta-agua.onrender.com. Envie os dados deste aparelho para a sua conta e depois use o endereço novo."), 1500);
+}
 </script>
 </body>
 </html>
