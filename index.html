@@ -261,6 +261,16 @@ html.lista-propria select[aria-expanded="true"] { border-color: var(--accent); b
 .erro:empty { display: none; }
 .login-erro { margin: 0; background: var(--bad-soft); color: var(--bad); border-radius: 12px; padding: 10px 12px; font-size: .9rem; }
 #b-login { width: 100%; }
+.login-ok { margin: 0; background: var(--ok-soft); color: var(--ink); border-radius: 12px; padding: 10px 12px; font-size: .9rem; }
+#b-esqueci { justify-self: end; margin: -10px 0 -8px; min-height: 40px; font-size: .9rem; }
+#b-voltar-login { justify-self: center; margin-top: -6px; }
+.login-visitante { display: grid; gap: 10px; }
+.login-ou { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: .85rem; }
+.login-ou::before, .login-ou::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+#b-visitante { width: 100%; }
+.login-visitante .hint { text-align: center; font-size: .85rem; }
+.login-priv { margin: 0; text-align: center; font-size: .85rem; }
+.login-priv a { color: var(--muted); }
 body.sem-conta > header, body.sem-conta > main { display: none; }
 .sync { font-size: .75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); white-space: nowrap; }
 .sync.off { background: var(--warn-soft); color: var(--warn); }
@@ -601,19 +611,29 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
 <section id="login" hidden>
   <div class="login-card">
     <div class="login-marca"><span class="login-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-3 4.4-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-3-6.6-6-11z"/><path d="M9 14.5a3 3 0 0 0 3 3"/></svg></span><span>Coleta de Água</span></div>
-    <p class="login-sub">Entre para guardar suas coletas e ver tudo em qualquer aparelho.</p>
-    <div class="seg login-seg" role="radiogroup" aria-label="Acesso">
+    <p class="login-sub" id="l-sub">Entre para guardar suas coletas e ver tudo em qualquer aparelho.</p>
+    <div class="seg login-seg" id="l-seg" role="radiogroup" aria-label="Acesso">
       <button type="button" role="radio" id="lm-entrar" data-login-modo="entrar" aria-checked="true">Entrar</button>
       <button type="button" role="radio" id="lm-criar" data-login-modo="criar" aria-checked="false">Criar conta</button>
     </div>
     <form id="f-login" novalidate>
       <label class="field" for="l-nome" id="l-nome-campo" hidden><span>Nome</span><input type="text" id="l-nome" autocomplete="name" maxlength="80"><small class="erro" id="e-nome"></small></label>
-      <label class="field" for="l-email"><span>E-mail</span><input type="email" id="l-email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false"><small class="erro" id="e-email"></small></label>
-      <label class="field" for="l-senha"><span>Senha</span><span class="senha-wrap"><input type="password" id="l-senha" autocomplete="current-password"><button type="button" class="ver-senha" id="b-ver-senha" aria-label="Mostrar a senha">Mostrar</button></span><small class="erro" id="e-senha"></small></label>
+      <label class="field" for="l-email" id="l-email-campo"><span>E-mail</span><input type="email" id="l-email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false"><small class="erro" id="e-email"></small></label>
+      <label class="field" for="l-senha" id="l-senha-campo"><span id="l-senha-rot">Senha</span><span class="senha-wrap"><input type="password" id="l-senha" autocomplete="current-password"><button type="button" class="ver-senha" id="b-ver-senha" aria-label="Mostrar a senha">Mostrar</button></span><small class="erro" id="e-senha"></small></label>
+      <label class="field" for="l-senha2" id="l-senha2-campo" hidden><span>Repita a nova senha</span><input type="password" id="l-senha2" autocomplete="new-password"><small class="erro" id="e-senha2"></small></label>
+      <button type="button" class="link" id="b-esqueci">Esqueci minha senha</button>
       <p class="login-erro" id="l-erro" role="alert" hidden></p>
+      <p class="login-ok" id="l-ok" role="status" hidden></p>
       <p class="hint" id="l-espera" hidden>O servidor pode levar até 1 minuto para acordar no primeiro acesso do dia.</p>
       <button class="btn primary" type="submit" id="b-login">Entrar</button>
+      <button type="button" class="link" id="b-voltar-login" hidden>Voltar para o login</button>
     </form>
+    <div class="login-visitante" id="l-visitante">
+      <span class="login-ou">ou</span>
+      <button class="btn" type="button" id="b-visitante">Entrar como visitante</button>
+      <p class="hint">Sem cadastro: os registros ficam só neste aparelho. Depois dá para criar uma conta e levar tudo para ela.</p>
+    </div>
+    <p class="login-priv"><a href="privacidade.html">Política de privacidade</a></p>
   </div>
 </section>
 
@@ -844,7 +864,7 @@ async function salvarConfig(cfg) {
 
 /* ---------- Conta e servidor ---------- */
 const API_URL = ((document.querySelector('meta[name="coleta-api"]') || {}).content || "").trim().replace(/\/+$/, "");
-const TOKEN_KEY = "coleta-agua:token", CONTA_KEY = "coleta-agua:conta";
+const TOKEN_KEY = "coleta-agua:token", CONTA_KEY = "coleta-agua:conta", VISITANTE_KEY = "coleta-agua:visitante";
 const SRV = { token: null, conta: null, fila: [], enviando: false, erro: "", acordando: false, tmr: null, tmrSync: null };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ERROS_SERVIDOR = {
@@ -854,8 +874,18 @@ const ERROS_SERVIDOR = {
   "name, email and password are required": "Preencha nome, e-mail e senha.",
   "email and password are required": "Preencha e-mail e senha.",
   "email already registered": "Este e-mail já está cadastrado.",
-  "too many attempts, please try again later": "Muitas tentativas. Espere alguns minutos e tente de novo."
+  "too many attempts, please try again later": "Muitas tentativas. Espere alguns minutos e tente de novo.",
+  "email not configured": "A recuperação de senha por e-mail ainda não foi ativada.",
+  "invalid or expired reset link": "Este link expirou ou já foi usado. Peça um novo em \"Esqueci minha senha\".",
+  "token and password are required": "Informe a nova senha."
 };
+const ROTULO_LOGIN = { entrar: "Entrar", criar: "Criar conta", esqueci: "Enviar link", redefinir: "Salvar nova senha" };
+const SUB_LOGIN = {
+  entrar: "Entre para guardar suas coletas e ver tudo em qualquer aparelho.",
+  esqueci: "Informe o e-mail da sua conta. Vamos enviar um link para você criar uma senha nova.",
+  redefinir: "Crie uma senha nova para a sua conta."
+};
+const CAMPOS_LOGIN = ["nome", "email", "senha", "senha2"];
 function lsGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
 function lsSet(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch {} }
 function kCache() { return "coleta-agua:cache:" + SRV.conta.id; }
@@ -964,8 +994,25 @@ function iniciarServidor() {
   S.modo = "servidor";
   SRV.token = lsGet(TOKEN_KEY);
   try { SRV.conta = JSON.parse(lsGet(CONTA_KEY) || "null"); } catch { SRV.conta = null; }
-  if (!SRV.token || !SRV.conta || typeof SRV.conta.id !== "number") { mostrarLogin(); return; }
+  const redefinir = new URLSearchParams(location.search).get("redefinir");
+  if (redefinir) { S.tokenRedefinir = redefinir; S.loginModo = "redefinir"; SRV.token = null; mostrarLogin(); return; }
+  if (!SRV.token || !SRV.conta || typeof SRV.conta.id !== "number") { if (lsGet(VISITANTE_KEY)) entrarVisitante(); else mostrarLogin(); return; }
   entrarApp();
+}
+function entrarVisitante() {
+  lsSet(VISITANTE_KEY, "1"); S.visitante = true;
+  document.body.classList.remove("sem-conta"); $("#login").hidden = true;
+  carregarLocal(); mostrarSync();
+}
+function sairVisitante() {
+  lsSet(VISITANTE_KEY, null); S.visitante = false;
+  S.modo = "servidor"; S.pronto = false; S.dias = {}; S.legado = null;
+  S.loginModo = "criar";
+  mostrarLogin(); mostrarSync();
+}
+function limparRedefinir() {
+  S.tokenRedefinir = null;
+  history.replaceState(null, "", location.pathname + location.hash);
 }
 function entrarApp() {
   document.body.classList.remove("sem-conta"); $("#login").hidden = true;
@@ -989,47 +1036,71 @@ function mostrarLogin() {
 }
 function modoLogin(m) {
   S.loginModo = m;
-  const criar = m === "criar";
-  $("#lm-entrar").setAttribute("aria-checked", String(!criar));
+  const criar = m === "criar", esqueci = m === "esqueci", redefinir = m === "redefinir", acesso = !esqueci && !redefinir;
+  $("#lm-entrar").setAttribute("aria-checked", String(m === "entrar"));
   $("#lm-criar").setAttribute("aria-checked", String(criar));
+  $("#l-seg").hidden = !acesso;
+  $("#l-sub").textContent = SUB_LOGIN[m] || SUB_LOGIN.entrar;
   $("#l-nome-campo").hidden = !criar;
-  $("#l-senha").setAttribute("autocomplete", criar ? "new-password" : "current-password");
-  $("#b-login").textContent = criar ? "Criar conta" : "Entrar";
-  for (const c of ["nome", "email", "senha"]) { $("#e-" + c).textContent = ""; $("#l-" + c).classList.remove("invalido"); }
-  $("#l-erro").hidden = true;
+  $("#l-email-campo").hidden = redefinir;
+  $("#l-senha-campo").hidden = esqueci;
+  $("#l-senha2-campo").hidden = !redefinir;
+  $("#l-senha-rot").textContent = redefinir ? "Nova senha" : "Senha";
+  $("#l-senha").setAttribute("autocomplete", criar || redefinir ? "new-password" : "current-password");
+  $("#b-esqueci").hidden = m !== "entrar";
+  $("#b-voltar-login").hidden = acesso;
+  $("#l-visitante").hidden = !acesso;
+  $("#b-login").textContent = ROTULO_LOGIN[m];
+  for (const c of CAMPOS_LOGIN) { $("#e-" + c).textContent = ""; $("#l-" + c).classList.remove("invalido"); }
+  $("#l-erro").hidden = true; $("#l-ok").hidden = true;
 }
 async function enviarLogin(ev) {
   ev.preventDefault();
-  const criar = S.loginModo === "criar";
-  const nome = $("#l-nome").value.trim(), email = $("#l-email").value.trim(), senha = $("#l-senha").value;
+  const m = S.loginModo || "entrar", criar = m === "criar", redefinir = m === "redefinir";
+  const nome = $("#l-nome").value.trim(), email = $("#l-email").value.trim(), senha = $("#l-senha").value, senha2 = $("#l-senha2").value;
   const erros = {};
   if (criar && !nome) erros.nome = "Informe seu nome.";
-  if (!EMAIL_RE.test(email)) erros.email = "Informe um e-mail válido.";
-  if (!senha) erros.senha = "Informe sua senha.";
-  else if (criar && senha.length < 6) erros.senha = "A senha deve ter pelo menos 6 caracteres.";
-  for (const c of ["nome", "email", "senha"]) { $("#e-" + c).textContent = erros[c] || ""; $("#l-" + c).classList.toggle("invalido", !!erros[c]); }
-  $("#l-erro").hidden = true;
-  const primeiro = ["nome", "email", "senha"].find((c) => erros[c]);
+  if (!redefinir && !EMAIL_RE.test(email)) erros.email = "Informe um e-mail válido.";
+  if (m !== "esqueci") {
+    if (!senha) erros.senha = redefinir ? "Informe a nova senha." : "Informe sua senha.";
+    else if ((criar || redefinir) && senha.length < 6) erros.senha = "A senha deve ter pelo menos 6 caracteres.";
+  }
+  if (redefinir && !erros.senha && senha2 !== senha) erros.senha2 = "As duas senhas não são iguais.";
+  for (const c of CAMPOS_LOGIN) { $("#e-" + c).textContent = erros[c] || ""; $("#l-" + c).classList.toggle("invalido", !!erros[c]); }
+  $("#l-erro").hidden = true; $("#l-ok").hidden = true;
+  const primeiro = CAMPOS_LOGIN.find((c) => erros[c]);
   if (primeiro) { $("#l-" + primeiro).focus(); return; }
   const b = $("#b-login");
-  b.disabled = true; b.textContent = criar ? "Criando conta…" : "Entrando…";
+  b.disabled = true; b.textContent = { entrar: "Entrando…", criar: "Criando conta…", esqueci: "Enviando…", redefinir: "Salvando…" }[m];
   const espera = setTimeout(() => { $("#l-espera").hidden = false; }, 3000);
   try {
     SRV.token = null;
-    if (criar) await apiReq("/auth/register", { method: "POST", body: { name: nome, email, password: senha } });
-    const r = await apiReq("/auth/login", { method: "POST", body: { email, password: senha } });
+    if (m === "esqueci") {
+      await apiReq("/auth/forgot", { method: "POST", body: { email } });
+      $("#l-ok").textContent = "Se houver uma conta com este e-mail, enviamos um link para criar uma senha nova. Ele vale 30 minutos. Confira também a caixa de spam.";
+      $("#l-ok").hidden = false;
+      return;
+    }
+    let r;
+    if (redefinir) r = await apiReq("/auth/reset", { method: "POST", body: { token: S.tokenRedefinir, password: senha } });
+    else {
+      if (criar) await apiReq("/auth/register", { method: "POST", body: { name: nome, email, password: senha } });
+      r = await apiReq("/auth/login", { method: "POST", body: { email, password: senha } });
+    }
     SRV.token = r.token;
     const conta = await apiReq("/auth/me");
     SRV.conta = { id: conta.id, name: conta.name, email: conta.email };
     lsSet(TOKEN_KEY, SRV.token); lsSet(CONTA_KEY, JSON.stringify(SRV.conta));
-    $("#l-senha").value = "";
+    lsSet(VISITANTE_KEY, null); S.visitante = false;
+    $("#l-senha").value = ""; $("#l-senha2").value = "";
+    if (redefinir) { limparRedefinir(); S.loginModo = "entrar"; toast("Senha nova salva."); }
     entrarApp();
   } catch (e) {
     SRV.token = null;
     $("#l-erro").textContent = traduzirErro(e); $("#l-erro").hidden = false;
   } finally {
     clearTimeout(espera); $("#l-espera").hidden = true;
-    b.disabled = false; b.textContent = S.loginModo === "criar" ? "Criar conta" : "Entrar";
+    b.disabled = false; b.textContent = ROTULO_LOGIN[S.loginModo] || ROTULO_LOGIN.entrar;
   }
 }
 function sessaoExpirada() {
@@ -1104,13 +1175,16 @@ async function iniciar() {
   } else if (!window.claude && API_URL) {
     iniciarServidor();
   } else {
-    S.modo = "local";
-    const j = lerLocal();
-    S.config = normalizarConfig(j && j.config);
-    S.dias = {}; for (const d of Object.values((j && j.dias) || {})) { const v = limparDia(d); if (v) S.dias[v.data] = v; }
-    S.pronto = true;
-    aoMudarDados();
+    carregarLocal();
   }
+}
+function carregarLocal() {
+  S.modo = "local";
+  const j = lerLocal();
+  S.config = normalizarConfig(j && j.config);
+  S.dias = {}; for (const d of Object.values((j && j.dias) || {})) { const v = limparDia(d); if (v) S.dias[v.data] = v; }
+  S.pronto = true;
+  aoMudarDados();
 }
 function assinar() {
   let temCfg = false, temDias = false;
@@ -1471,6 +1545,7 @@ function renderHoje() {
       </ol>
       <button class="btn" type="button" id="b-ajuda-ok">Entendi</button>
     </div>`);
+  if (S.visitante) notas.unshift(nota("info", "Você está usando como visitante: os registros ficam só neste aparelho.", '<button class="link" type="button" data-criar-conta="1">Criar conta</button>'));
   if (S.modo === "servidor" && S.legado) notas.unshift(nota("info", `Este aparelho tem ${S.legado.dias.length} dias salvos de antes da conta.`, '<button class="link" type="button" id="b-migrar">Enviar para a minha conta</button>'));
 
   const C = 2 * Math.PI * 30, feito = nTopo ? nFeitos / nTopo : 0;
@@ -1640,8 +1715,11 @@ function renderAjustes() {
   if (focado !== "r-bebedouro") $("#r-bebedouro").value = S.config.regras.Bebedouro ?? 0;
   ["r-torneira", "r-bebedouro", "n-fab", "n-setor", "n-tipo", "b-novo", "f-import"].forEach((id) => { $("#" + id).disabled = S.soLeitura; });
   const cc = $("#conta-card");
-  cc.hidden = S.modo !== "servidor" || !SRV.conta;
-  if (!cc.hidden) {
+  cc.hidden = !S.visitante && (S.modo !== "servidor" || !SRV.conta);
+  if (S.visitante) {
+    $("#conta-info").innerHTML = "Você está usando como <b>visitante</b>: os registros ficam só neste navegador. Crie uma conta para guardar tudo e ver em qualquer aparelho; os dias já salvos aqui podem ir junto.";
+    $("#conta-acoes").innerHTML = '<button class="btn primary" type="button" data-criar-conta="1">Criar conta ou entrar</button>';
+  } else if (!cc.hidden) {
     $("#conta-info").innerHTML = `Conectado como <b>${esc(SRV.conta.name)}</b> (${esc(SRV.conta.email)}). Seus registros ficam salvos na conta e aparecem em qualquer aparelho em que você entrar.`;
     const n = SRV.fila.length;
     $("#conta-acoes").innerHTML = S.confirmSair && n
@@ -2378,7 +2456,7 @@ document.addEventListener("click", async (ev) => {
   if (t.id === "b-trocar-fab") { S.trocandoFab = !S.trocandoFab; renderHoje(); $("#b-trocar-fab")?.focus(); return; }
   if (t.id === "b-ajuda") { S.ajuda = true; if (S.aba !== "hoje") trocarAba("hoje"); if (S.pronto) renderHoje(); window.scrollTo(0, 0); return; }
   if (t.id === "b-ajuda-ok") { S.ajuda = false; lsSet("coleta-agua:ajuda-ok", "1"); renderHoje(); return; }
-  if (t.id === "b-ver-senha") { const i = $("#l-senha"), ver = i.type === "password"; i.type = ver ? "text" : "password"; t.textContent = ver ? "Ocultar" : "Mostrar"; t.setAttribute("aria-label", ver ? "Ocultar a senha" : "Mostrar a senha"); i.focus(); return; }
+  if (t.id === "b-ver-senha") { const i = $("#l-senha"), ver = i.type === "password"; i.type = ver ? "text" : "password"; $("#l-senha2").type = i.type; t.textContent = ver ? "Ocultar" : "Mostrar"; t.setAttribute("aria-label", ver ? "Ocultar a senha" : "Mostrar a senha"); i.focus(); return; }
   if (t.id === "b-tema") { aplicarTema(temaEscuro() ? "claro" : "escuro"); return; }
   if (t.dataset.param) { G.param = t.dataset.param; renderGraficos(); $("#" + t.id)?.focus(); return; }
   if (t.dataset.fab) { guardarRascunho(); S.trocandoFab = false; S.fabManual = Number(t.dataset.fab); montarRascunho(); renderHoje(); $("#fab-" + S.fab)?.focus(); return; }
@@ -2407,6 +2485,10 @@ document.addEventListener("click", async (ev) => {
   if (t.dataset.ncLimpar) { const id = t.dataset.ncLimpar; delete S.nc[id]; marcarRascunho(); renderHoje(); document.querySelector(`[data-nc-abrir="${id}"]`)?.focus(); return; }
   if (t.id === "b-backup") { oferecerArquivo(`coleta_agua_backup_${hojeISO()}.json`, JSON.stringify({ config: S.config, dias: Object.values(S.dias) }, null, 1)); return; }
   if (t.id === "b-import-sim") { importar(); return; }
+  if (t.id === "b-visitante") { entrarVisitante(); return; }
+  if (t.dataset.criarConta) { sairVisitante(); $("#l-nome").focus(); return; }
+  if (t.id === "b-esqueci") { modoLogin("esqueci"); $("#l-email").focus(); return; }
+  if (t.id === "b-voltar-login") { if (S.tokenRedefinir) limparRedefinir(); modoLogin("entrar"); $("#l-email").focus(); return; }
   if (t.dataset.loginModo) { modoLogin(t.dataset.loginModo); $(t.dataset.loginModo === "criar" ? "#l-nome" : "#l-email").focus(); return; }
   if (t.id === "b-sair") { if (SRV.fila.length) { S.confirmSair = true; renderAjustes(); } else sairConta(); return; }
   if (t.id === "b-sair-forcar") { sairConta(); return; }

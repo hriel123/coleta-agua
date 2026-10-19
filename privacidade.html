@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Política de privacidade · Coleta de Água</title>
+<meta name="description" content="Quais dados o Coleta de Água guarda, para que usa e como pedir correção ou exclusão.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2322d3ee'/%3E%3Cstop offset='1' stop-color='%2334d399'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M32 4C23 17 12 29 12 41a20 20 0 0 0 40 0C52 29 41 17 32 4z' fill='url(%23g)'/%3E%3Cpath d='M22 41a10 10 0 0 0 10 10' fill='none' stroke='%230a1322' stroke-width='4.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<script>
+  try {
+    var t = localStorage.getItem('coleta-agua:tema');
+    if (t === 'claro') document.documentElement.setAttribute('data-theme', 'light');
+    else if (t !== 'auto') document.documentElement.setAttribute('data-theme', 'dark');
+  } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --bg: #F2F5FA; --surface: #FFFFFF; --line: #DCE3ED;
+    --ink: #0F1B2D; --muted: #5A6B82; --accent: #0B7A96;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0A1322; --surface: #101B2E; --line: #1F2D45;
+      --ink: #E6EDF7; --muted: #8FA1B9; --accent: #22D3EE;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0A1322; --surface: #101B2E; --line: #1F2D45;
+    --ink: #E6EDF7; --muted: #8FA1B9; --accent: #22D3EE;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Manrope, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.7; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 40px 16px 72px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem; color: var(--ink); text-decoration: none; margin-bottom: 28px; }
+  .brand svg { width: 30px; height: 30px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 28px 24px; }
+  h1 { font-size: clamp(1.6rem, 5vw, 2.1rem); line-height: 1.2; margin-bottom: 6px; }
+  .date { color: var(--muted); font-size: .9rem; margin-bottom: 24px; }
+  h2 { font-size: 1.1rem; margin: 28px 0 8px; }
+  p, li { color: var(--muted); }
+  p + p { margin-top: 10px; }
+  ul { padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
+  strong { color: var(--ink); font-weight: 700; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="brand" href="./">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="g-logo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs><path d="M12 2.5c-3.2 4.6-6.5 8-6.5 11.7a6.5 6.5 0 0 0 13 0c0-3.7-3.3-7.1-6.5-11.7z" fill="url(#g-logo)"/><path d="M9 15a3 3 0 0 0 3 3" fill="none" stroke="#0a1322" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Coleta de Água
+  </a>
+  <main class="card">
+    <h1>Política de privacidade</h1>
+    <p class="date">Atualizada em 19 de outubro de 2026.</p>
+
+    <p>O Coleta de Água é um projeto desenvolvido por Hariel Silva Fabrício para organizar o rodízio de coleta de amostras de água. Esta página explica quais dados o sistema guarda, para que eles servem e como pedir correção ou exclusão, de acordo com a Lei Geral de Proteção de Dados (LGPD).</p>
+
+    <h2>Quais dados guardamos</h2>
+    <ul>
+      <li><strong>Conta:</strong> nome, e-mail e data de criação. A senha é guardada só em forma criptografada (hash); ninguém consegue lê-la, nem nós.</li>
+      <li><strong>Registros que você cadastra:</strong> pontos de coleta (setor, tipo e fábrica), regras do rodízio e, para cada dia, os pontos coletados, os resultados de cloro, pH e turbidez, o horário, quem coletou, os motivos de pontos não coletados e as observações.</li>
+      <li><strong>Recuperação de senha:</strong> quando você pede um link, guardamos um código temporário, também criptografado, que vale 30 minutos.</li>
+      <li><strong>No seu navegador:</strong> o acesso à conta (para você não precisar entrar toda vez), uma cópia dos registros para o site abrir rápido e funcionar sem internet, as alterações ainda não enviadas, o tema e o último nome usado em "Quem coletou". No modo visitante, todos os registros ficam só no navegador e nunca são enviados ao servidor.</li>
+    </ul>
+
+    <h2>Para que usamos</h2>
+    <p>Só para o site funcionar: mostrar o rodízio, o histórico, os gráficos e os resultados das análises, e enviar o e-mail de recuperação de senha.</p>
+    <p>Não vendemos nem compartilhamos dados com ninguém, não usamos para propaganda e não há ferramentas de rastreamento ou estatísticas de visitas. Cada conta vê só os próprios registros.</p>
+
+    <h2>Onde os dados ficam</h2>
+    <p>O site e o servidor ficam no Render, com um banco de dados PostgreSQL no Neon. Os e-mails de recuperação de senha são enviados pelo Brevo, um serviço de envio de e-mails. Ao abrir as páginas, o navegador também carrega as fontes do Google Fonts, que recebe o endereço de internet do aparelho, como acontece na maioria dos sites.</p>
+
+    <h2>Por quanto tempo</h2>
+    <p>Os registros ficam guardados enquanto a conta existir. Você pode excluir dias a qualquer momento pelo Histórico. Ao sair da conta, a cópia guardada no navegador é apagada.</p>
+
+    <h2>Segurança</h2>
+    <p>Toda a comunicação usa conexão segura (HTTPS), as senhas são criptografadas e há limite de tentativas de login para dificultar ataques.</p>
+
+    <h2>Seus direitos</h2>
+    <p>Você pode pedir para ver, corrigir ou excluir os seus dados e a sua conta. Basta escrever para <a href="mailto:hariel.silvafabricio@gmail.com">hariel.silvafabricio@gmail.com</a> usando o e-mail da conta. O pedido é atendido em até 15 dias.</p>
+  </main>
+</div>
+</body>
+</html>

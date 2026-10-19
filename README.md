@@ -22,24 +22,27 @@ Site para planejar e registrar a coleta diária de amostras de água potável em
 - Painel com indicadores, gráficos por período e por ponto e lista de alertas
 - Histórico dos dias registrados, com "Copiar resumo" e planilha por período
 - Login com conta própria: cada conta guarda as próprias coletas no servidor e vê tudo em qualquer aparelho
+- "Esqueci minha senha": o link para criar uma senha nova chega por e-mail
+- Modo visitante: usa o site sem cadastro, com os registros só no aparelho, e depois envia tudo para uma conta nova
 - Tema claro e escuro e layout para celular, com barra de navegação inferior
 - Cópia de segurança: baixar e restaurar os dados
 
 <img src="docs/celular.webp" alt="Painel do Coleta de Água no celular" width="300">
 
-Os prints usam dados de exemplo.
+Os prints usam dados de exemplo. A [política de privacidade](https://coleta-agua.onrender.com/privacidade.html) explica quais dados são guardados.
 
 ## Tecnologias
 
 - **Site:** HTML, CSS e JavaScript puros, sem frameworks
 - **API:** Node.js com Express 5, Prisma e PostgreSQL (Neon)
-- **Login:** JWT e bcrypt
+- **Login:** JWT e bcrypt; e-mail de recuperação de senha pela API do Brevo
 - **Hospedagem:** Render (site estático e API)
 
 ## Estrutura
 
 ```
 index.html    site (estilos e scripts embutidos)
+privacidade.html  política de privacidade
 backend/      API: rotas, schema do Prisma e migrations (veja backend/README.md)
 render.yaml   serviços no Render: site estático e API
 docs/         imagens deste README

@@ -17,11 +17,17 @@ services:
         generateValue: true
       - key: CORS_ORIGIN
         value: https://hriel123.github.io,https://coleta-agua.onrender.com
+      - key: APP_URL
+        value: https://coleta-agua.onrender.com
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
 
   - type: web
     name: coleta-agua
     runtime: static
-    buildCommand: mkdir -p publico && cp index.html publico/
+    buildCommand: mkdir -p publico && cp index.html privacidade.html publico/
     staticPublishPath: publico
     headers:
       - path: /*

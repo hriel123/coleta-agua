@@ -17,6 +17,8 @@ Servidor que guarda as contas e os registros do site Coleta de Água. Cada conta
 | POST | `/auth/register` | Cria a conta (`name`, `email`, `password`) |
 | POST | `/auth/login` | Devolve o token (`email`, `password`). Vale 30 dias |
 | GET | `/auth/me` | Dados da conta logada |
+| POST | `/auth/forgot` | Envia por e-mail o link para criar uma senha nova (`email`). Responde igual, exista ou não a conta |
+| POST | `/auth/reset` | Salva a senha nova (`token` do link, `password`) e devolve o token de acesso. O link vale 30 minutos e uma vez só |
 | GET | `/dados` | Configuração dos pontos e todos os dias da conta |
 | PUT | `/dados/config` | Salva a configuração dos pontos |
 | PUT | `/dados/dias/:data` | Salva um dia (`AAAA-MM-DD`) |
@@ -56,6 +58,16 @@ A API sobe em `http://localhost:3001`. Para o site usar essa API, coloque o ende
 
 No plano gratuito o servidor dorme depois de 15 minutos sem uso. O primeiro acesso depois disso leva de 30 a 60 segundos. Enquanto isso, o site mostra os dados guardados no aparelho e envia as alterações quando o servidor responde.
 
-### 3. Ligar o login no site
+### 3. E-mail de recuperação de senha (Brevo)
+
+O plano gratuito do Render bloqueia SMTP, então o e-mail sai pela API do [Brevo](https://www.brevo.com) (300 e-mails por dia no plano gratuito).
+
+1. No Brevo, em **Senders, Domains & Dedicated IPs** > **Senders**, cadastre e verifique o e-mail que vai enviar as mensagens.
+2. Em **SMTP & API** > **API Keys**, crie uma chave.
+3. No Render, em `coleta-agua-api` > **Environment**, adicione `BREVO_API_KEY` (a chave) e `MAIL_FROM` (o e-mail verificado). O `APP_URL` já vem no `render.yaml`.
+
+Sem essas variáveis, o resto funciona normalmente e `/auth/forgot` responde 503.
+
+### 4. Ligar o login no site
 
 No `index.html`, troque `<meta name="coleta-api" content="">` pelo endereço do serviço, por exemplo `<meta name="coleta-api" content="https://coleta-agua-api.onrender.com">`, e publique.
