@@ -271,6 +271,11 @@ html.lista-propria select[aria-expanded="true"] { border-color: var(--accent); b
 .login-visitante .hint { text-align: center; font-size: .85rem; }
 .login-priv { margin: 0; text-align: center; font-size: .85rem; }
 .login-priv a { color: var(--muted); }
+.demo-faixa { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 2px 10px; padding: 6px 16px; background: var(--accent); color: var(--on-accent); font-size: .88rem; font-weight: 600; text-align: center; }
+.demo-faixa > span { display: inline-flex; align-items: center; gap: 8px; }
+.demo-faixa svg { width: 16px; height: 16px; flex: none; }
+.demo-faixa button { background: none; border: 0; color: inherit; font: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 4px 2px; min-height: 32px; }
+@media (max-width: 719px) { .demo-faixa { font-size: .8rem; padding: 4px 12px; gap: 0 8px; } .demo-faixa svg { display: none; } .demo-faixa button { min-height: 28px; } }
 body.sem-conta > header, body.sem-conta > main { display: none; }
 .sync { font-size: .75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); white-space: nowrap; }
 .sync.off { background: var(--warn-soft); color: var(--warn); }
@@ -631,11 +636,13 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
     <div class="login-visitante" id="l-visitante">
       <span class="login-ou">ou</span>
       <button class="btn" type="button" id="b-visitante">Entrar como visitante</button>
-      <p class="hint">Sem cadastro: os registros ficam só neste aparelho. Depois dá para criar uma conta e levar tudo para ela.</p>
+      <p class="hint">Sem cadastro, com dados de exemplo salvos só neste navegador.</p>
     </div>
     <p class="login-priv"><a href="privacidade.html">Política de privacidade</a></p>
   </div>
 </section>
+
+<div class="demo-faixa" id="demo-faixa" hidden><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 15.5a2 2 0 0 0-1.44-1.44l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94a2 2 0 0 0 1.44-1.44l1.58-6.13a.5.5 0 0 1 .96 0l1.58 6.13a2 2 0 0 0 1.44 1.44l6.13 1.58a.5.5 0 0 1 0 .96l-6.13 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.13a.5.5 0 0 1-.96 0z"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3"/></svg>Modo visitante: dados de exemplo, salvos só neste navegador.</span><button type="button" data-criar-conta="1">Criar minha conta</button></div>
 
 <header class="top">
   <div class="top-in">
@@ -831,8 +838,10 @@ function msgErro(e) {
 
 /* ---------- Armazenamento ---------- */
 const LS_KEY = "coleta-agua:v1";
-function lerLocal() { try { return JSON.parse(localStorage.getItem(LS_KEY) || "null"); } catch { return null; } }
-function gravarLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify({ config: S.config, dias: S.dias })); return true; } catch { return false; } }
+const DEMO_KEY = "coleta-agua:visitante:dados";
+function chaveLocal() { return S.visitante ? DEMO_KEY : LS_KEY; }
+function lerLocal() { try { return JSON.parse(localStorage.getItem(chaveLocal()) || "null"); } catch { return null; } }
+function gravarLocal() { try { localStorage.setItem(chaveLocal(), JSON.stringify({ config: S.config, dias: S.dias })); return true; } catch { return false; } }
 
 async function salvarDia(dia) {
   if (S.modo === "servidor") { enfileirar({ op: "dia", data: dia.data, corpo: dia }); return; }
@@ -1001,21 +1010,50 @@ function iniciarServidor() {
 }
 function entrarVisitante() {
   lsSet(VISITANTE_KEY, "1"); S.visitante = true;
-  document.body.classList.remove("sem-conta"); $("#login").hidden = true;
+  if (!lerLocal()) lsSet(DEMO_KEY, JSON.stringify(dadosExemplo()));
+  document.body.classList.remove("sem-conta"); $("#login").hidden = true; $("#demo-faixa").hidden = false;
   carregarLocal(); mostrarSync();
 }
 function sairVisitante() {
-  lsSet(VISITANTE_KEY, null); S.visitante = false;
+  lsSet(VISITANTE_KEY, null); lsSet(DEMO_KEY, null); S.visitante = false;
+  for (const k of Object.keys(RASC)) delete RASC[k];
+  gravarRascunhos();
   S.modo = "servidor"; S.pronto = false; S.dias = {}; S.legado = null;
-  S.loginModo = "criar";
+  S.loginModo = "criar"; $("#demo-faixa").hidden = true;
   mostrarLogin(); mostrarSync();
+}
+function dadosExemplo() {
+  const antes = { config: S.config, dias: S.dias };
+  S.config = clone(PADRAO); S.dias = {};
+  let semente = 11, n = 0;
+  const rnd = () => { semente = (semente * 9301 + 49297) % 233280; return semente / 233280; };
+  const val = (min, max, casas) => Number((min + rnd() * (max - min)).toFixed(casas));
+  const hoje = hojeISO(), agora = new Date().toISOString();
+  for (let d = addDias(hoje, -63); d < hoje; d = addDias(d, 1)) {
+    if ([0, 6].includes(new Date(utc(d)).getUTCDay())) continue;
+    n++;
+    if (n === 25) { S.dias[d] = { data: d, semColeta: true, motivo: "Fábrica parada", fabrica: null, itens: [], obs: "Parada para manutenção geral.", atualizadoEm: agora }; continue; }
+    const fab = fabricaSugerida(d), itens = [], naoColetados = [];
+    sugeridos(fab, d).forEach((id, i, ids) => {
+      const p = S.config.pontos.find((x) => x.id === id);
+      if (n === 34 && i === ids.length - 1) { naoColetados.push({ ponto: id, setor: p.setor, tipo: p.tipo, fabrica: p.fabrica, motivo: "Em manutenção" }); return; }
+      const it = { ponto: id, setor: p.setor, tipo: p.tipo, fabrica: p.fabrica, cloro: val(0.8, 2.2, 2), ph: val(6.8, 7.6, 1), turbidez: val(0.2, 1.4, 2) };
+      if (n === 30 && i === 1) it.cloro = 0.12;
+      if (n === 38 && i === 2) it.turbidez = 5.8;
+      itens.push(it);
+    });
+    S.dias[d] = { data: d, fabrica: fab, itens, naoColetados, hora: pad(7 + Math.floor(rnd() * 3)) + ":" + pad(Math.floor(rnd() * 4) * 15), responsavel: "", obs: "", atualizadoEm: agora };
+  }
+  const ex = { config: S.config, dias: S.dias };
+  S.config = antes.config; S.dias = antes.dias;
+  return ex;
 }
 function limparRedefinir() {
   S.tokenRedefinir = null;
   history.replaceState(null, "", location.pathname + location.hash);
 }
 function entrarApp() {
-  document.body.classList.remove("sem-conta"); $("#login").hidden = true;
+  document.body.classList.remove("sem-conta"); $("#login").hidden = true; $("#demo-faixa").hidden = true;
   S.pronto = false; S.dias = {}; S.legado = null;
   try { SRV.fila = JSON.parse(lsGet(kFila()) || "[]"); if (!Array.isArray(SRV.fila)) SRV.fila = []; } catch { SRV.fila = []; }
   let c = null; try { c = JSON.parse(lsGet(kCache()) || "null"); } catch {}
@@ -1545,7 +1583,6 @@ function renderHoje() {
       </ol>
       <button class="btn" type="button" id="b-ajuda-ok">Entendi</button>
     </div>`);
-  if (S.visitante) notas.unshift(nota("info", "Você está usando como visitante: os registros ficam só neste aparelho.", '<button class="link" type="button" data-criar-conta="1">Criar conta</button>'));
   if (S.modo === "servidor" && S.legado) notas.unshift(nota("info", `Este aparelho tem ${S.legado.dias.length} dias salvos de antes da conta.`, '<button class="link" type="button" id="b-migrar">Enviar para a minha conta</button>'));
 
   const C = 2 * Math.PI * 30, feito = nTopo ? nFeitos / nTopo : 0;
@@ -1717,8 +1754,8 @@ function renderAjustes() {
   const cc = $("#conta-card");
   cc.hidden = !S.visitante && (S.modo !== "servidor" || !SRV.conta);
   if (S.visitante) {
-    $("#conta-info").innerHTML = "Você está usando como <b>visitante</b>: os registros ficam só neste navegador. Crie uma conta para guardar tudo e ver em qualquer aparelho; os dias já salvos aqui podem ir junto.";
-    $("#conta-acoes").innerHTML = '<button class="btn primary" type="button" data-criar-conta="1">Criar conta ou entrar</button>';
+    $("#conta-info").innerHTML = "Você está no <b>modo visitante</b>, com dados de exemplo salvos só neste navegador. Crie uma conta para registrar as suas coletas e ver tudo em qualquer aparelho.";
+    $("#conta-acoes").innerHTML = '<button class="btn primary" type="button" data-criar-conta="1">Criar minha conta</button>';
   } else if (!cc.hidden) {
     $("#conta-info").innerHTML = `Conectado como <b>${esc(SRV.conta.name)}</b> (${esc(SRV.conta.email)}). Seus registros ficam salvos na conta e aparecem em qualquer aparelho em que você entrar.`;
     const n = SRV.fila.length;

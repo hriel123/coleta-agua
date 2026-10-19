@@ -23,7 +23,7 @@ Site para planejar e registrar a coleta diária de amostras de água potável em
 - Histórico dos dias registrados, com "Copiar resumo" e planilha por período
 - Login com conta própria: cada conta guarda as próprias coletas no servidor e vê tudo em qualquer aparelho
 - "Esqueci minha senha": o link para criar uma senha nova chega por e-mail
-- Modo visitante: usa o site sem cadastro, com os registros só no aparelho, e depois envia tudo para uma conta nova
+- Modo visitante: conhece o site sem cadastro, com dados de exemplo salvos só no navegador
 - Tema claro e escuro e layout para celular, com barra de navegação inferior
 - Cópia de segurança: baixar e restaurar os dados
 
