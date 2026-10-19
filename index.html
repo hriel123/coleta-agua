@@ -394,6 +394,13 @@ details.outros .tags { padding: 0 10px 10px; }
 .empty b { font-family: var(--f-display); font-stretch: 110%; }
 
 #toast { position: fixed; left: 16px; right: 16px; margin-inline: auto; width: fit-content; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 700; z-index: 10; }
+#acordando { position: fixed; left: 16px; right: 16px; top: calc(16px + env(safe-area-inset-top, 0px)); margin-inline: auto; max-width: 440px; z-index: 40; display: flex; gap: 14px; align-items: flex-start; background: var(--surface); color: var(--ink); border: 1px solid var(--accent); border-radius: var(--r); padding: 16px 18px; box-shadow: 0 12px 32px rgba(0, 0, 0, .28); animation: acordando-in .25s ease-out; }
+#acordando[hidden] { display: none; }
+#acordando .giro { width: 22px; height: 22px; flex: none; margin-top: 2px; border-radius: 50%; border: 2.5px solid var(--line); border-top-color: var(--accent); animation: giro .8s linear infinite; }
+#acordando p { margin: 4px 0 0; color: var(--muted); font-size: .88rem; line-height: 1.45; }
+#acordando small { display: block; margin-top: 8px; color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
+@keyframes giro { to { transform: rotate(360deg); } }
+@keyframes acordando-in { from { opacity: 0; transform: translateY(-8px); } }
 
 #v-graficos { position: relative; }
 .filtros { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 10px; align-items: end; }
@@ -629,7 +636,6 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
       <button type="button" class="link" id="b-esqueci">Esqueci minha senha</button>
       <p class="login-erro" id="l-erro" role="alert" hidden></p>
       <p class="login-ok" id="l-ok" role="status" hidden></p>
-      <p class="hint" id="l-espera" hidden>O servidor pode levar até 1 minuto para acordar no primeiro acesso do dia.</p>
       <button class="btn primary" type="submit" id="b-login">Entrar</button>
       <button type="button" class="link" id="b-voltar-login" hidden>Voltar para o login</button>
     </form>
@@ -742,6 +748,14 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
   <linearGradient id="ga-f2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--s2)" stop-opacity=".42"/><stop offset="1" style="stop-color:var(--s2)" stop-opacity="0"/></linearGradient>
 </defs></svg>
 <div id="toast" role="status" aria-live="polite" hidden></div>
+<div id="acordando" role="status" aria-live="polite" hidden>
+  <span class="giro" aria-hidden="true"></span>
+  <div>
+    <b>Ligando o servidor…</b>
+    <p>Ele fica em repouso quando ninguém está usando e leva até 1 minuto para voltar. Aguarde, não precisa recarregar a página.</p>
+    <small data-tempo></small>
+  </div>
+</div>
 <div id="folha" hidden><div class="folha-in" role="dialog" aria-modal="true" aria-labelledby="folha-tit">
   <h2 id="folha-tit">Resumo do dia</h2>
   <p class="hint">Este navegador não deixou copiar sozinho. Selecione o texto e copie.</p>
@@ -899,12 +913,23 @@ function lsGet(k) { try { return localStorage.getItem(k); } catch { return null;
 function lsSet(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch {} }
 function kCache() { return "coleta-agua:cache:" + SRV.conta.id; }
 function kFila() { return "coleta-agua:pendentes:" + SRV.conta.id; }
+const ACORDANDO = { pendentes: 0, tmr: null, tick: null };
+function avisoAcordando(desde) {
+  const el = $("#acordando");
+  clearInterval(ACORDANDO.tick);
+  el.hidden = !desde;
+  if (!desde) return;
+  const tick = () => { el.querySelector("[data-tempo]").textContent = "Aguardando há " + Math.round((Date.now() - desde) / 1000) + " s"; };
+  tick(); ACORDANDO.tick = setInterval(tick, 1000);
+}
 async function apiReq(path, { method = "GET", body } = {}) {
   const headers = { "Content-Type": "application/json" };
   if (SRV.token) headers.Authorization = "Bearer " + SRV.token;
+  if (++ACORDANDO.pendentes === 1) { const inicio = Date.now(); ACORDANDO.tmr = setTimeout(() => avisoAcordando(inicio), 4000); }
   let res;
   try { res = await fetch(API_URL + path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined }); }
   catch { const e = new Error("network"); e.status = 0; throw e; }
+  finally { if (--ACORDANDO.pendentes === 0) { clearTimeout(ACORDANDO.tmr); avisoAcordando(null); } }
   if (res.status === 204) return null;
   const data = await res.json().catch(() => null);
   if (!res.ok) { const e = new Error((data && data.error) || "HTTP " + res.status); e.status = res.status; throw e; }
@@ -1110,7 +1135,6 @@ async function enviarLogin(ev) {
   if (primeiro) { $("#l-" + primeiro).focus(); return; }
   const b = $("#b-login");
   b.disabled = true; b.textContent = { entrar: "Entrando…", criar: "Criando conta…", esqueci: "Enviando…", redefinir: "Salvando…" }[m];
-  const espera = setTimeout(() => { $("#l-espera").hidden = false; }, 3000);
   try {
     SRV.token = null;
     if (m === "esqueci") {
@@ -1137,7 +1161,6 @@ async function enviarLogin(ev) {
     SRV.token = null;
     $("#l-erro").textContent = traduzirErro(e); $("#l-erro").hidden = false;
   } finally {
-    clearTimeout(espera); $("#l-espera").hidden = true;
     b.disabled = false; b.textContent = ROTULO_LOGIN[S.loginModo] || ROTULO_LOGIN.entrar;
   }
 }
