@@ -100,6 +100,7 @@ html { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) var(--bg); }
   optgroup option:checked { font-weight: 700; }
 }
 [hidden] { display: none !important; }
+.vh { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5; }
 button, input, select, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -368,16 +369,21 @@ details.outros .tags { padding: 0 10px 10px; }
 
 .month { margin-top: 6px; }
 .dia { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; }
-.dia { cursor: pointer; }
+.dia { position: relative; cursor: pointer; }
 .dia:hover { border-color: var(--field-line); }
 .dia header { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; min-width: 0; }
 .dia-meta { margin: -4px 0 0; font-size: .85rem; color: var(--muted); overflow-wrap: anywhere; }
-.dia time, .dia .chip { white-space: nowrap; flex: none; }
+.dia time { white-space: nowrap; flex: none; }
+.dia-abrir { flex: 1 1 auto; align-self: stretch; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; }
+.dia-abrir::after { content: ""; position: absolute; inset: -1px; border-radius: 16px; }
+.dia-abrir:focus-visible { outline: none; }
+.dia-abrir:focus-visible::after { outline: 2px solid var(--accent); outline-offset: 2px; }
 .nc-li { color: var(--warn); }
 .dia time { font-family: var(--f-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
 .chip { font-size: .75rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
 .chip.f1, .chip.f2 { color: var(--ink); }
-.dia .acts { margin-left: auto; display: flex; gap: 2px; flex: none; }
+.dia .acts { position: relative; z-index: 1; margin-left: auto; display: flex; gap: 2px; flex: none; }
+.dia .confirm { position: relative; z-index: 1; }
 .itens { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .92rem; }
 .itens li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 2px 8px; align-items: center; }
 .itens .vals { grid-column: 2; }
@@ -1745,12 +1751,12 @@ function renderHistorico() {
             <button class="icon-btn" type="button" data-resumo="${d.data}" aria-label="Copiar resumo de ${fmt(d.data)}" title="Copiar resumo">${ICO_COPIA}</button>
             ${S.soLeitura ? "" : `<button class="icon-btn danger" type="button" data-excluir="${d.data}" aria-label="Excluir ${fmt(d.data)}" title="Excluir">${ICO_LIXO}</button>`}
           </span>`;
-    const abrir = `data-abrir="${d.data}" tabindex="0" role="button" aria-label="Abrir ${semana(d.data)} ${fmt(d.data)}"`;
+    const resumo = resumoDia(d).split("\n").slice(1).map((l) => l.replace(/^[✓✗] /, "").replace(/\.$/, "")).join(". ");
+    const abrir = (chip) => `<button type="button" class="dia-abrir" data-abrir="${d.data}"><time datetime="${d.data}">${semana(d.data)} ${fmtCurto(d.data)}</time> ${chip}${resumo ? `<span class="vh">: ${esc(resumo)}.</span>` : ""}</button>`;
     if (d.semColeta) {
-      html += `<article class="dia" ${abrir}>
+      html += `<article class="dia">
         <header>
-          <time datetime="${d.data}">${semana(d.data)} ${fmtCurto(d.data)}</time>
-          <span class="chip sc">Sem coleta · ${esc(d.motivo)}</span>
+          ${abrir(`<span class="chip sc">Sem coleta · ${esc(d.motivo)}</span>`)}
           ${acoes}
         </header>
         ${d.obs ? `<p class="obs">${esc(d.obs)}</p>` : ""}
@@ -1760,10 +1766,9 @@ function renderHistorico() {
     }
     const itens = (d.itens || []).slice().sort((a, b) => (a.fabrica - b.fabrica) || ((ORDEM_TIPO[a.tipo] ?? 9) - (ORDEM_TIPO[b.tipo] ?? 9)));
     const meta = [d.hora ? "às " + d.hora : "", d.responsavel ? "por " + d.responsavel : ""].filter(Boolean).join(" ");
-    html += `<article class="dia" ${abrir}>
+    html += `<article class="dia">
       <header>
-        <time datetime="${d.data}">${semana(d.data)} ${fmtCurto(d.data)}</time>
-        <span class="chip f${d.fabrica}">Fábrica ${d.fabrica}</span>
+        ${abrir(`<span class="chip f${d.fabrica}">Fábrica ${d.fabrica}</span>`)}
         ${acoes}
       </header>
       ${meta ? `<p class="dia-meta">${esc(meta)}</p>` : ""}
@@ -2507,8 +2512,6 @@ document.addEventListener("click", async (ev) => {
   }
   const t = ev.target.closest("button, [data-fab]");
   if (!t) {
-    const art = ev.target.closest && ev.target.closest("#v-historico article[data-abrir]");
-    if (art) { guardarRascunho(); S.data = art.dataset.abrir; S.fabManual = null; montarRascunho(); renderHoje(); trocarAba("hoje"); window.scrollTo(0, 0); }
     if (ev.target.id === "folha") $("#folha").hidden = true;
     return;
   }
@@ -2730,7 +2733,7 @@ if (LISTA_PROPRIA) {
   document.addEventListener("scroll", (ev) => { if (LISTA && !LISTA.el.contains(ev.target)) fecharLista(); }, true);
 }
 document.addEventListener("keydown", (ev) => {
-  if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('#v-graficos [data-sel][role="button"], #v-historico article[data-abrir]')) { ev.preventDefault(); ev.target.click(); }
+  if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('#v-graficos [data-sel][role="button"]')) { ev.preventDefault(); ev.target.click(); }
   if (ev.key === "Escape" && !$("#folha").hidden) $("#folha").hidden = true;
 });
 document.addEventListener("toggle", (ev) => { if (ev.target.id === "d-outros") S.outrosAberto = ev.target.open; if (ev.target.id === "d-semcol") S.semColAberto = ev.target.open; }, true);
