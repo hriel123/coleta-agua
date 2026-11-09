@@ -2247,9 +2247,9 @@ function renderGraficos() {
   for (const g of grupos) {
     html += `<h3>${nomeLocal(g.f)}</h3><div class="sp-list" ${vars}>` + g.ps.map((p) => {
       const se = series[p.id], ult = se[se.length - 1].v, n = noPeriodo[p.id] || 0;
-      return `<div class="sp-row${G.ponto === p.id ? " sel" : ""}" data-sel="${p.id}" role="button" tabindex="0" aria-pressed="${G.ponto === p.id}" aria-label="${esc(p.setor + " " + p.tipo + ": " + n + " coletas no período" + (ult === null ? "" : ", " + ult + " dias sem coleta"))}">
-        <span class="sp-lbl"><i class="k f${p.fabrica}"></i><span>${esc(p.setor)}<small>${esc(p.tipo)} · ${n}×</small></span></span>
-        <span class="sp-graf"><span class="sp-top"><b>${ult === null ? "nunca" : ult === 0 ? "hoje" : "há " + ult + " d"}</b></span>${sparkRitmo(se, p.fabrica, L.sw, ymax, tipRitmo(p))}</span>
+      return `<div class="sp-row${G.ponto === p.id ? " sel" : ""}" data-sel="${p.id}" role="button" tabindex="0" aria-pressed="${G.ponto === p.id}">
+        <span class="sp-lbl"><i class="k f${p.fabrica}"></i><span>${esc(p.setor)}<small>${esc(p.tipo)}<span aria-hidden="true"> · ${n}×</span></small></span></span>
+        <span class="sp-graf"><span class="sp-top"><b aria-hidden="true">${ult === null ? "nunca" : ult === 0 ? "hoje" : "há " + ult + " d"}</b><span class="vh">: ${n} coletas no período${ult === null ? "" : ", " + ult + " dias sem coleta"}</span></span>${sparkRitmo(se, p.fabrica, L.sw, ymax, tipRitmo(p))}</span>
       </div>`;
     }).join("") + "</div>";
   }
@@ -2272,9 +2272,9 @@ function renderGraficos() {
       const faixa = dominioParam(pr.c, lista.map((a) => a.v));
       html += `<p class="hint">Cada bolinha é uma amostra, com a data embaixo. As linhas tracejadas vermelhas marcam os limites aceitáveis; bolinhas vermelhas estão fora deles.</p>${chavesHTML(new Set(lista.map((a) => a.fab)))}<div class="sp-list" ${vars}>` + ids.map((id) => {
         const p = info[id], ord = porPonto[id].slice().sort((a, b) => (a.data < b.data ? -1 : 1)), u = ord[ord.length - 1];
-        return `<div class="sp-row${G.ponto === id ? " sel" : ""}" data-sel="${id}" role="button" tabindex="0" aria-pressed="${G.ponto === id}" aria-label="${esc(p.setor + " " + p.tipo + ": último " + pr.titulo + " " + fmtNum(u.v) + " " + pr.un + " em " + fmt(u.data) + (u.fora ? ", fora da faixa" : ""))}">
+        return `<div class="sp-row${G.ponto === id ? " sel" : ""}" data-sel="${id}" role="button" tabindex="0" aria-pressed="${G.ponto === id}">
           <span class="sp-lbl"><i class="k f${p.fabrica}"></i><span>${esc(p.setor)}<small>${esc(p.tipo)}</small></span></span>
-          <span class="sp-graf"><span class="sp-top${u.fora ? " fora" : ""}"><b>${fmtNum(u.v)}</b><small>${pr.un}${u.fora ? " · fora" : ""}</small></span>${sparkRes(ord, dom, p.fabrica, pr.c, L.sw, faixa)}</span>
+          <span class="sp-graf"><span class="sp-top${u.fora ? " fora" : ""}"><span class="vh">: último ${pr.titulo}</span><b>${fmtNum(u.v)}</b><small>${pr.un}${u.fora ? '<span aria-hidden="true"> · fora</span>' : ""}</small><span class="vh">em ${fmt(u.data)}${u.fora ? ", fora da faixa" : ""}</span></span>${sparkRes(ord, dom, p.fabrica, pr.c, L.sw, faixa)}</span>
         </div>`;
       }).join("") + "</div>";
     }
