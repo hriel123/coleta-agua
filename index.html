@@ -1605,10 +1605,13 @@ function renderHoje() {
       prox < S.data ? `<button class="link" type="button" data-ir="${prox}">Lançar ${semana(prox)} ${fmtCurto(prox)}</button>` : ""));
   }
   if (S.soLeitura) notas.push(nota("warn", "Você está vendo este site só para leitura. As coletas não podem ser salvas daqui."));
+  const salvo = [];
   if (acabouDeSalvar) {
     const prox = simularAgenda().agenda.find((a) => a.data > S.data && !a.semColeta);
-    notas.unshift(nota("ok", `<b>Coleta salva!</b> ${prox ? `Próxima: ${quandoTxt(prox.data)}, Fábrica ${prox.fab}.` : ""}`,
+    salvo.push(nota("ok", `<b>Coleta salva!</b> ${prox ? `Próxima: ${quandoTxt(prox.data)}, Fábrica ${prox.fab}.` : ""}`,
       `<span class="actions">${prox ? `<button class="link" type="button" data-ir="${prox.data}">Ver os pontos</button>` : ""}<button class="link" type="button" data-resumo="${S.data}">Copiar resumo</button></span>`));
+    const foraTxt = reg ? (reg.itens || []).flatMap((it) => CAMPOS.filter((c) => fora(c, it[c])).map((c) => `${esc(it.setor)} · ${esc(it.tipo)} (${c === "ph" ? "pH" : LIM[c].nome.toLowerCase()} ${fmtNum(it[c])}${LIM[c].un ? " " + LIM[c].un : ""})`)) : [];
+    if (foraTxt.length) salvo.push(nota("warn", `<b>${foraTxt.length} ${foraTxt.length === 1 ? "valor fora" : "valores fora"} do normal:</b> ${listaNomes(foraTxt)}. Avise o responsável.`));
   }
   if (S.ajuda || !lsGet("coleta-agua:ajuda-ok")) notas.unshift(`<div class="ajuda" id="ajuda">
       <h2>Como usar em 3 passos</h2>
@@ -1624,6 +1627,7 @@ function renderHoje() {
   const C = 2 * Math.PI * 30, feito = nTopo ? nFeitos / nTopo : 0;
   el.innerHTML = `
     <div class="coleta-grid"><div class="col-a">
+    ${salvo.join("")}
     <div class="hero">
       <div class="hero-top">
         <button type="button" class="nav-dia" id="b-dia-ant" data-dia="-1" aria-label="Dia anterior">${SETA_E}</button>
