@@ -423,6 +423,8 @@ details.mes > summary small { margin-left: auto; font-family: var(--f-body); fon
 #toast { position: fixed; left: 16px; right: 16px; margin-inline: auto; width: fit-content; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 700; z-index: 10; }
 #acordando { position: fixed; left: 16px; right: 16px; top: calc(16px + env(safe-area-inset-top, 0px)); margin-inline: auto; max-width: 440px; z-index: 40; display: flex; gap: 14px; align-items: flex-start; background: var(--surface); color: var(--ink); border: 1px solid var(--accent); border-radius: var(--r); padding: 16px 18px; box-shadow: 0 12px 32px rgba(0, 0, 0, .28); animation: acordando-in .25s ease-out; }
 #acordando[hidden] { display: none; }
+body.sem-conta { display: flex; flex-direction: column; }
+body.sem-conta #acordando { position: sticky; order: -1; align-self: center; width: calc(100% - 32px); margin-top: 16px; }
 #acordando .giro { width: 22px; height: 22px; flex: none; margin-top: 2px; border-radius: 50%; border: 2.5px solid var(--line); border-top-color: var(--accent); animation: giro .8s linear infinite; }
 #acordando p { margin: 4px 0 0; color: var(--muted); font-size: .88rem; line-height: 1.45; }
 #acordando small { display: block; margin-top: 8px; color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
