@@ -280,10 +280,8 @@ html.lista-propria select[aria-expanded="true"] { border-color: var(--accent); b
 .login-priv { margin: -12px 0; text-align: center; font-size: .85rem; }
 .login-priv a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 8px; color: var(--muted); }
 .demo-faixa { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 2px 10px; padding: 6px 16px; background: var(--accent); color: var(--on-accent); font-size: .88rem; font-weight: 600; text-align: center; }
-.demo-faixa > span { display: inline-flex; align-items: center; gap: 8px; }
-.demo-faixa svg { width: 16px; height: 16px; flex: none; }
 .demo-faixa button { background: none; border: 0; color: inherit; font: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 4px 2px; min-height: 44px; margin-block: -6px; }
-@media (max-width: 719px) { .demo-faixa { font-size: .8rem; padding: 4px 12px; gap: 0 8px; } .demo-faixa svg { display: none; } .demo-faixa button { margin-block: -8px; } }
+@media (max-width: 719px), (max-height: 520px) { .demo-faixa { font-size: .8rem; padding: 4px 12px; gap: 0 12px; } .faixa-extra { display: none; } .demo-faixa button { margin-block: -10px; } }
 body.sem-conta > header, body.sem-conta > main { display: none; }
 .sync { font-size: .75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--ink); white-space: nowrap; }
 .sync.off { background: var(--warn-soft); color: var(--warn); }
@@ -304,6 +302,15 @@ body.sem-conta > header, body.sem-conta > main { display: none; }
 .senha-wrap input { padding-right: 88px; }
 .ver-senha { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); min-height: 44px; padding: 4px 10px; border: 0; background: none; color: var(--accent); font-weight: 700; cursor: pointer; border-radius: 8px; }
 .login-sub { margin: -8px 0 0; color: var(--muted); font-size: .92rem; }
+.login-desc { margin: -6px 0 0; font-size: .95rem; }
+@media (min-width: 600px) and (max-height: 520px) {
+  #login { padding: 12px 16px; }
+  .login-card { max-width: 46rem; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: repeat(5, auto) 1fr; gap: 12px 28px; padding: 18px 22px; align-items: start; }
+  .login-card > * { grid-column: 1; }
+  .login-card > #l-seg { grid-column: 2; grid-row: 1; }
+  .login-card > #f-login { grid-column: 2; grid-row: 2 / -1; }
+  .login-priv { margin: -6px 0; text-align: left; }
+}
 details.avancado { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
 details.avancado > summary { cursor: pointer; padding: 14px; font-weight: 700; min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 10px; list-style: none; }
 details.avancado > summary::-webkit-details-marker { display: none; }
@@ -637,6 +644,7 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
 <section id="login" role="main" hidden>
   <div class="login-card">
     <h1 class="login-marca"><span class="login-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-3 4.4-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-3-6.6-6-11z"/><path d="M9 14.5a3 3 0 0 0 3 3"/></svg></span><span>Coleta de Água</span></h1>
+    <p class="login-desc">Organiza o rodízio de coleta entre duas fábricas: os pontos de coleta do dia e o registro de cloro, pH e turbidez.</p>
     <p class="login-sub" id="l-sub">Entre para guardar suas coletas e ver tudo em qualquer aparelho.</p>
     <div class="seg login-seg" id="l-seg" role="radiogroup" aria-label="Acesso">
       <button type="button" role="radio" id="lm-entrar" data-login-modo="entrar" aria-checked="true">Entrar</button>
@@ -662,7 +670,7 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
   </div>
 </section>
 
-<div class="demo-faixa" id="demo-faixa" hidden><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 15.5a2 2 0 0 0-1.44-1.44l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94a2 2 0 0 0 1.44-1.44l1.58-6.13a.5.5 0 0 1 .96 0l1.58 6.13a2 2 0 0 0 1.44 1.44l6.13 1.58a.5.5 0 0 1 0 .96l-6.13 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.13a.5.5 0 0 1-.96 0z"/><path d="M20 3v4M22 5h-4M4 17v2M5 18H3"/></svg>Modo visitante: dados de exemplo, salvos só neste navegador.</span><button type="button" data-criar-conta="1">Criar minha conta</button></div>
+<div class="demo-faixa" id="demo-faixa" hidden><span>Modo visitante<span class="faixa-extra">: dados de exemplo, salvos só neste navegador</span>.</span><button type="button" data-criar-conta="1">Criar minha conta</button><button type="button" data-ja-conta="1">Já tenho conta</button></div>
 
 <header class="top">
   <div class="top-in">
@@ -911,6 +919,7 @@ const ERROS_SERVIDOR = {
 const ROTULO_LOGIN = { entrar: "Entrar", criar: "Criar conta", esqueci: "Enviar link", redefinir: "Salvar nova senha" };
 const SUB_LOGIN = {
   entrar: "Entre para guardar suas coletas e ver tudo em qualquer aparelho.",
+  criar: "Crie uma conta para guardar suas coletas e ver tudo em qualquer aparelho.",
   esqueci: "Informe o e-mail da sua conta. Vamos enviar um link para você criar uma senha nova.",
   redefinir: "Crie uma senha nova para a sua conta."
 };
@@ -1052,13 +1061,13 @@ function entrarVisitante() {
   document.body.classList.remove("sem-conta"); $("#login").hidden = true; $("#demo-faixa").hidden = false;
   carregarLocal(); mostrarSync();
 }
-function sairVisitante() {
+function sairVisitante(modo) {
   lsSet(VISITANTE_KEY, null); lsSet(DEMO_KEY, null); lsSet("coleta-agua:resp", null); S.visitante = false;
   for (const k of Object.keys(RASC)) delete RASC[k];
   gravarRascunhos();
   S.modo = "servidor"; S.pronto = false; S.dias = {}; S.legado = null;
   S.data = hojeISO(); S.fabManual = null; S.dirty = false; S.resp = "";
-  S.loginModo = "criar"; $("#demo-faixa").hidden = true;
+  S.loginModo = modo; $("#demo-faixa").hidden = true;
   mostrarLogin(); mostrarSync();
 }
 function dadosExemplo() {
@@ -1768,7 +1777,7 @@ function renderAjustes() {
   cc.hidden = !S.visitante && (S.modo !== "servidor" || !SRV.conta);
   if (S.visitante) {
     $("#conta-info").innerHTML = "Você está no <b>modo visitante</b>, com dados de exemplo salvos só neste navegador. Crie uma conta para registrar as suas coletas e ver tudo em qualquer aparelho.";
-    $("#conta-acoes").innerHTML = '<button class="btn primary" type="button" data-criar-conta="1">Criar minha conta</button>';
+    $("#conta-acoes").innerHTML = '<div class="actions"><button class="btn primary" type="button" data-criar-conta="1">Criar minha conta</button><button class="btn" type="button" data-ja-conta="1">Já tenho conta</button></div>';
   } else if (!cc.hidden) {
     $("#conta-info").innerHTML = `Conectado como <b>${esc(SRV.conta.name)}</b> (${esc(SRV.conta.email)}). Seus registros ficam salvos na conta e aparecem em qualquer aparelho em que você entrar.`;
     const n = SRV.fila.length;
@@ -2526,7 +2535,8 @@ document.addEventListener("click", async (ev) => {
   if (t.id === "b-acordando") { avisoAcordando(null); if (document.body.classList.contains("sem-conta")) $("#b-login").click(); else tentarSincronizar(); return; }
   if (t.id === "b-sincronizar") { tentarSincronizar(); return; }
   if (t.id === "b-visitante") { entrarVisitante(); return; }
-  if (t.dataset.criarConta) { sairVisitante(); $("#l-nome").focus(); return; }
+  if (t.dataset.criarConta) { sairVisitante("criar"); $("#l-nome").focus(); return; }
+  if (t.dataset.jaConta) { sairVisitante("entrar"); $("#l-email").focus(); return; }
   if (t.id === "b-esqueci") { modoLogin("esqueci"); $("#l-email").focus(); return; }
   if (t.id === "b-voltar-login") { if (S.tokenRedefinir) limparRedefinir(); modoLogin("entrar"); $("#l-email").focus(); return; }
   if (t.dataset.loginModo) { modoLogin(t.dataset.loginModo); $(t.dataset.loginModo === "criar" ? "#l-nome" : "#l-email").focus(); return; }
