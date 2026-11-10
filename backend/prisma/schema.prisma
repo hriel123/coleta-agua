@@ -12,6 +12,7 @@ model User {
   name           String
   email          String          @unique
   password       String
+  tokenVersion   Int             @default(0)
   config         Json?
   createdAt      DateTime        @default(now())
   dias           Dia[]
