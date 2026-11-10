@@ -1924,23 +1924,29 @@ function rotular(xs, larg, linhas) {
   }
   return pos;
 }
-function curva(seg, topo, base) {
+function curva(seg) {
   if (seg.length < 2) return "";
-  const lim = (v) => Math.max(topo, Math.min(base, v));
+  const n = seg.length, m = [], t = [];
+  for (let i = 0; i < n - 1; i++) { const dx = seg[i + 1][0] - seg[i][0]; m[i] = dx ? (seg[i + 1][1] - seg[i][1]) / dx : 0; }
+  t[0] = m[0]; t[n - 1] = m[n - 2];
+  for (let i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : (m[i - 1] + m[i]) / 2;
+  for (let i = 0; i < n - 1; i++) {
+    if (!m[i]) { t[i] = t[i + 1] = 0; continue; }
+    const a = t[i] / m[i], b = t[i + 1] / m[i], h = a * a + b * b;
+    if (h > 9) { const k = 3 / Math.sqrt(h); t[i] = k * a * m[i]; t[i + 1] = k * b * m[i]; }
+  }
   let d = `M${seg[0][0]},${seg[0][1]}`;
-  for (let i = 0; i < seg.length - 1; i++) {
-    const p0 = seg[i - 1] || seg[i], p1 = seg[i], p2 = seg[i + 1], p3 = seg[i + 2] || p2;
-    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, lim(p1[1] + (p2[1] - p0[1]) / 6)];
-    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, lim(p2[1] - (p3[1] - p1[1]) / 6)];
-    d += ` C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0]},${p2[1]}`;
+  for (let i = 0; i < n - 1; i++) {
+    const [x0, y0] = seg[i], [x1, y1] = seg[i + 1], h = (x1 - x0) / 3;
+    d += ` C${(x0 + h).toFixed(1)},${(y0 + t[i] * h).toFixed(1)} ${(x1 - h).toFixed(1)},${(y1 - t[i + 1] * h).toFixed(1)} ${x1},${y1}`;
   }
   return d;
 }
-function caminhos(pts, base, fab, suave, topo = 0) {
+function caminhos(pts, base, fab, suave) {
   let g = "", seg = [];
   const fecha = () => {
     if (seg.length > 1) {
-      const lin = suave ? curva(seg, topo, base) : "M" + seg.map((q) => q.join(",")).join(" L");
+      const lin = suave ? curva(seg) : "M" + seg.map((q) => q.join(",")).join(" L");
       g += `<path class="sp-area" fill="url(#ga-f${fab})" d="${lin} L${seg[seg.length - 1][0]},${base} L${seg[0][0]},${base} Z"/><path class="sp-line f${fab}" d="${lin}"/>`;
     }
     seg = [];
@@ -1973,7 +1979,7 @@ function sparkRes(ord, dom, fab, c, sw, faixa) {
   let g = "";
   for (const lv of [lim.min, lim.max]) if (lv !== null && lv > faixa.lo && lv < faixa.hi) g += `<line class="lim" x1="0" x2="${sw}" y1="${y(lv)}" y2="${y(lv)}"/>`;
   g += `<line class="sp-base" x1="0" x2="${sw}" y1="${base}" y2="${base}"/>`;
-  g += caminhos(ord.map((a) => [x(a.data), y(a.v)]), base, fab, true, top);
+  g += caminhos(ord.map((a) => [x(a.data), y(a.v)]), base, fab, true);
   const pos = rotular(ord.map((a) => x(a.data)), 30, 1);
   ord.forEach((a, k) => {
     g += `<circle class="sp-dot ${a.fora ? "fora" : "f" + fab}" cx="${x(a.data)}" cy="${y(a.v)}" r="3.5"/>`;
@@ -2004,7 +2010,7 @@ function grande(cfg) {
   }
   const marcas = pts.filter((q) => q.marca);
   for (const q of marcas) g += `<line class="mk f${fab}" x1="${x(q.data)}" x2="${x(q.data)}" y1="${mt}" y2="${base}"/>`;
-  g += caminhos(pts.map((q) => (q.v === null ? null : [x(q.data), y(q.v)])), base, fab, !!faixa, mt);
+  g += caminhos(pts.map((q) => (q.v === null ? null : [x(q.data), y(q.v)])), base, fab, !!faixa);
   for (const q of marcas) g += `<circle class="sp-dot ${q.fora ? "fora" : "f" + fab}" cx="${x(q.data)}" cy="${y(q.v ?? lo)}" r="4.5"/>`;
   const pos = rotular(marcas.map((q) => x(q.data)), 32, 2);
   marcas.forEach((q, k) => {
@@ -2056,7 +2062,7 @@ function areaSerie(cfg) {
   for (const se of series) {
     const seg = se.pts.map((q) => [x(q.data), y(q.v)]);
     if (seg.length > 1) {
-      const lin = curva(seg, mt, base);
+      const lin = curva(seg);
       g += `<path class="sp-area" fill="url(#ga-f${se.fab})" d="${lin} L${seg[seg.length - 1][0]},${base} L${seg[0][0]},${base} Z"/><path class="area-l f${se.fab}" d="${lin}"/>`;
     }
     for (const q of se.pts) g += `<circle class="sp-dot ${q.fora ? "fora" : "f" + se.fab}" cx="${x(q.data)}" cy="${y(q.v)}" r="3.5"/>`;
