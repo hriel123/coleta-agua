@@ -1067,10 +1067,11 @@ function entrarVisitante() {
   carregarLocal(); mostrarSync();
 }
 function sairVisitante() {
-  lsSet(VISITANTE_KEY, null); lsSet(DEMO_KEY, null); S.visitante = false;
+  lsSet(VISITANTE_KEY, null); lsSet(DEMO_KEY, null); lsSet("coleta-agua:resp", null); S.visitante = false;
   for (const k of Object.keys(RASC)) delete RASC[k];
   gravarRascunhos();
   S.modo = "servidor"; S.pronto = false; S.dias = {}; S.legado = null;
+  S.data = hojeISO(); S.fabManual = null; S.dirty = false; S.resp = "";
   S.loginModo = "criar"; $("#demo-faixa").hidden = true;
   mostrarLogin(); mostrarSync();
 }
@@ -1199,12 +1200,12 @@ function sessaoExpirada() {
 }
 function sairConta() {
   if (SRV.conta) { lsSet(kCache(), null); lsSet(kFila(), null); }
-  lsSet(TOKEN_KEY, null); lsSet(CONTA_KEY, null);
+  lsSet(TOKEN_KEY, null); lsSet(CONTA_KEY, null); lsSet("coleta-agua:resp", null);
   clearTimeout(SRV.tmr); clearTimeout(SRV.tmrSync);
   for (const k of Object.keys(RASC)) delete RASC[k];
   gravarRascunhos();
   SRV.token = null; SRV.conta = null; SRV.fila = []; SRV.erro = "";
-  S.pronto = false; S.dias = {}; S.confirmSair = false; S.legado = null;
+  S.pronto = false; S.dias = {}; S.confirmSair = false; S.legado = null; S.dirty = false; S.resp = "";
   $("#l-email").value = ""; $("#l-senha").value = "";
   mostrarLogin(); mostrarSync();
 }
