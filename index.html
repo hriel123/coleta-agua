@@ -508,7 +508,7 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
   .tabs button { display: grid; justify-items: center; gap: 3px; padding: 6px 2px; min-height: 54px; border: 0; border-radius: 12px; font-size: .72rem; }
   .tabs button svg { width: 22px; height: 22px; }
   .tabs button[aria-current="page"] { color: var(--accent); background: var(--accent-soft); }
-  main { padding-block: 16px calc(90px + env(safe-area-inset-bottom, 0px)); }
+  main { padding-block: 10px calc(90px + env(safe-area-inset-bottom, 0px)); }
   .savebar { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
   .month { position: sticky; top: calc(57px + env(safe-area-inset-top, 0px)); z-index: 2; background: var(--bg); padding-block: 8px; margin-top: 0; }
   #toast { bottom: auto; top: calc(66px + env(safe-area-inset-top, 0px)); }
@@ -637,6 +637,29 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
   #v-historico, #v-ajustes { max-width: 52rem; }
 }
 .col-a, .col-b { display: grid; gap: 18px; min-width: 0; }
+@media (max-width: 719px) {
+  .col-a, .col-b { gap: 12px; }
+  .hero { padding: 10px; gap: 6px; }
+  .prog-anel { grid-template-columns: 60px minmax(0, 1fr); gap: 12px; }
+  .anel, .anel-caixa { width: 60px; height: 60px; }
+  .ajuda { padding: 12px; gap: 8px; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .ajuda ol { grid-column: 1 / -1; }
+  .ajuda .btn { grid-column: 2; grid-row: 1; }
+  .ajuda ol { gap: 6px; }
+  .ajuda h2 { font-size: 1.05rem; }
+  .ajuda li { grid-template-columns: 24px minmax(0, 1fr); gap: 8px; font-size: .9rem; }
+  .ajuda li::before { width: 24px; height: 24px; font-size: .8rem; }
+  .col-b .block { gap: 6px; }
+}
+@media (min-width: 720px) and (max-width: 1023px) and (max-height: 520px) {
+  .top-in { max-width: none; display: flex; align-items: center; gap: 12px; padding-block: 0; }
+  .brand { display: contents; }
+  .brand h1 { font-size: 1.1rem; flex: none; }
+  .brand .hoje { display: none; }
+  .tabs { order: 1; flex: 1; min-width: 0; justify-content: center; }
+  .tabs button { padding: 12px 8px 9px; font-size: .88rem; }
+  .brand-r { order: 2; flex: none; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
