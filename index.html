@@ -412,6 +412,8 @@ details.outros .tags { padding: 0 10px 10px; }
 #acordando .giro { width: 22px; height: 22px; flex: none; margin-top: 2px; border-radius: 50%; border: 2.5px solid var(--line); border-top-color: var(--accent); animation: giro .8s linear infinite; }
 #acordando p { margin: 4px 0 0; color: var(--muted); font-size: .88rem; line-height: 1.45; }
 #acordando small { display: block; margin-top: 8px; color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
+#acordando small:empty { display: none; }
+#acordando .btn { margin-top: 12px; }
 @keyframes giro { to { transform: rotate(360deg); } }
 @keyframes acordando-in { from { opacity: 0; transform: translateY(-8px); } }
 
@@ -761,12 +763,17 @@ details.tabela summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
   <linearGradient id="ga-f2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--s2)" stop-opacity=".42"/><stop offset="1" style="stop-color:var(--s2)" stop-opacity="0"/></linearGradient>
 </defs></svg>
 <div id="toast" role="status" aria-live="polite" hidden></div>
-<div id="acordando" role="status" aria-live="polite" hidden>
+<div id="acordando" hidden>
   <span class="giro" aria-hidden="true"></span>
   <div>
-    <b>Ligando o servidor…</b>
-    <p>Ele fica em repouso quando ninguém está usando e leva até 1 minuto para voltar. Aguarde, não precisa recarregar a página.</p>
+    <div role="status" aria-live="polite">
+      <div data-esperando><b>Ligando o servidor…</b>
+      <p>Ele fica em repouso quando ninguém está usando e leva até 1 minuto para voltar. Aguarde, não precisa recarregar a página.</p></div>
+      <div data-falhou hidden><b>O servidor não respondeu</b>
+      <p>Esperamos 90 segundos sem resposta. Verifique a internet e tente de novo.</p></div>
+    </div>
     <small data-tempo></small>
+    <button class="btn small" type="button" id="b-acordando" hidden>Tentar de novo</button>
   </div>
 </div>
 <div id="folha" hidden><div class="folha-in" role="dialog" aria-modal="true" aria-labelledby="folha-tit">
@@ -928,21 +935,28 @@ function kCache() { return "coleta-agua:cache:" + SRV.conta.id; }
 function kFila() { return "coleta-agua:pendentes:" + SRV.conta.id; }
 const ACORDANDO = { pendentes: 0, tmr: null, tick: null };
 function avisoAcordando(desde) {
-  const el = $("#acordando");
+  const el = $("#acordando"), falhou = desde === "falhou", tempo = el.querySelector("[data-tempo]");
   clearInterval(ACORDANDO.tick);
   el.hidden = !desde;
+  tempo.textContent = "";
   if (!desde) return;
-  const tick = () => { el.querySelector("[data-tempo]").textContent = "Aguardando há " + Math.round((Date.now() - desde) / 1000) + " s"; };
+  el.querySelector("[data-esperando]").hidden = falhou;
+  el.querySelector("[data-falhou]").hidden = !falhou;
+  el.querySelector(".giro").hidden = falhou;
+  $("#b-acordando").hidden = !falhou;
+  if (falhou) return;
+  const tick = () => { tempo.textContent = "Aguardando há " + Math.round((Date.now() - desde) / 1000) + " s"; };
   tick(); ACORDANDO.tick = setInterval(tick, 1000);
 }
 async function apiReq(path, { method = "GET", body } = {}) {
   const headers = { "Content-Type": "application/json" };
   if (SRV.token) headers.Authorization = "Bearer " + SRV.token;
-  if (++ACORDANDO.pendentes === 1) { const inicio = Date.now(); ACORDANDO.tmr = setTimeout(() => avisoAcordando(inicio), 4000); }
-  let res;
-  try { res = await fetch(API_URL + path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined }); }
-  catch { const e = new Error("network"); e.status = 0; throw e; }
-  finally { if (--ACORDANDO.pendentes === 0) { clearTimeout(ACORDANDO.tmr); avisoAcordando(null); } }
+  if (++ACORDANDO.pendentes === 1) { avisoAcordando(null); const inicio = Date.now(); ACORDANDO.tmr = setTimeout(() => avisoAcordando(inicio), 4000); }
+  const ctrl = new AbortController(), limite = setTimeout(() => ctrl.abort(), 90000);
+  let res, esgotou = false;
+  try { res = await fetch(API_URL + path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined, signal: ctrl.signal }); }
+  catch { esgotou = ctrl.signal.aborted; const e = new Error("network"); e.status = 0; throw e; }
+  finally { clearTimeout(limite); if (--ACORDANDO.pendentes === 0) { clearTimeout(ACORDANDO.tmr); avisoAcordando(esgotou ? "falhou" : null); } }
   if (res.status === 204) return null;
   const data = await res.json().catch(() => null);
   if (!res.ok) { const e = new Error((data && data.error) || "HTTP " + res.status); e.status = res.status; throw e; }
@@ -1004,7 +1018,7 @@ function tentarSincronizar() {
   sincronizarDoServidor().then(() => enviarFila()).catch((e) => {
     if (e.status === 401) { sessaoExpirada(); return; }
     SRV.erro = "offline"; mostrarSync();
-    if (!S.pronto) $("#v-hoje").innerHTML = '<div class="empty"><b>Sem conexão com o servidor</b><span class="hint">Tentando de novo a cada 15 segundos. No primeiro acesso do dia o servidor pode levar até 1 minuto para acordar.</span></div>';
+    if (!S.pronto) $("#v-hoje").innerHTML = '<div class="empty"><b>Sem conexão com o servidor</b><span class="hint">Tentando de novo a cada 15 segundos. No primeiro acesso do dia o servidor pode levar até 1 minuto para acordar.</span><span class="actions"><button class="btn small" type="button" id="b-sincronizar">Tentar de novo</button></span></div>';
     SRV.tmrSync = setTimeout(tentarSincronizar, 15000);
   });
 }
@@ -2570,6 +2584,8 @@ document.addEventListener("click", async (ev) => {
   if (t.dataset.ncLimpar) { const id = t.dataset.ncLimpar; delete S.nc[id]; marcarRascunho(); renderHoje(); document.querySelector(`[data-nc-abrir="${id}"]`)?.focus(); return; }
   if (t.id === "b-backup") { oferecerArquivo(`coleta_agua_backup_${hojeISO()}.json`, JSON.stringify({ config: S.config, dias: Object.values(S.dias) }, null, 1)); return; }
   if (t.id === "b-import-sim") { importar(); return; }
+  if (t.id === "b-acordando") { avisoAcordando(null); if (document.body.classList.contains("sem-conta")) $("#b-login").click(); else tentarSincronizar(); return; }
+  if (t.id === "b-sincronizar") { tentarSincronizar(); return; }
   if (t.id === "b-visitante") { entrarVisitante(); return; }
   if (t.dataset.criarConta) { sairVisitante(); $("#l-nome").focus(); return; }
   if (t.id === "b-esqueci") { modoLogin("esqueci"); $("#l-email").focus(); return; }
