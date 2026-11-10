@@ -1352,6 +1352,7 @@ function avisoNC(id, ult, ate) {
   return n && (!ult || n.data > ult) ? n : null;
 }
 function maxPrevia() { return addDias(hojeISO(), 14); }
+function minData() { const ini = (Number(hojeISO().slice(0, 4)) - 1) + "-01-01", d = Object.keys(S.dias).sort()[0]; return d && d < ini ? d : ini; }
 function simularAgenda() {
   const hoje = hojeISO(), limite = maxPrevia();
   const sim = ultimas(hoje, true);
@@ -1486,7 +1487,8 @@ function proxDiaUtil(s) { let d = addDias(s, 1); while ([0, 6].includes(new Date
 function irParaDia(d) {
   guardarRascunho();
   const max = maxPrevia();
-  S.data = d > max ? max : d; S.fabManual = null; S.outrosAberto = false; S.semColAberto = false; S.motivo = null; S.trocandoFab = false;
+  const min = minData();
+  S.data = d > max ? max : d < min ? min : d; S.fabManual = null; S.outrosAberto = false; S.semColAberto = false; S.motivo = null; S.trocandoFab = false;
   montarRascunho(); renderHoje();
 }
 function listaNomes(arr) { return arr.length <= 1 ? arr.join("") : arr.slice(0, -1).join(", ") + " e " + arr[arr.length - 1]; }
@@ -1510,11 +1512,11 @@ function renderSemColeta(el, reg) {
   el.innerHTML = `
     <div class="hero">
       <div class="hero-top">
-        <button type="button" class="nav-dia" id="b-dia-ant" data-dia="-1" aria-label="Dia anterior">${SETA_E}</button>
+        <button type="button" class="nav-dia" id="b-dia-ant" data-dia="-1" aria-label="Dia anterior" ${S.data <= minData() ? "disabled" : ""}>${SETA_E}</button>
         <label class="hero-data" for="f-data">
           <span class="hero-rel">${relTxt} · ${SEMANA_LONGA[new Date(utc(S.data)).getUTCDay()]}</span>
-          <span class="hero-dia">${Number(dd)} de ${MESES[Number(mm) - 1]}${ICO_CAL}</span>
-          <input type="date" id="f-data" value="${S.data}" max="${max}" aria-label="Escolher a data da coleta">
+          <span class="hero-dia">${Number(dd)} de ${MESES[Number(mm) - 1]}${S.data.slice(0, 4) !== hojeISO().slice(0, 4) ? " de " + S.data.slice(0, 4) : ""}${ICO_CAL}</span>
+          <input type="date" id="f-data" value="${S.data}" min="${minData()}" max="${max}" aria-label="Escolher a data da coleta">
         </label>
         <button type="button" class="nav-dia" id="b-dia-prox" data-dia="1" aria-label="Próximo dia" ${S.data >= max ? "disabled" : ""}>${SETA_D}</button>
       </div>
@@ -1552,11 +1554,11 @@ function renderPrevia(el) {
   el.innerHTML = `
     <div class="hero previa">
       <div class="hero-top">
-        <button type="button" class="nav-dia" id="b-dia-ant" data-dia="-1" aria-label="Dia anterior">${SETA_E}</button>
+        <button type="button" class="nav-dia" id="b-dia-ant" data-dia="-1" aria-label="Dia anterior" ${S.data <= minData() ? "disabled" : ""}>${SETA_E}</button>
         <label class="hero-data" for="f-data">
           <span class="hero-rel">Prévia · ${rel === 1 ? "amanhã" : "daqui a " + rel + " dias"} · ${SEMANA_LONGA[new Date(utc(S.data)).getUTCDay()]}</span>
-          <span class="hero-dia">${Number(dd)} de ${MESES[Number(mm) - 1]}${ICO_CAL}</span>
-          <input type="date" id="f-data" value="${S.data}" max="${max}" aria-label="Escolher a data da coleta">
+          <span class="hero-dia">${Number(dd)} de ${MESES[Number(mm) - 1]}${S.data.slice(0, 4) !== hojeISO().slice(0, 4) ? " de " + S.data.slice(0, 4) : ""}${ICO_CAL}</span>
+          <input type="date" id="f-data" value="${S.data}" min="${minData()}" max="${max}" aria-label="Escolher a data da coleta">
         </label>
         <button type="button" class="nav-dia" id="b-dia-prox" data-dia="1" aria-label="Próximo dia" ${S.data >= max ? "disabled" : ""}>${SETA_D}</button>
       </div>
@@ -1644,11 +1646,11 @@ function renderHoje() {
     ${salvo.join("")}
     <div class="hero">
       <div class="hero-top">
-        <button type="button" class="nav-dia" id="b-dia-ant" data-dia="-1" aria-label="Dia anterior">${SETA_E}</button>
+        <button type="button" class="nav-dia" id="b-dia-ant" data-dia="-1" aria-label="Dia anterior" ${S.data <= minData() ? "disabled" : ""}>${SETA_E}</button>
         <label class="hero-data" for="f-data">
           <span class="hero-rel">${relTxt} · ${SEMANA_LONGA[new Date(utc(S.data)).getUTCDay()]}</span>
-          <span class="hero-dia">${Number(dd)} de ${MESES[Number(mm) - 1]}${ICO_CAL}</span>
-          <input type="date" id="f-data" value="${S.data}" max="${maxPrevia()}" aria-label="Escolher a data da coleta">
+          <span class="hero-dia">${Number(dd)} de ${MESES[Number(mm) - 1]}${S.data.slice(0, 4) !== hojeISO().slice(0, 4) ? " de " + S.data.slice(0, 4) : ""}${ICO_CAL}</span>
+          <input type="date" id="f-data" value="${S.data}" min="${minData()}" max="${maxPrevia()}" aria-label="Escolher a data da coleta">
         </label>
         <button type="button" class="nav-dia" id="b-dia-prox" data-dia="1" aria-label="Próximo dia" title="${S.data >= hoje ? "Ver a previsão dos próximos dias" : "Próximo dia"}">${SETA_D}</button>
       </div>
