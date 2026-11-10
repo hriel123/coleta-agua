@@ -2434,11 +2434,16 @@ function resumoDia(d) {
   return l.join("\n");
 }
 function copiarTexto(txt) {
-  const falhou = () => { $("#folha-txt").value = txt; $("#folha").hidden = false; const ta = $("#folha-txt"); ta.focus(); ta.select(); };
+  const falhou = () => { S.folhaVolta = document.activeElement; $("#folha-txt").value = txt; $("#folha").hidden = false; const ta = $("#folha-txt"); ta.focus(); ta.select(); };
   try {
     if (!navigator.clipboard || !navigator.clipboard.writeText) { falhou(); return; }
     navigator.clipboard.writeText(txt).then(() => toast("Resumo copiado. É só colar na conversa."), falhou);
   } catch { falhou(); }
+}
+function fecharFolha() {
+  $("#folha").hidden = true;
+  const v = S.folhaVolta; S.folhaVolta = null;
+  if (v && v.isConnected) v.focus();
 }
 async function oferecerArquivo(nome, texto) {
   let dl = null;
@@ -2522,7 +2527,7 @@ document.addEventListener("click", async (ev) => {
   }
   const t = ev.target.closest("button, [data-fab]");
   if (!t) {
-    if (ev.target.id === "folha") $("#folha").hidden = true;
+    if (ev.target.id === "folha") fecharFolha();
     return;
   }
   if (t.dataset.aba) { trocarAba(t.dataset.aba); return; }
@@ -2557,7 +2562,7 @@ document.addEventListener("click", async (ev) => {
   }
   if (t.id === "b-csv") { oferecerArquivo(`coleta_agua_${S.csvPeriodo === "tudo" ? "completo_" + hojeISO() : S.csvPeriodo === "30" ? "ultimos_30_dias_" + hojeISO() : S.csvPeriodo}.csv`, paraCSV(S.csvPeriodo)); return; }
   if (t.dataset.resumo) { const d = S.dias[t.dataset.resumo]; if (d) copiarTexto(resumoDia(d)); return; }
-  if (t.id === "b-folha-fechar") { $("#folha").hidden = true; return; }
+  if (t.id === "b-folha-fechar") { fecharFolha(); return; }
   if (t.id === "b-agenda-mais") { S.agendaMais = !S.agendaMais; renderPontos(); $("#b-agenda-mais")?.focus(); return; }
   if (t.dataset.ncAbrir) { S.ncAberto = t.dataset.ncAbrir; renderHoje(); document.querySelector(`[data-nc="${t.dataset.ncAbrir}"]`)?.focus(); return; }
   if (t.dataset.ncFechar) { const id = S.ncAberto; S.ncAberto = null; renderHoje(); document.querySelector(`[data-nc-abrir="${id}"]`)?.focus(); return; }
@@ -2744,7 +2749,11 @@ if (LISTA_PROPRIA) {
 }
 document.addEventListener("keydown", (ev) => {
   if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('#v-graficos [data-sel][role="button"]')) { ev.preventDefault(); ev.target.click(); }
-  if (ev.key === "Escape" && !$("#folha").hidden) $("#folha").hidden = true;
+  if (ev.key === "Escape" && !$("#folha").hidden) fecharFolha();
+  if (ev.key === "Tab" && !$("#folha").hidden) {
+    const f = [$("#folha-txt"), $("#b-folha-fechar")], i = f.indexOf(document.activeElement);
+    if (ev.shiftKey ? i <= 0 : i < 0 || i === f.length - 1) { ev.preventDefault(); f[ev.shiftKey ? f.length - 1 : 0].focus(); }
+  }
 });
 document.addEventListener("toggle", (ev) => { if (ev.target.id === "d-outros") S.outrosAberto = ev.target.open; if (ev.target.id === "d-semcol") S.semColAberto = ev.target.open; }, true);
 document.addEventListener("click", (ev) => { if (ev.target.id === "f-data" && typeof ev.target.showPicker === "function") { try { ev.target.showPicker(); } catch {} } });
