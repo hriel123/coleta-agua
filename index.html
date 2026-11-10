@@ -1878,7 +1878,7 @@ function aplicarTema(pref) {
   if ($("#tema-sel")) $("#tema-sel").value = pref;
 }
 function iniciarTema() {
-  let pref = "escuro";
+  let pref = "auto";
   try { const v = localStorage.getItem(TEMA_KEY); if (v === "claro" || v === "escuro" || v === "auto") pref = v; } catch {}
   S.temaPref = "auto";
   if (pref !== "auto") aplicarTema(pref); else botaoTema();
