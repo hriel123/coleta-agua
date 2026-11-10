@@ -1664,7 +1664,7 @@ function renderPontos() {
   const atrasados = todos.filter((e) => nivelPonto(e.p, e.dias) === "bad").length;
   const { agenda, prox } = simularAgenda();
   const infoP = (id) => S.config.pontos.find((x) => x.id === id) || { id, setor: id, tipo: "", fabrica: 0 };
-  const chipsDe = (a) => a.ids.map(infoP).filter((p) => p.fabrica !== 0).map((p) => `<span class="ag-chip">${ICO[p.tipo] || ""}${esc(p.setor)}</span>`).join("");
+  const chipsDe = (a) => { const pts = a.ids.map(infoP).filter((p) => p.fabrica !== 0); return pts.map((p) => `<span class="ag-chip">${ICO[p.tipo] || ""}${esc(p.setor)}${pts.filter((q) => q.setor === p.setor).length > 1 ? " · " + esc(p.tipo.toLowerCase()) : ""}</span>`).join(""); };
   const nAg = S.agendaMais ? 7 : 3;
   const agendaHTML = agenda.length ? `<div class="card"><h2>Próximos dias</h2>
     <p class="hint">Previsão pelo rodízio em dias úteis. A caixa d'água entra todo dia.</p>
