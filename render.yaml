@@ -27,7 +27,7 @@ services:
   - type: web
     name: coleta-agua
     runtime: static
-    buildCommand: mkdir -p publico && cp index.html privacidade.html publico/
+    buildCommand: mkdir -p publico && cp index.html privacidade.html app.css app.js publico/
     staticPublishPath: publico
     headers:
       - path: /*
