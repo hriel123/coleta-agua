@@ -1,3 +1,5 @@
 node_modules/
 .env
 publico/
+dados_setembro_2026.json
+*.local.json
