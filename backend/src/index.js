@@ -18,9 +18,11 @@ const allowedOrigins = (process.env.CORS_ORIGIN || 'https://hriel123.github.io')
 
 const app = express();
 
+app.disable('x-powered-by');
 app.set('trust proxy', 1);
 app.use(cors({ origin: allowedOrigins }));
-app.use(express.json({ limit: '5mb' }));
+app.use('/dados/importar', express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '100kb' }));
 
 app.get('/health', (req, res) => {
   res.json({ ok: true });

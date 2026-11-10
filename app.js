@@ -115,6 +115,7 @@ const ERROS_SERVIDOR = {
   "invalid credentials": "E-mail ou senha incorretos.",
   "invalid email format": "Informe um e-mail válido.",
   "password must be at least 6 characters long": "A senha deve ter pelo menos 6 caracteres.",
+  "password must be at most 72 bytes long": "A senha é longa demais: use até 72 caracteres (letras com acento contam como dois).",
   "name, email and password are required": "Preencha nome, e-mail e senha.",
   "email and password are required": "Preencha e-mail e senha.",
   "email already registered": "Este e-mail já está cadastrado.",
