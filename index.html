@@ -327,8 +327,8 @@ details.outros { background: var(--surface); border: 1px solid var(--line); bord
 details.outros > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 56px; font-weight: 700; }
 details.outros > summary::-webkit-details-marker { display: none; }
 details.outros > summary small { display: block; font-weight: 400; color: var(--muted); font-size: .82rem; }
-details.outros > summary::after { content: ""; flex: none; width: 9px; height: 9px; border: solid var(--muted); border-width: 0 2px 2px 0; transform: rotate(45deg); margin: 0 4px 4px 0; transition: transform .2s; }
-details.outros[open] > summary::after { transform: rotate(-135deg); margin: 4px 4px 0 0; }
+details.outros > summary::after, #d-ritmo > summary::after, details.mes > summary::after { content: ""; flex: none; width: 9px; height: 9px; border: solid var(--muted); border-width: 0 2px 2px 0; transform: rotate(45deg); margin: 0 4px 4px 0; transition: transform .2s; }
+details.outros[open] > summary::after, #d-ritmo[open] > summary::after, details.mes[open] > summary::after { transform: rotate(-135deg); margin: 4px 4px 0 0; }
 details.outros .tags { padding: 0 10px 10px; }
 .savebar { position: sticky; bottom: 12px; z-index: 3; padding-top: 6px; }
 .savebar .btn { width: 100%; min-height: 54px; border-radius: 14px; font-size: 1.02rem; box-shadow: 0 6px 18px rgba(0, 0, 0, .16); }
@@ -375,6 +375,13 @@ details.outros .tags { padding: 0 10px 10px; }
 .summary .big { font-family: var(--f-display); font-stretch: 112%; font-weight: 800; font-size: 1.15rem; }
 
 .month { margin-top: 6px; }
+#d-ritmo { display: block; }
+#d-ritmo > summary { list-style: none; cursor: pointer; align-items: center; flex-wrap: nowrap; min-height: 44px; }
+#d-ritmo > summary::-webkit-details-marker, details.mes > summary::-webkit-details-marker { display: none; }
+.chart-in { display: grid; gap: 10px; padding-top: 10px; }
+details.mes > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; font-family: var(--f-display); font-stretch: 105%; font-weight: 700; font-size: 1rem; }
+details.mes > summary small { margin-left: auto; font-family: var(--f-body); font-weight: 600; font-size: .82rem; color: var(--muted); }
+.mes-dias { display: grid; gap: 18px; padding-top: 8px; }
 .dia { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; }
 .dia { position: relative; cursor: pointer; }
 .dia:hover { border-color: var(--field-line); }
@@ -858,7 +865,7 @@ const S = {
   config: null, dias: {},
   aba: "hoje", data: hojeISO(), fabManual: null, fab: 1, sel: {}, obs: "", dirty: false,
   confirmando: null, removendo: null, importando: null,
-  nc: {}, ncAberto: null, hora: "", resp: "", agendaMais: false, csvPeriodo: "tudo"
+  nc: {}, ncAberto: null, hora: "", resp: "", agendaMais: false, csvPeriodo: "tudo", mesesAbertos: {}
 };
 
 const $ = (s) => document.querySelector(s);
@@ -1756,7 +1763,11 @@ function renderHistorico() {
   let mes = "";
   for (const d of dias) {
     const m = d.data.slice(0, 7);
-    if (m !== mes) { mes = m; html += `<h3 class="month">${MESES[Number(m.slice(5)) - 1]} de ${m.slice(0, 4)}</h3>`; }
+    if (m !== mes) {
+      const n = dias.filter((x) => x.data.startsWith(m)).length;
+      html += `${mes ? "</div></details>" : ""}<details class="mes" data-mes="${m}" ${S.mesesAbertos[m] ?? m === meses[0] ? "open" : ""}><summary class="month">${MESES[Number(m.slice(5)) - 1]} de ${m.slice(0, 4)}<small>${n} ${n === 1 ? "dia" : "dias"}</small></summary><div class="mes-dias">`;
+      mes = m;
+    }
     const confirmar = S.confirmando === d.data ? `<div class="confirm"><span>Excluir o registro de ${fmt(d.data)}?</span><button class="btn small danger" type="button" data-excluir-sim="${d.data}">Sim, excluir</button><button class="btn small" type="button" data-cancelar="1">Cancelar</button></div>` : "";
     const acoes = `<span class="acts">
             <button class="icon-btn" type="button" data-resumo="${d.data}" aria-label="Copiar resumo de ${fmt(d.data)}" title="Copiar resumo">${ICO_COPIA}</button>
@@ -1788,6 +1799,7 @@ function renderHistorico() {
       ${confirmar}
     </article>`;
   }
+  if (mes) html += "</div></details>";
   el.innerHTML = html;
 }
 
@@ -2257,7 +2269,7 @@ function renderGraficos() {
   const iRitmo = html.length;
   const grupos = [1, 2, 0].map((f) => ({ f, ps: Object.values(info).filter((p) => p.fabrica === f && (p.ativo !== false || noPeriodo[p.id])) })).filter((g) => g.ps.length);
   const ymax = Math.max(7, ...grupos.flatMap((g) => g.ps.flatMap((p) => series[p.id].map((q) => q.v ?? 0))));
-  html += `<div class="chart"><div class="chart-head"><h2>Quando cada ponto foi coletado</h2></div>
+  html += `<details class="chart" id="d-ritmo" ${G.ritmoAberto ? "open" : ""}><summary class="chart-head"><h2>Quando cada ponto foi coletado</h2></summary><div class="chart-in">
     <p class="hint">Cada bolinha é uma coleta, com a data embaixo. A área cresce enquanto o ponto fica sem coleta.</p>${chavesHTML(new Set(grupos.map((g) => g.f)))}`;
   for (const g of grupos) {
     html += `<h3>${nomeLocal(g.f)}</h3><div class="sp-list" ${vars}>` + g.ps.map((p) => {
@@ -2268,7 +2280,7 @@ function renderGraficos() {
       </div>`;
     }).join("") + "</div>";
   }
-  html += "</div>";
+  html += "</div></details>";
 
   const iRes = html.length;
   html += '<div class="chart"><div class="chart-head"><h2>Resultados por ponto</h2><span class="un">' + esc((PARAM.find((x) => x.c === G.param) || PARAM[0]).titulo) + '</span></div>';
@@ -2744,7 +2756,7 @@ document.addEventListener("keydown", (ev) => {
     if (ev.shiftKey ? i <= 0 : i < 0 || i === f.length - 1) { ev.preventDefault(); f[ev.shiftKey ? f.length - 1 : 0].focus(); }
   }
 });
-document.addEventListener("toggle", (ev) => { if (ev.target.id === "d-outros") S.outrosAberto = ev.target.open; if (ev.target.id === "d-semcol") S.semColAberto = ev.target.open; }, true);
+document.addEventListener("toggle", (ev) => { if (ev.target.id === "d-outros") S.outrosAberto = ev.target.open; if (ev.target.id === "d-semcol") S.semColAberto = ev.target.open; if (ev.target.id === "d-ritmo") G.ritmoAberto = ev.target.open; if (ev.target.dataset.mes) S.mesesAbertos[ev.target.dataset.mes] = ev.target.open; }, true);
 document.addEventListener("click", (ev) => { if (ev.target.id === "f-data" && typeof ev.target.showPicker === "function") { try { ev.target.showPicker(); } catch {} } });
 const vg = document.getElementById("v-graficos");
 function alvoTip(ev) {
