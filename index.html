@@ -828,7 +828,6 @@ const S = {
   confirmando: null, removendo: null, importando: null,
   nc: {}, ncAberto: null, hora: "", resp: "", agendaMais: false, csvPeriodo: "tudo"
 };
-let db = null;
 
 const $ = (s) => document.querySelector(s);
 function esc(s) { return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
@@ -862,9 +861,6 @@ function toast(msg) {
 function msgErro(e) {
   if (e && e.status !== undefined) return e.status === 401 ? "Sua sessão expirou. Entre de novo." : traduzirErro(e);
   const c = e && e.code;
-  if (c === "invalid_argument") { S.soLeitura = true; renderHoje(); renderTudo(); return "Você tem acesso só de leitura a este site. Peça acesso de edição ao dono."; }
-  if (c === "quota_exceeded") return "O armazenamento está cheio. Baixe um backup e apague dias antigos no Histórico.";
-  if (c === "resource_exhausted") return "Muitas alterações seguidas. Espere alguns segundos e tente de novo.";
   if (c === "local") return "O navegador não deixou salvar. Verifique se o modo anônimo está desligado.";
   return "Não foi possível salvar. Verifique a conexão e tente de novo.";
 }
@@ -878,28 +874,19 @@ function gravarLocal() { try { localStorage.setItem(chaveLocal(), JSON.stringify
 
 async function salvarDia(dia) {
   if (S.modo === "servidor") { enfileirar({ op: "dia", data: dia.data, corpo: dia }); return; }
-  if (db) return db.collection("dias").doc(dia.data).set(dia);
   S.dias = { ...S.dias, [dia.data]: dia };
   if (!gravarLocal()) throw { code: "local" };
   aoMudarDados();
 }
 async function excluirDia(data) {
   if (S.modo === "servidor") { enfileirar({ op: "del", data }); return; }
-  if (db) return db.collection("dias").doc(data).delete();
   const m = { ...S.dias }; delete m[data]; S.dias = m;
   if (!gravarLocal()) throw { code: "local" };
   aoMudarDados();
 }
-let filaConfig = Promise.resolve();
 async function salvarConfig(cfg) {
   S.config = cfg;
   if (S.modo === "servidor") { enfileirar({ op: "config", corpo: cfg }); return; }
-  if (db) {
-    aoMudarDados();
-    const p = filaConfig.then(() => db.doc("config/geral").set(cfg));
-    filaConfig = p.catch(() => {});
-    return p;
-  }
   if (!gravarLocal()) throw { code: "local" };
   aoMudarDados();
 }
@@ -1044,7 +1031,7 @@ function mostrarStatusLado() {
   const el = $("#lado-status"); if (!el) return;
   const n = S.modo === "servidor" ? SRV.fila.length : 0;
   const off = S.modo === "servidor" && SRV.erro === "offline";
-  const onde = S.modo === "servidor" ? (SRV.conta ? "na conta de <b>" + esc(SRV.conta.name) + "</b>" : "na sua conta") : S.modo === "nuvem" ? "na sua conta do Claude" : "só neste navegador";
+  const onde = S.modo === "servidor" ? (SRV.conta ? "na conta de <b>" + esc(SRV.conta.name) + "</b>" : "na sua conta") : "só neste navegador";
   const ico = off ? '<path d="M3 3l18 18"/><path d="M8.5 6.6A6 6 0 0 1 17.6 10 4 4 0 0 1 20.4 16M17 18H7a4.5 4.5 0 0 1-1.6-8.7"/>'
     : n ? '<path d="M20 11.5A8 8 0 0 0 5.6 6.8L4 8.5"/><path d="M4 4v4.5h4.5"/><path d="M4 12.5a8 8 0 0 0 14.4 4.7l1.6-1.7"/><path d="M20 20v-4.5h-4.5"/>'
     : '<path d="M7 18.5a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.6 1.5 4 4 0 0 1-1 7.5z"/><path d="M9.5 13.5l2 2 3.5-3.7"/>';
@@ -1252,15 +1239,7 @@ async function iniciar() {
   try { const a = localStorage.getItem("coleta-agua:aba"); if (ABAS.includes(a)) S.aba = a; } catch {}
   const h = location.hash.replace("#", ""); if (ABAS.includes(h)) S.aba = h;
   trocarAba(S.aba);
-  if (window.claude && typeof window.claude.use === "function") {
-    try { db = await window.claude.use("db"); } catch { db = null; }
-  }
-  S.semNuvem = !!window.claude && !db;
-  if (db) {
-    S.modo = "nuvem";
-    assinar();
-    verificarEscrita();
-  } else if (!window.claude && API_URL) {
+  if (API_URL) {
     iniciarServidor();
   } else {
     carregarLocal();
@@ -1274,26 +1253,6 @@ function carregarLocal() {
   S.pronto = true;
   aoMudarDados();
 }
-function assinar() {
-  let temCfg = false, temDias = false;
-  const erro = () => { toast("A conexão com os registros caiu. Recarregue a página."); };
-  db.doc("config/geral").onSnapshot((snap) => {
-    S.config = normalizarConfig(snap.exists ? snap.data() : null);
-    temCfg = true; S.pronto = temCfg && temDias; if (S.pronto) aoMudarDados();
-  }, erro);
-  db.collection("dias").orderBy("data", "desc").limit(1000).onSnapshot((qs) => {
-    const m = {}; qs.docs.forEach((d) => { const v = limparDia(d.data()); if (v) m[v.data] = v; });
-    S.dias = m;
-    temDias = true; S.pronto = temCfg && temDias; if (S.pronto) aoMudarDados();
-  }, erro);
-}
-async function verificarEscrita() {
-  try {
-    const u = await window.claude.use("user");
-    if (u && (await u.can("data.write")) === false) { S.soLeitura = true; if (S.pronto) renderHoje(); renderTudo(); }
-  } catch {}
-}
-
 /* ---------- Regras do rodízio ---------- */
 function ultimas(ate, incluir) {
   const m = {};
@@ -1428,7 +1387,7 @@ function editandoHoje() {
   return !!(a && a.closest && a.closest("#v-hoje") && a.matches("input:not([type=checkbox]), textarea"));
 }
 function aoMudarDados() {
-  if (!S.pronto || S.importandoAgora) return;
+  if (!S.pronto) return;
   if (!S.dirty) { montarRascunho(); if (!editandoHoje()) renderHoje(); }
   renderTudo();
 }
@@ -1613,7 +1572,6 @@ function renderHoje() {
     notas.push(nota("info", `Coleta deste dia já salva (Fábrica ${reg.fabrica}).`,
       `<span class="actions"><button class="link" type="button" data-resumo="${S.data}">Copiar resumo</button>${prox <= hoje && !S.dias[prox] ? `<button class="link" type="button" data-ir="${prox}">Ir para ${semana(prox)} ${fmtCurto(prox)}</button>` : ""}</span>`));
   }
-  if (S.semNuvem) notas.push(nota("warn", "Sem conexão com o armazenamento compartilhado. O que você salvar agora fica só neste navegador."));
   if (fimDeSemana) notas.push(nota("warn", "Data em fim de semana."));
   if (!reg && lacuna >= 2) {
     const prox = proxDiaUtil(anterior.data);
@@ -1820,8 +1778,6 @@ function renderAjustes() {
   }
   $("#modo-label").textContent = S.modo === "servidor"
     ? "Não é preciso fazer backup: tudo fica salvo na sua conta. O arquivo abaixo é só uma cópia extra, se você quiser guardar."
-    : S.modo === "nuvem"
-    ? "Os registros ficam guardados neste site e aparecem em qualquer aparelho em que você abrir este link com a sua conta. O backup serve para guardar uma cópia ou levar os dados para outro lugar."
     : "Os registros ficam guardados só neste navegador. Baixe um backup de vez em quando para não perder nada.";
   const grupos = [1, 2, 0].map((f) => ({ f, pts: S.config.pontos.filter((p) => p.fabrica === f) })).filter((g) => g.pts.length);
   $("#aj-lista").innerHTML = grupos.map((g) => `<div class="block"><h3>${g.f === 0 ? "Todo dia" : "Fábrica " + g.f}</h3><ul class="cfg-list">${g.pts.map((p) => `
@@ -2462,20 +2418,9 @@ function fecharFolha() {
   if (v && v.isConnected) v.focus();
 }
 async function oferecerArquivo(nome, texto) {
-  let dl = null;
-  if (window.claude && typeof window.claude.use === "function") { try { dl = await window.claude.use("downloads"); } catch { dl = null; } }
-  if (dl) {
-    try { await dl.save({ filename: nome, data: texto }); toast("Arquivo pronto."); }
-    catch (e) { if (!e || e.code !== "declined") toast("Não foi possível gerar o arquivo aqui."); }
-    return;
-  }
-  if (!window.claude) {
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([texto], { type: "text/plain;charset=utf-8" }));
-    a.download = nome; document.body.appendChild(a); a.click(); a.remove();
-    return;
-  }
-  toast("Este navegador não permite baixar arquivos daqui.");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([texto], { type: "text/plain;charset=utf-8" }));
+  a.download = nome; document.body.appendChild(a); a.click(); a.remove();
 }
 
 function validarImport(j) {
@@ -2496,20 +2441,12 @@ async function importar() {
       toast(`Backup importado: ${imp.dias.length} dias.`);
       return;
     }
-    if (db) {
-      S.importandoAgora = true;
-      await salvarConfig(imp.config);
-      let i = 0;
-      for (const d of imp.dias) { toast(`Importando ${++i} de ${imp.dias.length}…`); await salvarDia(d); }
-      S.importandoAgora = false; S.dirty = false; aoMudarDados();
-    } else {
-      S.config = imp.config;
-      const m = { ...S.dias }; for (const d of imp.dias) m[d.data] = d; S.dias = m;
-      if (!gravarLocal()) throw { code: "local" };
-      S.dirty = false; aoMudarDados();
-    }
+    S.config = imp.config;
+    const m = { ...S.dias }; for (const d of imp.dias) m[d.data] = d; S.dias = m;
+    if (!gravarLocal()) throw { code: "local" };
+    S.dirty = false; aoMudarDados();
     toast(`Backup importado: ${imp.dias.length} dias.`);
-  } catch (e) { S.importandoAgora = false; aoMudarDados(); toast(msgErro(e)); }
+  } catch (e) { aoMudarDados(); toast(msgErro(e)); }
 }
 
 let hojeAtual = hojeISO();
