@@ -33,3 +33,6 @@ services:
       - path: /*
         name: Cache-Control
         value: no-cache
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'none'; script-src 'self' 'sha256-qSX1vni9DB4JVLXMPRMRVvfo/JpGvtvyUvLw+sEguaY=' 'sha256-hUGvntsbxkWl882hBJrdOyKQBuFg6bLodwOwx6gxYuM=' 'unsafe-hashes' 'sha256-MhtPZXr7+LpJUY5qtMutB+qWfQtMaPccfe7QXtCcEYc='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src https://coleta-agua-api.onrender.com; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
