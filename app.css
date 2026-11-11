@@ -283,8 +283,11 @@ body.sem-conta > header, body.sem-conta > main { display: none; }
 .ajuda .btn { justify-self: start; }
 .senha-wrap { position: relative; display: block; }
 .field > span.senha-wrap { font-size: inherit; font-weight: inherit; color: inherit; }
-.senha-wrap input { padding-right: 88px; }
-.ver-senha { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); min-height: 44px; padding: 4px 10px; border: 0; background: none; color: var(--accent); font-weight: 700; cursor: pointer; border-radius: 8px; }
+.senha-wrap input { padding-right: 52px; }
+.ver-senha { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--accent); cursor: pointer; border-radius: 8px; }
+.ver-senha svg { width: 20px; height: 20px; }
+.ver-senha .olho-riscado, .senha-wrap input[type="text"] + .ver-senha .olho { display: none; }
+.senha-wrap input[type="text"] + .ver-senha .olho-riscado { display: block; }
 .login-sub { margin: -8px 0 0; color: var(--muted); font-size: .92rem; }
 .login-desc { margin: -6px 0 0; font-size: .95rem; }
 @media (min-width: 600px) and (max-height: 520px) {

@@ -1716,7 +1716,7 @@ document.addEventListener("click", async (ev) => {
   if (t.id === "b-trocar-fab") { S.trocandoFab = !S.trocandoFab; renderHoje(); $("#b-trocar-fab")?.focus(); return; }
   if (t.id === "b-ajuda") { S.ajuda = true; if (S.aba !== "hoje") trocarAba("hoje"); if (S.pronto) renderHoje(); window.scrollTo(0, 0); return; }
   if (t.id === "b-ajuda-ok") { S.ajuda = false; lsSet("coleta-agua:ajuda-ok", "1"); renderHoje(); return; }
-  if (t.id === "b-ver-senha") { const i = $("#l-senha"), ver = i.type === "password"; i.type = ver ? "text" : "password"; $("#l-senha2").type = i.type; t.textContent = ver ? "Ocultar" : "Mostrar"; t.setAttribute("aria-label", ver ? "Ocultar a senha" : "Mostrar a senha"); i.focus(); return; }
+  if (t.id === "b-ver-senha") { const i = $("#l-senha"), ver = i.type === "password"; i.type = ver ? "text" : "password"; $("#l-senha2").type = i.type; t.setAttribute("aria-label", ver ? "Ocultar a senha" : "Mostrar a senha"); i.focus(); return; }
   if (t.id === "b-tema") { aplicarTema(temaEscuro() ? "claro" : "escuro"); return; }
   if (t.dataset.param) { G.param = t.dataset.param; renderGraficos(); $("#" + t.id)?.focus(); return; }
   if (t.dataset.fab) { guardarRascunho(); S.trocandoFab = false; S.fabManual = Number(t.dataset.fab); montarRascunho(); renderHoje(); $("#fab-" + S.fab)?.focus(); return; }
