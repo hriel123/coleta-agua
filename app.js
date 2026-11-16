@@ -122,7 +122,8 @@ const ERROS_SERVIDOR = {
   "too many attempts, please try again later": "Muitas tentativas. Espere alguns minutos e tente de novo.",
   "email not configured": "A recuperação de senha por e-mail ainda não foi ativada.",
   "invalid or expired reset link": "Este link expirou ou já foi usado. Peça um novo em \"Esqueci minha senha\".",
-  "token and password are required": "Informe a nova senha."
+  "token and password are required": "Informe a nova senha.",
+  "storage quota exceeded": "Sua conta atingiu o limite de 5 MB de dados salvos."
 };
 const ROTULO_LOGIN = { entrar: "Entrar", criar: "Criar conta", esqueci: "Enviar link", redefinir: "Salvar nova senha" };
 const SUB_LOGIN = {
@@ -195,7 +196,7 @@ async function enviarFila() {
         else await apiReq("/dados/config", { method: "PUT", body: op.corpo });
       } catch (e) {
         if (e.status === 401) { sessaoExpirada(); return; }
-        if (e.status >= 400 && e.status < 500) { SRV.fila = SRV.fila.filter((x) => x !== op); gravarFila(); toast("O servidor recusou uma alteração de " + (op.data ? fmt(op.data) : "ajustes") + "."); continue; }
+        if (e.status >= 400 && e.status < 500 && e.status !== 429) { SRV.fila = SRV.fila.filter((x) => x !== op); gravarFila(); toast("O servidor recusou uma alteração de " + (op.data ? fmt(op.data) : "ajustes") + "."); continue; }
         SRV.erro = "offline"; SRV.tmr = setTimeout(enviarFila, 20000); return;
       }
       SRV.fila = SRV.fila.filter((x) => x !== op); gravarFila();
