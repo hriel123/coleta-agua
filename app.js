@@ -402,6 +402,12 @@ function sessaoExpirada() {
   toast("Sua sessão expirou. Entre de novo; nada do que você salvou se perdeu.");
   mostrarLogin();
 }
+async function sairTodos(b) {
+  b.disabled = true;
+  try { await apiReq("/auth/logout-all", { method: "POST" }); }
+  catch (e) { if (e.status !== 401) { b.disabled = false; toast(traduzirErro(e)); return; } }
+  sairConta();
+}
 function sairConta() {
   if (SRV.conta) { lsSet(kCache(), null); lsSet(kFila(), null); }
   lsSet(TOKEN_KEY, null); lsSet(CONTA_KEY, null); lsSet("coleta-agua:resp", null);
@@ -996,8 +1002,8 @@ function renderAjustes() {
     $("#conta-info").innerHTML = `Conectado como <b>${esc(SRV.conta.name)}</b> (${esc(SRV.conta.email)}). Seus registros ficam salvos na conta e aparecem em qualquer aparelho em que você entrar.`;
     const n = SRV.fila.length;
     $("#conta-acoes").innerHTML = S.confirmSair && n
-      ? `<div class="confirm"><span>${n} ${n === 1 ? "alteração ainda não foi enviada" : "alterações ainda não foram enviadas"} e ${n === 1 ? "vai" : "vão"} se perder. Sair mesmo assim?</span><button class="btn small danger" type="button" id="b-sair-forcar">Sair mesmo assim</button><button class="btn small" type="button" data-cancelar="1">Cancelar</button></div>`
-      : '<button class="btn" type="button" id="b-sair">Sair da conta</button>';
+      ? `<div class="confirm"><span>${n} ${n === 1 ? "alteração ainda não foi enviada" : "alterações ainda não foram enviadas"} e ${n === 1 ? "vai" : "vão"} se perder. Sair mesmo assim?</span><button class="btn small danger" type="button" id="${S.confirmSair === "todos" ? "b-sair-todos-forcar" : "b-sair-forcar"}">Sair mesmo assim</button><button class="btn small" type="button" data-cancelar="1">Cancelar</button></div>`
+      : '<div class="actions"><button class="btn" type="button" id="b-sair">Sair da conta</button><button class="btn" type="button" id="b-sair-todos">Sair de todos os aparelhos</button></div>';
   }
   $("#modo-label").textContent = S.modo === "servidor"
     ? "Não é preciso fazer backup: tudo fica salvo na sua conta. O arquivo abaixo é só uma cópia extra, se você quiser guardar."
@@ -1756,6 +1762,8 @@ document.addEventListener("click", async (ev) => {
   if (t.dataset.loginModo) { modoLogin(t.dataset.loginModo); $(t.dataset.loginModo === "criar" ? "#l-nome" : "#l-email").focus(); return; }
   if (t.id === "b-sair") { if (SRV.fila.length) { S.confirmSair = true; renderAjustes(); } else sairConta(); return; }
   if (t.id === "b-sair-forcar") { sairConta(); return; }
+  if (t.id === "b-sair-todos") { if (SRV.fila.length) { S.confirmSair = "todos"; renderAjustes(); } else sairTodos(t); return; }
+  if (t.id === "b-sair-todos-forcar") { sairTodos(t); return; }
   if (t.id === "b-migrar") {
     const j = S.legado; if (!j) return;
     t.disabled = true;
