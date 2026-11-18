@@ -100,8 +100,8 @@ async function excluirDia(data) {
   aoMudarDados();
 }
 async function salvarConfig(cfg) {
-  S.config = cfg;
   if (S.modo === "servidor") { enfileirar({ op: "config", corpo: cfg }); return; }
+  S.config = cfg;
   if (!gravarLocal()) throw { code: "local" };
   aoMudarDados();
 }
@@ -109,7 +109,7 @@ async function salvarConfig(cfg) {
 /* ---------- Conta e servidor ---------- */
 const API_URL = ((document.querySelector('meta[name="coleta-api"]') || {}).content || "").trim().replace(/\/+$/, "");
 const TOKEN_KEY = "coleta-agua:token", CONTA_KEY = "coleta-agua:conta", VISITANTE_KEY = "coleta-agua:visitante";
-const SRV = { token: null, conta: null, fila: [], enviando: false, erro: "", acordando: false, tmr: null, tmrSync: null };
+const SRV = { token: null, conta: null, fila: [], enviando: false, erro: "", acordando: false, tmr: null, tmrSync: null, ver: null };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ERROS_SERVIDOR = {
   "invalid credentials": "E-mail ou senha incorretos.",
@@ -152,8 +152,8 @@ function avisoAcordando(desde) {
   const tick = () => { tempo.textContent = "Aguardando há " + Math.round((Date.now() - desde) / 1000) + " s"; };
   tick(); ACORDANDO.tick = setInterval(tick, 1000);
 }
-async function apiReq(path, { method = "GET", body } = {}) {
-  const headers = { "Content-Type": "application/json" };
+async function apiReq(path, { method = "GET", body, headers: extra } = {}) {
+  const headers = { "Content-Type": "application/json", ...extra };
   if (SRV.token) headers.Authorization = "Bearer " + SRV.token;
   if (++ACORDANDO.pendentes === 1) { avisoAcordando(null); const inicio = Date.now(); ACORDANDO.tmr = setTimeout(() => avisoAcordando(inicio), 4000); }
   const ctrl = new AbortController(), limite = setTimeout(() => ctrl.abort(), 90000);
@@ -163,22 +163,27 @@ async function apiReq(path, { method = "GET", body } = {}) {
   finally { clearTimeout(limite); if (--ACORDANDO.pendentes === 0) { clearTimeout(ACORDANDO.tmr); avisoAcordando(esgotou ? "falhou" : null); } }
   if (res.status === 204) return null;
   const data = await res.json().catch(() => null);
-  if (!res.ok) { const e = new Error((data && data.error) || "HTTP " + res.status); e.status = res.status; throw e; }
+  if (!res.ok) { const e = new Error((data && data.error) || "HTTP " + res.status); e.status = res.status; e.data = data; throw e; }
   return data;
 }
 function traduzirErro(e) {
   if (e && e.status === 0) return "Não foi possível falar com o servidor. Verifique a internet e tente de novo.";
   return ERROS_SERVIDOR[e && e.message] || "Algo deu errado no servidor. Tente de novo em instantes.";
 }
-function gravarCache() { if (SRV.conta) lsSet(kCache(), JSON.stringify({ config: S.config, dias: S.dias })); }
+function gravarCache() { if (SRV.conta) lsSet(kCache(), JSON.stringify({ config: S.config, dias: S.dias, ver: SRV.ver })); }
 function gravarFila() { if (SRV.conta) lsSet(kFila(), JSON.stringify(SRV.fila)); }
 function aplicarOp(op) {
   if (op.op === "dia") S.dias = { ...S.dias, [op.data]: op.corpo };
   else if (op.op === "del") { const m = { ...S.dias }; delete m[op.data]; S.dias = m; }
   else if (op.op === "config") S.config = op.corpo;
 }
+function versaoDe(k) { return SRV.ver ? SRV.ver[k] || 0 : null; }
 function enfileirar(op) {
   op.k = op.op === "config" ? "config" : "dia:" + op.data;
+  if (!op.base) {
+    const ant = SRV.fila.find((x) => x.k === op.k);
+    op.base = ant ? ant.base : { v: versaoDe(op.k), c: clone(op.op === "config" ? S.config : S.dias[op.data] || null) };
+  }
   SRV.fila = SRV.fila.filter((x) => x.k !== op.k);
   SRV.fila.push(op);
   aplicarOp(op); gravarCache(); gravarFila(); aoMudarDados(); mostrarSync();
@@ -190,16 +195,19 @@ async function enviarFila() {
   try {
     while (SRV.fila.length) {
       const op = SRV.fila[0];
+      const headers = op.base && typeof op.base.v === "number" ? { "X-Versao": String(op.base.v) } : undefined;
+      let r;
       try {
-        if (op.op === "dia") await apiReq("/dados/dias/" + op.data, { method: "PUT", body: op.corpo });
-        else if (op.op === "del") await apiReq("/dados/dias/" + op.data, { method: "DELETE" });
-        else await apiReq("/dados/config", { method: "PUT", body: op.corpo });
+        if (op.op === "dia") r = await apiReq("/dados/dias/" + op.data, { method: "PUT", body: op.corpo, headers });
+        else if (op.op === "del") r = await apiReq("/dados/dias/" + op.data, { method: "DELETE", headers });
+        else r = await apiReq("/dados/config", { method: "PUT", body: op.corpo, headers });
       } catch (e) {
         if (e.status === 401) { sessaoExpirada(); return; }
+        if (e.status === 409 && e.data && e.data.error === "conflict") { resolverConflito(op, e.data); continue; }
         if (e.status >= 400 && e.status < 500 && e.status !== 429) { SRV.fila = SRV.fila.filter((x) => x !== op); gravarFila(); toast("O servidor recusou uma alteração de " + (op.data ? fmt(op.data) : "ajustes") + "."); continue; }
         SRV.erro = "offline"; SRV.tmr = setTimeout(enviarFila, 20000); return;
       }
-      SRV.fila = SRV.fila.filter((x) => x !== op); gravarFila();
+      SRV.fila = SRV.fila.filter((x) => x !== op); registrarVersao(op, r); gravarFila();
     }
     SRV.erro = "";
   } finally { SRV.enviando = false; mostrarSync(); }
@@ -211,11 +219,204 @@ async function sincronizarDoServidor() {
     S.config = normalizarConfig(d && d.config);
     S.dias = {};
     for (const x of (d && d.dias) || []) { const v = limparDia(x); if (v) S.dias[v.data] = v; }
+    SRV.ver = null;
+    if (d && d.versoes && typeof d.configVersao === "number") {
+      SRV.ver = { config: d.configVersao };
+      for (const [k, v] of Object.entries(d.versoes)) SRV.ver["dia:" + k] = v;
+    }
     for (const op of SRV.fila) aplicarOp(op);
+    for (const c of CONF.lista) S.dias[c.data] = mesclarDia(c.b, c.l, c.r, {}).dia;
     gravarCache(); S.pronto = true; SRV.erro = "";
     verificarLegado();
     aoMudarDados();
   } finally { clearTimeout(lento); SRV.acordando = false; mostrarSync(); }
+}
+function registrarVersao(op, r) {
+  if (!SRV.ver) return;
+  const v = op.op === "del" ? 0 : r && typeof r.versao === "number" ? r.versao : null;
+  if (v === null) return;
+  SRV.ver[op.k] = v;
+  for (const x of SRV.fila) if (x.k === op.k) x.base = { v, c: op.op === "del" ? null : clone(op.corpo) };
+  gravarCache();
+}
+function reenfileirar(op) {
+  op.k = op.op === "config" ? "config" : "dia:" + op.data;
+  SRV.fila.push(op); aplicarOp(op);
+}
+function resolverConflito(op, info) {
+  const ult = SRV.fila.filter((x) => x.k === op.k).pop() || op;
+  SRV.fila = SRV.fila.filter((x) => x.k !== op.k);
+  if (SRV.ver) SRV.ver[op.k] = info.versao;
+  const b = ult.base ? ult.base.c : null;
+  if (op.op === "config") {
+    const r = normalizarConfig(info.atual);
+    const m = mesclarConfig(b, ult.corpo, r);
+    if (mesmoJSON(m.cfg, r)) S.config = r;
+    else reenfileirar({ op: "config", corpo: m.cfg, base: { v: info.versao, c: r } });
+    toast("Os ajustes também mudaram em outro aparelho. Juntei as duas versões." + (m.choques ? " Onde os dois mudaram o mesmo ponto, ficou a deste aparelho." : ""));
+  } else {
+    const data = op.data, r = info.atual ? limparDia(info.atual) : null;
+    if (ult.op === "del") {
+      if (r) { S.dias = { ...S.dias, [data]: r }; toast(`${fmt(data)} foi alterado em outro aparelho depois, então não foi excluído.`); }
+      else { const m = { ...S.dias }; delete m[data]; S.dias = m; }
+    } else if (!r) {
+      reenfileirar({ op: "dia", data, corpo: ult.corpo, base: { v: 0, c: null } });
+      toast(`${fmt(data)} tinha sido excluído em outro aparelho. A coleta deste aparelho foi mantida.`);
+    } else {
+      const m = mesclarDia(b, ult.corpo, r, {});
+      if (m.choques.length) {
+        guardarConflito({ data, base: { v: info.versao, c: r }, b, l: ult.corpo, r });
+        S.dias = { ...S.dias, [data]: m.dia };
+      } else {
+        if (mesmoDia(m.dia, r)) S.dias = { ...S.dias, [data]: r };
+        else reenfileirar({ op: "dia", data, corpo: m.dia, base: { v: info.versao, c: r } });
+        toast(`${fmt(data)} também mudou em outro aparelho. Juntei as duas versões.`);
+      }
+    }
+  }
+  gravarFila(); gravarCache(); aoMudarDados();
+}
+function mesmoJSON(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+function chaveDia(d) {
+  const v = d && limparDia(d); if (!v) return null;
+  const ord = (a, b) => (a.ponto < b.ponto ? -1 : a.ponto > b.ponto ? 1 : 0);
+  return JSON.stringify({ ...v, atualizadoEm: "", itens: [...v.itens].sort(ord), naoColetados: [...(v.naoColetados || [])].sort(ord) });
+}
+function mesmoDia(a, b) { const ka = chaveDia(a); return ka !== null && ka === chaveDia(b); }
+function mesclarConfig(B, L, R) {
+  const b = B ? normalizarConfig(B) : null, l = normalizarConfig(L), r = normalizarConfig(R);
+  let choques = 0;
+  const tres = (bv, lv, rv) => {
+    if (mesmoJSON(lv, rv)) return lv;
+    if (mesmoJSON(lv, bv)) return rv;
+    if (mesmoJSON(rv, bv)) return lv;
+    choques++; return lv;
+  };
+  const mapa = (c) => new Map((c ? c.pontos : []).map((p) => [p.id, p]));
+  const mb = mapa(b), ml = mapa(l), mr = mapa(r);
+  const pontos = [];
+  for (const id of new Set([...mr.keys(), ...ml.keys()])) {
+    const pb = mb.get(id), pl = ml.get(id), pr = mr.get(id);
+    let res;
+    if (mesmoJSON(pl, pr)) res = pl;
+    else if (mesmoJSON(pl, pb)) res = pr;
+    else if (mesmoJSON(pr, pb)) res = pl;
+    else if (!pl || !pr) res = pl || pr;
+    else { res = { id }; for (const f of ["fabrica", "setor", "tipo", "ativo"]) res[f] = tres(pb ? pb[f] : undefined, pl[f], pr[f]); }
+    if (res) pontos.push(res);
+  }
+  const regras = {};
+  for (const t of ["Torneira", "Bebedouro"]) regras[t] = tres(b ? b.regras[t] : undefined, l.regras[t], r.regras[t]);
+  return { cfg: { pontos, regras }, choques };
+}
+function fmtValor(f, v) { return v === null || v === undefined ? "vazio" : fmtNum(v) + (LIM[f].un ? " " + LIM[f].un : ""); }
+function descPonto(p) {
+  if (!p) return "fora desta coleta";
+  if (p.t === "nc") return "não coletado (" + p.motivo + ")";
+  return "coletado: " + CAMPOS.map((f) => LIM[f].nome + " " + fmtValor(f, p[f])).join(", ");
+}
+function descDia(d) {
+  if (d.semColeta) return "sem coleta (" + d.motivo + ")";
+  return nomeFab(d.fabrica) + ", " + d.itens.length + (d.itens.length === 1 ? " ponto coletado" : " pontos coletados");
+}
+function mesclarDia(B, L, R, escolhas) {
+  const b = B ? limparDia(B) : null, l = limparDia(L), r = limparDia(R);
+  const choques = [], deste = new Set(), outro = new Set();
+  const fim = (dia) => ({ dia, choques, deste: [...deste], outro: [...outro] });
+  if (mesmoDia(l, r) || mesmoDia(r, b)) return fim(l);
+  if (mesmoDia(l, b)) return fim(r);
+  const tipo = (d) => (d.semColeta ? "sc" : "f" + d.fabrica);
+  if (tipo(l) !== tipo(r)) {
+    choques.push({ id: "dia", rotulo: "O dia inteiro", l: descDia(l), r: descDia(r) });
+    return fim(escolhas.dia === "r" ? r : l);
+  }
+  const tres = (bv, lv, rv, id, rotulo, desc, nome) => {
+    if (mesmoJSON(lv, rv)) return lv;
+    if (mesmoJSON(lv, bv)) { outro.add(nome); return rv; }
+    if (mesmoJSON(rv, bv)) { deste.add(nome); return lv; }
+    choques.push({ id, rotulo, l: desc(lv), r: desc(rv) });
+    return escolhas[id] === "r" ? rv : lv;
+  };
+  const dia = l.semColeta ? { data: l.data, semColeta: true, fabrica: null, itens: [] } : { data: l.data, fabrica: l.fabrica, itens: [], naoColetados: [] };
+  const campos = l.semColeta ? [["motivo", "Motivo"], ["obs", "Observação"]] : [["hora", "Hora"], ["responsavel", "Responsável"], ["obs", "Observação"]];
+  for (const [c, nome] of campos) dia[c] = tres(b ? b[c] : undefined, l[c], r[c], "d:" + c, nome, (v) => (v ? v : "vazio"), nome.toLowerCase());
+  dia.atualizadoEm = new Date().toISOString();
+  if (l.semColeta) return fim(dia);
+  const mapa = (d) => {
+    const m = new Map(); if (!d || d.semColeta) return m;
+    for (const it of d.itens) m.set(it.ponto, { ...it, t: "item" });
+    for (const x of d.naoColetados || []) if (!m.has(x.ponto)) m.set(x.ponto, { ...x, t: "nc" });
+    return m;
+  };
+  const est = (p) => (!p ? null : p.t === "item" ? [p.t, p.cloro, p.ph, p.turbidez] : [p.t, p.motivo]);
+  const mb = mapa(b), ml = mapa(l), mr = mapa(r);
+  for (const id of new Set([...mr.keys(), ...ml.keys(), ...mb.keys()])) {
+    const pb = mb.get(id), pl = ml.get(id), pr = mr.get(id), q = pl || pr || pb;
+    const nome = q.setor + (q.tipo ? " · " + q.tipo : "");
+    let res;
+    if (mesmoJSON(est(pl), est(pr))) res = pl;
+    else if (mesmoJSON(est(pl), est(pb))) { res = pr; outro.add(nome); }
+    else if (mesmoJSON(est(pr), est(pb))) { res = pl; deste.add(nome); }
+    else if (pl && pr && pl.t === "item" && pr.t === "item") {
+      res = { ...pl };
+      for (const f of CAMPOS) res[f] = tres(pb && pb.t === "item" ? pb[f] : undefined, pl[f], pr[f], "p:" + id + ":" + f, nome + ": " + LIM[f].nome, (v) => fmtValor(f, v), nome);
+    } else {
+      choques.push({ id: "p:" + id, rotulo: nome, l: descPonto(pl), r: descPonto(pr) });
+      res = escolhas["p:" + id] === "r" ? pr : pl;
+    }
+    if (!res) continue;
+    const { t, ...v } = res;
+    (t === "item" ? dia.itens : dia.naoColetados).push(v);
+  }
+  const ord = (a, c) => (a.fabrica - c.fabrica) || ((ORDEM_TIPO[a.tipo] ?? 9) - (ORDEM_TIPO[c.tipo] ?? 9));
+  dia.itens.sort(ord); dia.naoColetados.sort(ord);
+  return fim(dia);
+}
+const CONF = { lista: [], dlg: null };
+function kConf() { return "coleta-agua:conflitos:" + SRV.conta.id; }
+function lerConflitos() { try { const a = JSON.parse(lsGet(kConf()) || "[]"); return Array.isArray(a) ? a.filter((c) => c && dataValida(c.data) && c.l && c.r && c.base) : []; } catch { return []; } }
+function gravarConflitos() { if (SRV.conta) lsSet(kConf(), CONF.lista.length ? JSON.stringify(CONF.lista) : null); }
+function guardarConflito(c) {
+  CONF.lista = CONF.lista.filter((x) => x.data !== c.data);
+  CONF.lista.push(c); gravarConflitos(); abrirConflito();
+}
+function fecharConflito() { if (CONF.dlg && CONF.dlg.open) CONF.dlg.close(); }
+function abrirConflito() {
+  if (!SRV.token || !CONF.lista.length) return;
+  const c = CONF.lista[0], m = mesclarDia(c.b, c.l, c.r, {});
+  if (!m.choques.length) { concluirConflito(m.dia); return; }
+  let d = CONF.dlg;
+  if (!d) {
+    d = document.createElement("dialog"); d.className = "conflito";
+    d.addEventListener("cancel", (ev) => ev.preventDefault());
+    d.addEventListener("close", () => { if (CONF.lista.length && SRV.token) setTimeout(abrirConflito, 0); });
+    d.addEventListener("change", () => { d.querySelector('button[type="submit"]').disabled = [...d.querySelectorAll("fieldset")].some((f) => !f.querySelector("input:checked")); });
+    d.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const escolhas = {}; let falta = false;
+      for (const f of d.querySelectorAll("fieldset")) { const i = f.querySelector("input:checked"); if (i) escolhas[f.dataset.choque] = i.value; else falta = true; }
+      if (falta) return;
+      const atual = CONF.lista[0];
+      concluirConflito(mesclarDia(atual.b, atual.l, atual.r, escolhas).dia);
+    });
+    document.body.appendChild(d); CONF.dlg = d;
+  }
+  const juntou = [m.deste.length ? listaNomes(m.deste) + " (deste aparelho)" : "", m.outro.length ? listaNomes(m.outro) + " (do outro aparelho)" : ""].filter(Boolean).join("; ");
+  d.innerHTML = `<form class="folha-in" method="dialog">
+    <h2>${esc(semana(c.data) + " " + fmt(c.data))} mudou em dois aparelhos</h2>
+    <p class="hint">Este aparelho e outro salvaram este dia ao mesmo tempo.${juntou ? " Juntei: " + esc(juntou) + "." : ""} ${m.choques.length === 1 ? "Escolha qual valor fica:" : "Escolha qual valor fica em cada item:"}</p>
+    ${m.choques.map((x, i) => `<fieldset data-choque="${esc(x.id)}"><legend>${esc(x.rotulo)}</legend>
+      <label><input type="radio" name="ch${i}" value="l"> Deste aparelho: ${esc(x.l)}</label>
+      <label><input type="radio" name="ch${i}" value="r"> Do outro aparelho: ${esc(x.r)}</label></fieldset>`).join("")}
+    <button class="btn" type="submit" disabled>Salvar</button></form>`;
+  if (!d.open) d.showModal();
+}
+function concluirConflito(dia) {
+  const c = CONF.lista.shift(); gravarConflitos();
+  if (mesmoDia(dia, c.r)) { S.dias = { ...S.dias, [c.data]: c.r }; gravarCache(); aoMudarDados(); }
+  else enfileirar({ op: "dia", data: c.data, corpo: dia, base: c.base });
+  toast(`Coleta de ${fmt(c.data)} salva.`);
+  if (CONF.lista.length) abrirConflito(); else fecharConflito();
 }
 function tentarSincronizar() {
   clearTimeout(SRV.tmrSync);
@@ -313,7 +514,9 @@ function entrarApp() {
   document.body.classList.remove("sem-conta"); $("#login").hidden = true; $("#demo-faixa").hidden = true;
   S.pronto = false; S.dias = {}; S.legado = null;
   try { SRV.fila = JSON.parse(lsGet(kFila()) || "[]"); if (!Array.isArray(SRV.fila)) SRV.fila = []; } catch { SRV.fila = []; }
+  CONF.lista = lerConflitos();
   let c = null; try { c = JSON.parse(lsGet(kCache()) || "null"); } catch {}
+  SRV.ver = c && c.ver && typeof c.ver === "object" ? c.ver : null;
   if (c && c.config) {
     S.config = normalizarConfig(c.config);
     for (const x of Object.values(c.dias || {})) { const v = limparDia(x); if (v) S.dias[v.data] = v; }
@@ -323,6 +526,7 @@ function entrarApp() {
   }
   mostrarSync();
   tentarSincronizar();
+  abrirConflito();
 }
 function mostrarLogin() {
   document.body.classList.add("sem-conta"); $("#login").hidden = false;
@@ -397,7 +601,7 @@ async function enviarLogin(ev) {
   }
 }
 function sessaoExpirada() {
-  lsSet(TOKEN_KEY, null); SRV.token = null;
+  lsSet(TOKEN_KEY, null); SRV.token = null; fecharConflito();
   clearTimeout(SRV.tmr); clearTimeout(SRV.tmrSync);
   toast("Sua sessão expirou. Entre de novo; nada do que você salvou se perdeu.");
   mostrarLogin();
@@ -409,12 +613,12 @@ async function sairTodos(b) {
   sairConta();
 }
 function sairConta() {
-  if (SRV.conta) { lsSet(kCache(), null); lsSet(kFila(), null); }
+  if (SRV.conta) { lsSet(kCache(), null); lsSet(kFila(), null); lsSet(kConf(), null); }
   lsSet(TOKEN_KEY, null); lsSet(CONTA_KEY, null); lsSet("coleta-agua:resp", null);
   clearTimeout(SRV.tmr); clearTimeout(SRV.tmrSync);
   for (const k of Object.keys(RASC)) delete RASC[k];
   gravarRascunhos();
-  SRV.token = null; SRV.conta = null; SRV.fila = []; SRV.erro = "";
+  SRV.token = null; SRV.conta = null; SRV.fila = []; SRV.erro = ""; SRV.ver = null; CONF.lista = []; fecharConflito();
   S.pronto = false; S.dias = {}; S.confirmSair = false; S.legado = null; S.dirty = false; S.resp = "";
   $("#l-email").value = ""; $("#l-senha").value = "";
   mostrarLogin(); mostrarSync();
