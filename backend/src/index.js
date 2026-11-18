@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import 'dotenv/config';
 import { Prisma } from '@prisma/client';
 import authRoutes from './routes/auth.js';
@@ -20,6 +21,7 @@ const app = express();
 
 app.disable('x-powered-by');
 app.set('trust proxy', 3);
+app.use(helmet());
 app.use(cors({ origin: allowedOrigins }));
 app.use('/dados/importar', express.json({ limit: '5mb' }));
 app.use(express.json({ limit: '100kb' }));
