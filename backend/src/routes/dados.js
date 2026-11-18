@@ -5,6 +5,7 @@ import { prisma } from '../lib/prisma.js';
 const router = Router();
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const ID_REGEX = /^[a-z0-9-]+$/;
 const MAX_DOC_BYTES = 64 * 1024;
 const MAX_IMPORT_DAYS = 3000;
 const MAX_USER_BYTES = 5 * 1024 * 1024;
@@ -44,12 +45,32 @@ async function storedDayBytes(userId, exceptDate = '') {
   return total;
 }
 
+function isValidId(value) {
+  return typeof value === 'string' && ID_REGEX.test(value);
+}
+
+function hasValidPoints(list) {
+  return list === undefined || (Array.isArray(list) && list.every((item) => isObject(item) && isValidId(item.ponto)));
+}
+
 function isValidConfig(config) {
-  return isObject(config) && Array.isArray(config.pontos) && !isTooBig(config);
+  return (
+    isObject(config) &&
+    Array.isArray(config.pontos) &&
+    config.pontos.every((point) => isObject(point) && isValidId(point.id)) &&
+    !isTooBig(config)
+  );
 }
 
 function isValidDay(day, date) {
-  return isObject(day) && isRealDate(day.data) && (date === undefined || day.data === date) && !isTooBig(day);
+  return (
+    isObject(day) &&
+    isRealDate(day.data) &&
+    (date === undefined || day.data === date) &&
+    hasValidPoints(day.itens) &&
+    hasValidPoints(day.naoColetados) &&
+    !isTooBig(day)
+  );
 }
 
 function expectedVersion(req) {
