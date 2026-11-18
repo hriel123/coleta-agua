@@ -13,6 +13,7 @@ model User {
   email          String          @unique
   password       String
   tokenVersion   Int             @default(0)
+  configVersao   Int             @default(0)
   config         Json?
   createdAt      DateTime        @default(now())
   dias           Dia[]
@@ -23,6 +24,7 @@ model Dia {
   id           Int      @id @default(autoincrement())
   data         String
   conteudo     Json
+  versao       Int      @default(1)
   atualizadoEm DateTime @updatedAt
   userId       Int
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)

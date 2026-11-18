@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Dia" ADD COLUMN     "versao" INTEGER NOT NULL DEFAULT 1;
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "configVersao" INTEGER NOT NULL DEFAULT 0;
