@@ -165,6 +165,25 @@ router.get('/me', authMiddleware, async (req, res) => {
   res.json({ id: user.id, name: user.name, email: user.email });
 });
 
+router.delete('/me', authMiddleware, authLimiter, async (req, res) => {
+  const password = req.body?.password;
+  if (typeof password !== 'string' || !password) {
+    return res.status(400).json({ error: 'password is required' });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  if (!user) {
+    return res.status(404).json({ error: 'user not found' });
+  }
+
+  if (Buffer.byteLength(password) > 72 || !(await bcrypt.compare(password, user.password))) {
+    return res.status(403).json({ error: 'current password is incorrect' });
+  }
+
+  await prisma.user.delete({ where: { id: user.id } });
+  res.status(204).end();
+});
+
 router.post('/logout-all', authMiddleware, async (req, res) => {
   await prisma.user.update({ where: { id: req.userId }, data: { tokenVersion: { increment: 1 } } });
   res.status(204).end();

@@ -123,7 +123,9 @@ const ERROS_SERVIDOR = {
   "email not configured": "A recuperação de senha por e-mail ainda não foi ativada.",
   "invalid or expired reset link": "Este link expirou ou já foi usado. Peça um novo em \"Esqueci minha senha\".",
   "token and password are required": "Informe a nova senha.",
-  "storage quota exceeded": "Sua conta atingiu o limite de 5 MB de dados salvos."
+  "storage quota exceeded": "Sua conta atingiu o limite de 5 MB de dados salvos.",
+  "password is required": "Informe sua senha para confirmar.",
+  "current password is incorrect": "Senha incorreta."
 };
 const ROTULO_LOGIN = { entrar: "Entrar", criar: "Criar conta", esqueci: "Enviar link", redefinir: "Salvar nova senha" };
 const SUB_LOGIN = {
@@ -612,6 +614,19 @@ async function sairTodos(b) {
   catch (e) { if (e.status !== 401) { b.disabled = false; toast(traduzirErro(e)); return; } }
   sairConta();
 }
+async function excluirConta(f) {
+  const senha = $("#x-senha").value, b = f.querySelector('[type="submit"]');
+  if (!senha) return;
+  b.disabled = true;
+  try { await apiReq("/auth/me", { method: "DELETE", body: { password: senha } }); }
+  catch (e) {
+    b.disabled = false;
+    if (e.status === 401) { sessaoExpirada(); return; }
+    toast(traduzirErro(e)); $("#x-senha").select(); return;
+  }
+  sairConta();
+  toast("Sua conta e todos os registros dela foram excluídos.");
+}
 function sairConta() {
   if (SRV.conta) { lsSet(kCache(), null); lsSet(kFila(), null); lsSet(kConf(), null); }
   lsSet(TOKEN_KEY, null); lsSet(CONTA_KEY, null); lsSet("coleta-agua:resp", null);
@@ -619,7 +634,7 @@ function sairConta() {
   for (const k of Object.keys(RASC)) delete RASC[k];
   gravarRascunhos();
   SRV.token = null; SRV.conta = null; SRV.fila = []; SRV.erro = ""; SRV.ver = null; CONF.lista = []; fecharConflito();
-  S.pronto = false; S.dias = {}; S.confirmSair = false; S.legado = null; S.dirty = false; S.resp = "";
+  S.pronto = false; S.dias = {}; S.confirmSair = false; S.excluirConta = false; S.legado = null; S.dirty = false; S.resp = "";
   $("#l-email").value = ""; $("#l-senha").value = "";
   mostrarLogin(); mostrarSync();
 }
@@ -1205,9 +1220,11 @@ function renderAjustes() {
   } else if (!cc.hidden) {
     $("#conta-info").innerHTML = `Conectado como <b>${esc(SRV.conta.name)}</b> (${esc(SRV.conta.email)}). Seus registros ficam salvos na conta e aparecem em qualquer aparelho em que você entrar.`;
     const n = SRV.fila.length;
-    $("#conta-acoes").innerHTML = S.confirmSair && n
+    if (S.excluirConta) {
+      if (!$("#f-excluir-conta")) $("#conta-acoes").innerHTML = `<form id="f-excluir-conta" class="excluir-conta"><p class="hint">Apaga sua conta e todos os registros de coleta salvos nela${n ? `, inclusive ${n === 1 ? "1 alteração que ainda não foi enviada" : n + " alterações que ainda não foram enviadas"}` : ""}. Não dá para desfazer.</p><label class="field" for="x-senha"><span>Para excluir a conta, confirme sua senha</span><input type="password" id="x-senha" autocomplete="current-password" required></label><div class="actions"><button class="btn danger" type="submit">Excluir definitivamente</button><button class="btn" type="button" data-cancelar="1">Cancelar</button></div></form>`;
+    } else $("#conta-acoes").innerHTML = S.confirmSair && n
       ? `<div class="confirm"><span>${n} ${n === 1 ? "alteração ainda não foi enviada" : "alterações ainda não foram enviadas"} e ${n === 1 ? "vai" : "vão"} se perder. Sair mesmo assim?</span><button class="btn small danger" type="button" id="${S.confirmSair === "todos" ? "b-sair-todos-forcar" : "b-sair-forcar"}">Sair mesmo assim</button><button class="btn small" type="button" data-cancelar="1">Cancelar</button></div>`
-      : '<div class="actions"><button class="btn" type="button" id="b-sair">Sair da conta</button><button class="btn" type="button" id="b-sair-todos">Sair de todos os aparelhos</button></div>';
+      : '<div class="actions"><button class="btn" type="button" id="b-sair">Sair da conta</button><button class="btn" type="button" id="b-sair-todos">Sair de todos os aparelhos</button><button class="btn danger" type="button" id="b-excluir-conta">Excluir conta</button></div>';
   }
   $("#modo-label").textContent = S.modo === "servidor"
     ? "Não é preciso fazer backup: tudo fica salvo na sua conta. O arquivo abaixo é só uma cópia extra, se você quiser guardar."
@@ -1968,6 +1985,7 @@ document.addEventListener("click", async (ev) => {
   if (t.id === "b-sair-forcar") { sairConta(); return; }
   if (t.id === "b-sair-todos") { if (SRV.fila.length) { S.confirmSair = "todos"; renderAjustes(); } else sairTodos(t); return; }
   if (t.id === "b-sair-todos-forcar") { sairTodos(t); return; }
+  if (t.id === "b-excluir-conta") { S.confirmSair = false; S.excluirConta = true; renderAjustes(); $("#x-senha").focus(); return; }
   if (t.id === "b-migrar") {
     const j = S.legado; if (!j) return;
     t.disabled = true;
@@ -1979,7 +1997,7 @@ document.addEventListener("click", async (ev) => {
     } catch (e) { toast(msgErro(e)); t.disabled = false; }
     return;
   }
-  if (t.dataset.cancelar) { S.confirmSair = false; S.confirmando = null; S.removendo = null; S.importando = null; renderHistorico(); renderAjustes(); return; }
+  if (t.dataset.cancelar) { S.confirmSair = false; S.excluirConta = false; S.confirmando = null; S.removendo = null; S.importando = null; renderHistorico(); renderAjustes(); return; }
   if (t.dataset.abrir) { guardarRascunho(); S.data = t.dataset.abrir; S.fabManual = null; montarRascunho(); renderHoje(); trocarAba("hoje"); window.scrollTo(0, 0); return; }
   if (t.dataset.excluir) { S.confirmando = t.dataset.excluir; renderHistorico(); return; }
   if (t.dataset.excluirSim) {
@@ -2048,6 +2066,12 @@ document.addEventListener("input", (ev) => {
   if (t.id === "f-obs") { S.obs = t.value; marcarRascunho(); }
   if (t.id === "f-hora") { S.hora = t.value; marcarRascunho(); }
   if (t.id === "f-resp") { S.resp = t.value; marcarRascunho(); }
+});
+
+document.addEventListener("submit", (ev) => {
+  if (ev.target.id !== "f-excluir-conta") return;
+  ev.preventDefault();
+  excluirConta(ev.target);
 });
 
 document.getElementById("f-novo").addEventListener("submit", async (ev) => {
