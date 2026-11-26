@@ -118,7 +118,7 @@ const ERROS_SERVIDOR = {
   "password must be at most 72 bytes long": "A senha é longa demais: use até 72 caracteres (letras com acento contam como dois).",
   "name, email and password are required": "Preencha nome, e-mail e senha.",
   "email and password are required": "Preencha e-mail e senha.",
-  "email already registered": "Este e-mail já está cadastrado.",
+  "email already registered": "Este e-mail já tem conta. Use a aba \"Entrar\".",
   "too many attempts, please try again later": "Muitas tentativas. Espere alguns minutos e tente de novo.",
   "email not configured": "A recuperação de senha por e-mail ainda não foi ativada.",
   "invalid or expired reset link": "Este link expirou ou já foi usado. Peça um novo em \"Esqueci minha senha\".",
